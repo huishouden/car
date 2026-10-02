@@ -52,7 +52,7 @@ Dates are local calendar days (`YYYY-MM-DD`), distances whole numbers in the hou
 as entered; switching the unit relabels, it does not convert), costs whole cents. No plates or VINs.
 Shops live in the household-wide `contacts` collection shared by every app
 (`@huishouden/pwa-kit/contacts`); Car shows those whose `apps` include `car`. The Firestore rules live
-in [huishouden/tasks](https://github.com/huishouden/tasks), which owns the project's rules file. Signing
+in [huishouden/rules](https://github.com/huishouden/rules), which owns the project's rules file. Signing
 in uses Google with no extra scopes; the household comes from the shared `households` document, so one
 invite from the portal opens every Huishouden app.
 
