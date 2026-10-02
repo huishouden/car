@@ -20,7 +20,8 @@ export default defineConfig({
     pwaApp({
       name: 'Huishouden Car',
       shortName: 'Car',
-      description: "The household's cars: service due by date or mileage, odometer readings, renewals, service history and shops.",
+      description: "Keeping the cars on the road",
+      url: 'https://huishouden-car.web.app',
       themeColor: '#1b4332',
       backgroundColor: '#faf9f5',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
