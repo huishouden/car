@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/huishouden/car/compare/v1.3.0...v1.3.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* an entry saved just before the app closes is no longer lost ([#14](https://github.com/huishouden/car/issues/14)) ([7946e36](https://github.com/huishouden/car/commit/7946e36d36f3fb0f2e04a824b16f3e6da0ead9e0))
+
 ## [1.3.0](https://github.com/huishouden/car/compare/v1.2.0...v1.3.0) (2026-10-02)
 
 
