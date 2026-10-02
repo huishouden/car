@@ -116,3 +116,16 @@ test('phone: cars', async ({ page }) => {
     },
   });
 });
+
+// The kit's app bar with an invented signed-in person and the account menu open.
+test('account menu', ({ page }) =>
+  captureScreenshot(page, 'account-menu', {
+    fixedTime,
+    prepare: async (p) => {
+      await p.locator('hh-app-bar').evaluate((bar: HTMLElementTagNameMap['hh-app-bar']) => {
+        bar.user = { name: 'Sam Example', email: 'sam@example.com', photoURL: null };
+      });
+      await p.getByRole('button', { name: 'Signed in as sam@example.com' }).click();
+      await expect(p.getByRole('link', { name: 'All apps' })).toBeVisible();
+    },
+  }));

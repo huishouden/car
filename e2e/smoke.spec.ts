@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { expectCleanLoad, expectGoogleSignInPopup, expectInstallable } from '@huishouden/pwa-kit/e2e';
+import { expectCleanLoad, expectGoogleSignInPopup, expectHuishoudenFrame, expectInstallable } from '@huishouden/pwa-kit/e2e';
 
 test('loads without runtime errors and shows the sample cars', async ({ page }) => {
   await expectCleanLoad(page);
   await expect(page.getByText('Sample data')).toBeVisible();
   await expect(page.getByText('Oil change due in 600 miles or 3 weeks')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Huishouden home' })).toHaveAttribute('href', 'https://huishouden-piekstra.web.app');
+  await expectHuishoudenFrame(page, { app: 'Car', portalUrl: 'https://huishouden-piekstra.web.app' });
 });
 
 test('is installable', ({ page, request }) => expectInstallable(page, request));
