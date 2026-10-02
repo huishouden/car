@@ -1,4 +1,5 @@
 import type { Contact, ContactInput } from '@huishouden/pwa-kit/contacts';
+import type { Role } from '@huishouden/pwa-kit/roles';
 import type { DistanceUnit } from '../lib/distance';
 import type { CarData } from '../lib/demo';
 import type { AppointmentData, OdometerData, RenewalData, ServiceItemData, ServiceLogData, VehicleData } from '../lib/model';
@@ -49,4 +50,6 @@ export interface CarStore {
   actions: CarActions;
   /** The signed-in member's email (or the demo's). */
   me: string;
+  /** Their role in the household (the demo's member is an admin). */
+  role: Role | null;
 }

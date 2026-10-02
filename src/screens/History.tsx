@@ -9,7 +9,7 @@ import type { ScreenProps } from '../CarApp';
 import { Chip, cardClass, iconButton, linkClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
 
 /** Every service visit, newest first, with what it cost. */
-export function History({ store, unit, open }: ScreenProps) {
+export function History({ store, unit, may, open }: ScreenProps) {
   const { now } = useClock();
   const { data } = store;
   const [carId, setCarId] = useState<string>('');
@@ -73,9 +73,11 @@ export function History({ store, unit, open }: ScreenProps) {
                   )}
                   {e.notes && <p className="mt-1 text-base whitespace-pre-line text-stone-600">{e.notes}</p>}
                 </div>
-                <button type="button" className={iconButton} onClick={() => open({ kind: 'visit', visit: e })} aria-label={`Edit ${e.what} on ${formatYmd(e.date)}`}>
-                  <Pencil size={18} />
-                </button>
+                {may.change(e) && (
+                  <button type="button" className={iconButton} onClick={() => open({ kind: 'visit', visit: e })} aria-label={`Edit ${e.what} on ${formatYmd(e.date)}`}>
+                    <Pencil size={18} />
+                  </button>
+                )}
               </li>
             );
           })}

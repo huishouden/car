@@ -97,6 +97,7 @@ export function appointmentDoc(a: AppointmentInput, s: Stamp): AppointmentData {
     shopId: a.shopId || undefined,
     calendarEventId: a.calendarEventId || undefined,
     calendarLink: a.calendarLink && /^https:\/\//.test(a.calendarLink) ? a.calendarLink : undefined,
+    private: a.private === true,
     ...stamp(s),
   });
 }

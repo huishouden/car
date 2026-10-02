@@ -12,15 +12,16 @@ import { auth } from '../data/firebase';
 import { cardClass, ghostButton, iconButton, linkClass, primaryButton, secondaryButton } from '@huishouden/pwa-kit/react/ui';
 
 import type { ScreenProps } from '../CarApp';
+import { PrivateMark } from '@huishouden/pwa-kit/react/contacts';
 
 /** Service appointments: coming up first, the past folded away; Import from calendar finds them. */
-export function Appointments({ store, open, calendarAvailable, onImport }: ScreenProps & {
+export function Appointments({ store, may, open, calendarAvailable, onImport }: ScreenProps & {
   calendarAvailable: boolean;
   /** Adds calendar events as appointments, with a toast. */
   onImport: (list: CalendarMatch[]) => void;
 }) {
   const onAdd = () => open({ kind: 'appointment', appointment: null });
-  const onEdit = (a: Appointment) => open({ kind: 'appointment', appointment: a });
+  const onEdit = (a: Appointment) => (may.change(a) ? () => open({ kind: 'appointment', appointment: a }) : undefined);
   const vehicles = store.data.vehicles;
   const { now } = useClock();
   const [showPast, setShowPast] = useState(false);
@@ -64,7 +65,7 @@ export function Appointments({ store, open, calendarAvailable, onImport }: Scree
         {upcoming.length === 0 && <p className="p-6 text-lg text-stone-600">No appointments coming up.</p>}
         <ul>
           {upcoming.map((a, i) => (
-            <Row key={a.id} a={a} now={now} contacts={contacts} vehicles={vehicles} first={i === 0} onEdit={() => onEdit(a)} />
+            <Row key={a.id} a={a} now={now} contacts={contacts} vehicles={vehicles} first={i === 0} onEdit={onEdit(a)} />
           ))}
         </ul>
       </section>
@@ -77,7 +78,7 @@ export function Appointments({ store, open, calendarAvailable, onImport }: Scree
           {showPast && (
             <ul className={`${cardClass} mt-2`}>
               {past.map((a) => (
-                <Row key={a.id} a={a} now={now} contacts={contacts} vehicles={vehicles} onEdit={() => onEdit(a)} />
+                <Row key={a.id} a={a} now={now} contacts={contacts} vehicles={vehicles} onEdit={onEdit(a)} />
               ))}
             </ul>
           )}
@@ -103,7 +104,7 @@ export function Appointments({ store, open, calendarAvailable, onImport }: Scree
   );
 }
 
-function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; now: number; contacts: Contact[]; vehicles: Vehicle[]; first?: boolean; onEdit: () => void }) {
+function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; now: number; contacts: Contact[]; vehicles: Vehicle[]; first?: boolean; onEdit?: () => void }) {
   const d = new Date(a.at);
   const who = a.shopId ? contacts.find((c) => c.id === a.shopId) : undefined;
   const car = a.vehicleId ? vehicles.find((v) => v.id === a.vehicleId) : undefined;
@@ -115,6 +116,7 @@ function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; no
       </div>
       <div className="min-w-0 flex-1">
         <p className={`${first ? 'text-2xl' : 'text-xl'} font-semibold text-stone-800`}>{a.title}</p>
+        {a.private && <PrivateMark />}
         <p className="mt-0.5 text-base text-stone-700">
           <span className="font-medium text-forest-700">{relativeDay(a.at, now)}</span> · {formatDayLong(a.at)}, {formatTime(a.at)}
         </p>
@@ -147,9 +149,11 @@ function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; no
           </a>
         )}
       </div>
-      <button type="button" className={iconButton} onClick={onEdit} aria-label={`Edit ${a.title}`}>
-        <Pencil size={18} />
-      </button>
+      {onEdit && (
+        <button type="button" className={iconButton} onClick={onEdit} aria-label={`Edit ${a.title}`}>
+          <Pencil size={18} />
+        </button>
+      )}
     </li>
   );
 }

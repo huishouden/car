@@ -20,6 +20,9 @@ import { RenewalDialog } from './components/RenewalDialog';
 import { VisitDialog } from './components/VisitDialog';
 import { AppointmentDialog } from './components/AppointmentDialog';
 import { ContactDialog } from '@huishouden/pwa-kit/react/contacts';
+import { mayFor, type May } from './lib/may';
+
+export type { May };
 import { APP, ROLES } from './lib/contacts';
 import { Overview } from './screens/Overview';
 import { Cars } from './screens/Cars';
@@ -51,10 +54,11 @@ export type Open =
 
 export type Notify = (message: string, undo?: () => void) => void;
 
-/** What every screen gets: the store, the unit, and ways to open dialogs and say what happened. */
+/** What every screen gets: the store, the unit, what the role allows, and ways to open dialogs and say what happened. */
 export interface ScreenProps {
   store: CarStore;
   unit: DistanceUnit;
+  may: May;
   open: (o: Open) => void;
   notify: Notify;
 }
@@ -94,7 +98,8 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
     document.title = 'Huishouden Car';
   }, []);
 
-  const screen: ScreenProps = { store, unit, open: setDialog, notify };
+  const may = mayFor(store);
+  const screen: ScreenProps = { store, unit, may, open: setDialog, notify };
   const showCar = (id: string) => {
     setCarId(id);
     setTab('cars');
@@ -122,7 +127,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
         <div className="min-h-0 flex-1">{content}</div>
       </main>
 
-      {dialog?.kind === 'vehicle' && (
+      {dialog?.kind === 'vehicle' && may.settings && (
         <VehicleDialog
           vehicle={dialog.vehicle}
           onClose={close}
@@ -155,7 +160,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
             const undo = actions.saveServiceItem(dialog.item?.id ?? null, { ...input, vehicleId: dialog.vehicleId });
             notify(dialog.item ? `Saved ${input.name.trim()}` : `Added ${input.name.trim()} to ${vehicleName(dialog.vehicleId) ?? 'the car'}`, undo);
           }}
-          onDelete={dialog.item ? () => notify(`Removed ${dialog.item!.name}`, actions.deleteServiceItem(dialog.item!.id)) : undefined}
+          onDelete={dialog.item && may.change(dialog.item) ? () => notify(`Removed ${dialog.item!.name}`, actions.deleteServiceItem(dialog.item!.id)) : undefined}
         />
       )}
       {dialog?.kind === 'reading' && (
@@ -176,7 +181,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           now={now}
           onClose={close}
           onSave={(input) => notify(dialog.renewal ? `Saved ${input.name.trim()}` : `Added ${input.name.trim()}`, actions.saveRenewal(dialog.renewal?.id ?? null, input))}
-          onDelete={dialog.renewal ? () => notify(`Deleted ${dialog.renewal!.name}`, actions.deleteRenewal(dialog.renewal!.id)) : undefined}
+          onDelete={dialog.renewal && may.change(dialog.renewal) ? () => notify(`Deleted ${dialog.renewal!.name}`, actions.deleteRenewal(dialog.renewal!.id)) : undefined}
         />
       )}
       {dialog?.kind === 'visit' && (
@@ -191,7 +196,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
             const undo = actions.saveVisit(dialog.visit?.id ?? null, input);
             notify(dialog.visit ? `Saved ${input.what.trim()}` : `Logged ${input.what.trim()} on ${formatYmd(input.date, { day: 'numeric', month: 'short' })}`, undo);
           }}
-          onDelete={dialog.visit ? () => notify(`Deleted ${dialog.visit!.what}`, actions.deleteVisit(dialog.visit!.id)) : undefined}
+          onDelete={dialog.visit && may.change(dialog.visit) ? () => notify(`Deleted ${dialog.visit!.what}`, actions.deleteVisit(dialog.visit!.id)) : undefined}
         />
       )}
       {dialog?.kind === 'appointment' && (
@@ -202,12 +207,13 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           vehicles={data.vehicles}
           shops={data.contacts}
           calendarAvailable={calendar}
+          canMarkPrivate={may.seePrivate}
           onClose={close}
           onSave={(input) => {
             const undo = actions.saveAppointment(dialog.appointment?.id ?? null, input);
             if (!dialog.appointment) notify(`Added ${input.title.trim()}`, undo);
           }}
-          onDelete={dialog.appointment ? () => notify(`Deleted ${dialog.appointment!.title}`, actions.deleteAppointment(dialog.appointment!.id)) : undefined}
+          onDelete={dialog.appointment && may.change(dialog.appointment) ? () => notify(`Deleted ${dialog.appointment!.title}`, actions.deleteAppointment(dialog.appointment!.id)) : undefined}
         />
       )}
       {dialog?.kind === 'contact' && (
@@ -217,13 +223,14 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           roles={ROLES}
           title={{ add: 'New shop', edit: 'Edit shop' }}
           namePlaceholder="Example Auto Service"
+          canMarkPrivate={may.seePrivate}
           onClose={close}
           onSave={(input) => {
             actions.saveContact(dialog.contact?.id ?? null, input);
             if (!dialog.contact) notify(`Added ${input.name}`);
           }}
           onDelete={
-            dialog.contact
+            dialog.contact && may.change(dialog.contact)
               ? () => {
                   const gone = dialog.contact!;
                   actions.deleteContact(gone.id);

@@ -4,6 +4,13 @@ import { DEMO_MEMBERS, demoData, type CarData } from '../lib/demo';
 import { APP } from '../lib/contacts';
 import { applyOps, createActions, type Backend } from './actions';
 import type { CarStore } from './types';
+import type { Role } from '@huishouden/pwa-kit/roles';
+
+/** `?role=helper` (or kid) previews the sample as the household's helper would see it; otherwise an admin. */
+function previewRole(): Role {
+  const r = new URLSearchParams(location.search).get('role');
+  return r === 'helper' || r === 'kid' || r === 'member' ? r : 'admin';
+}
 
 /**
  * Sample data kept in memory: the signed-out app is fully clickable, nothing is saved, and a reload
@@ -13,7 +20,8 @@ export function useDemoStore(clock: () => number): CarStore {
   const [data, setData] = useState<CarData>(demoData);
   const ref = useRef(data);
   ref.current = data;
-  const me = DEMO_MEMBERS[0];
+  const [role] = useState(previewRole);
+  const me = role === 'admin' ? DEMO_MEMBERS[0] : 'jo@example.com';
 
   const actions = useMemo(() => {
     let seq = 0;
@@ -39,5 +47,5 @@ export function useDemoStore(clock: () => number): CarStore {
     return createActions(backend, () => ref.current, me, clock);
   }, [clock, me]);
 
-  return { data, ready: true, actions, me };
+  return { data, ready: true, actions, me, role };
 }

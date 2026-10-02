@@ -5,12 +5,13 @@ import { describeMonths } from '@huishouden/pwa-kit/schedule';
 import { nextRenewalDate } from '../lib/renewals';
 import { describeInterval, describeLast } from '../lib/schedule';
 import type { CarStore } from '../data/types';
-import type { Notify, Open } from '../CarApp';
+import type { May, Notify, Open } from '../CarApp';
 import { DueRow, Meta } from '../components/DueRow';
 
 /** A service item or renewal from the upcoming list, with Done / Renewed and Edit wired up. */
-export function UpcomingRow({ entry, store, unit, now, open, notify, showCar }: {
+export function UpcomingRow({ entry, store, unit, now, may, open, notify, showCar }: {
   entry: UpcomingItem;
+  may: May;
   store: CarStore;
   unit: DistanceUnit;
   now: number;
@@ -42,7 +43,7 @@ export function UpcomingRow({ entry, store, unit, now, open, notify, showCar }: 
             },
           })
         }
-        onEdit={() => open({ kind: 'item', vehicleId: item.vehicleId, item })}
+        onEdit={may.change(item) ? () => open({ kind: 'item', vehicleId: item.vehicleId, item }) : undefined}
         editLabel={`Edit ${item.name}${showCar ? ` for ${car}` : ''}`}
       />
     );
@@ -64,7 +65,7 @@ export function UpcomingRow({ entry, store, unit, now, open, notify, showCar }: 
             }
           : undefined
       }
-      onEdit={() => open({ kind: 'renewal', renewal })}
+      onEdit={may.change(renewal) ? () => open({ kind: 'renewal', renewal }) : undefined}
       editLabel={`Edit ${renewal.name}${showCar ? ` for ${car}` : ''}`}
     />
   );
