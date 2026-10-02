@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/huishouden/car/compare/v1.1.1...v1.2.0) (2026-10-02)
+
+
+### Features
+
+* publish service due dates, renewals and appointments to the household agenda ([#9](https://github.com/huishouden/car/issues/9)) ([041c6c5](https://github.com/huishouden/car/commit/041c6c50f74f5e949c680de6702420ce9ed718d4))
+
 ## [1.1.1](https://github.com/huishouden/car/compare/v1.1.0...v1.1.1) (2026-10-02)
 
 
