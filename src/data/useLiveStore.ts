@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { collection, doc, onSnapshot } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
 import { setDoc, writeBatch } from '@huishouden/pwa-kit/firestore';
-import { addContact, removeContactFromApp, restoreContact, updateContact, watchContacts, type Contact } from '@huishouden/pwa-kit/contacts';
+import { addContact, markUnflaggedOpen, removeContactFromApp, restoreContact, updateContact, watchContacts, type Contact } from '@huishouden/pwa-kit/contacts';
+import { can, isRestricted, type Role } from '@huishouden/pwa-kit/roles';
 import type { CarData } from '../lib/demo';
 import type { SettingsData } from '../lib/model';
 import { readError } from '@huishouden/pwa-kit/feedback';
@@ -28,7 +29,9 @@ const WHAT: Record<CollectionName | 'settings' | 'contacts', string> = {
  * Live household data from Firestore with onSnapshot listeners. Writes are fire-and-forget: the
  * persistent cache applies them locally at once (also offline) and syncs later.
  */
-export function useLiveStore(householdId: string, me: string, onError: (message: string) => void): CarStore {
+export function useLiveStore(householdId: string, me: string, role: Role | null, onError: (message: string) => void): CarStore {
+  // Helpers and kids may read only appointments and shops not marked private, and must ask for just those.
+  const restricted = isRestricted(role);
   const [data, setData] = useState<CarData>(EMPTY);
   const [answered, setAnswered] = useState<Set<string>>(() => new Set());
   const ref = useRef(data);
@@ -45,7 +48,7 @@ export function useLiveStore(householdId: string, me: string, onError: (message:
     };
     const unsubs = (Object.keys(COLLECTIONS) as CollectionName[]).map((col) =>
       onSnapshot(
-        collection(db, base, col),
+        restricted && col === 'carAppointments' ? query(collection(db, base, col), where('private', '==', false)) : collection(db, base, col),
         (s) => {
           const list = s.docs.map((d) => ({ id: d.id, ...d.data() }));
           setData((d) => ({ ...d, [COLLECTIONS[col]]: list }));
@@ -70,11 +73,11 @@ export function useLiveStore(householdId: string, me: string, onError: (message:
           setData((d) => ({ ...d, contacts }));
           answer('contacts');
         },
-        { app: APP, onError: fail('contacts') },
+        { app: APP, restricted, onError: fail('contacts') },
       ),
     );
     return () => unsubs.forEach((u) => u());
-  }, [base, householdId]);
+  }, [base, householdId, restricted]);
 
   const actions = useMemo(() => {
     const report = (p: Promise<unknown>) => void p.catch((e) => errorRef.current(readError(e, "Couldn't save")));
@@ -89,7 +92,7 @@ export function useLiveStore(householdId: string, me: string, onError: (message:
         }
         report(batch.commit());
         const before = ref.current;
-        publishChanges(householdId, me, before, applyOps(before, ops), ops);
+        publishChanges(householdId, me, before, applyOps(before, ops), ops, Date.now(), restricted);
       },
       saveSettings: (distanceUnit, by, now) => report(setDoc(doc(db, base, 'carSettings', 'main'), { distanceUnit, updatedAt: Math.round(now), updatedBy: by })),
       saveContact: (id, input) => report(id ? updateContact(db, householdId, id, input, me) : addContact(db, householdId, input, me)),
@@ -98,7 +101,7 @@ export function useLiveStore(householdId: string, me: string, onError: (message:
       restoreContact: (c: Contact) => report(restoreContact(db, householdId, c)),
     };
     return createActions(backend, () => ref.current, me, () => Date.now());
-  }, [base, householdId, me]);
+  }, [base, householdId, me, restricted]);
 
   const ready = (Object.keys(COLLECTIONS) as string[]).every((c) => answered.has(c)) && answered.has('settings');
 
@@ -109,15 +112,18 @@ export function useLiveStore(householdId: string, me: string, onError: (message:
   useEffect(() => {
     if (!loaded || synced.current || !me) return;
     synced.current = true;
-    syncAll(householdId, me, ref.current);
-  }, [loaded, householdId, me]);
+    syncAll(householdId, me, ref.current, Date.now(), restricted);
+    // Appointments saved before the private flag are hidden from helpers and kids until written
+    // with `private: false`: an admin's or member's device does that once.
+    if (can(role, 'see-private')) markUnflaggedOpen(db, householdId, 'carAppointments', ref.current.appointments).catch(() => {});
+  }, [loaded, householdId, me, restricted, role]);
 
   // A shop renamed or removed changes the appointments that name it.
   const shops = useRef(data.contacts);
   useEffect(() => {
     const before = shops.current;
     shops.current = data.contacts;
-    if (synced.current && before !== data.contacts) publishChanges(householdId, me, { ...ref.current, contacts: before }, ref.current, []);
-  }, [data.contacts, householdId, me]);
-  return { data, ready, actions, me };
+    if (synced.current && before !== data.contacts) publishChanges(householdId, me, { ...ref.current, contacts: before }, ref.current, [], Date.now(), restricted);
+  }, [data.contacts, householdId, me, restricted]);
+  return { data, ready, actions, me, role };
 }

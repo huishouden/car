@@ -3,12 +3,13 @@ import { formatDistance, formatReading, UNIT_NAMES } from '../lib/distance';
 import { daysAgo, daysUntil, formatDayLong, formatTime, relativeDay } from '@huishouden/pwa-kit/time';
 import { carOdometer, needsAttention, upcoming } from '../lib/upcoming';
 import { useClock } from '@huishouden/pwa-kit/react/clock';
+import { RoleNote } from '@huishouden/pwa-kit/react/roles';
 import type { ScreenProps, TabId } from '../CarApp';
 import { cardClass, ghostButton, overline, primaryButton, secondaryButton } from '@huishouden/pwa-kit/react/ui';
 import { UpcomingRow } from './rows';
 
 /** What needs doing across every car, each car's odometer, and the next appointment. */
-export function Overview({ store, unit, open, notify, onCar, onOpen }: ScreenProps & { onCar: (id: string) => void; onOpen: (tab: TabId) => void }) {
+export function Overview({ store, unit, may, open, notify, onCar, onOpen }: ScreenProps & { onCar: (id: string) => void; onOpen: (tab: TabId) => void }) {
   const { now } = useClock();
   const { data } = store;
   const list = upcoming(data, unit, now);
@@ -24,9 +25,13 @@ export function Overview({ store, unit, open, notify, onCar, onOpen }: ScreenPro
         <CarFront size={32} className="text-forest-700" aria-hidden="true" />
         <h2 className="mt-3 text-2xl font-semibold text-stone-800">No cars yet</h2>
         <p className="mt-2 text-lg text-stone-600">Add a car to see when its oil change, inspection and registration are due.</p>
-        <button type="button" className={`${primaryButton} mt-5`} onClick={() => open({ kind: 'vehicle', vehicle: null })}>
-          <Plus size={20} /> Add a car
-        </button>
+        {may.settings ? (
+          <button type="button" className={`${primaryButton} mt-5`} onClick={() => open({ kind: 'vehicle', vehicle: null })}>
+            <Plus size={20} /> Add a car
+          </button>
+        ) : (
+          <RoleNote action="change-settings" className="mt-3" />
+        )}
       </section>
     );
 
@@ -47,7 +52,7 @@ export function Overview({ store, unit, open, notify, onCar, onOpen }: ScreenPro
         {list.length === 0 && <p className="p-5 text-lg text-stone-600">No schedule or renewals yet. Add them from Cars and Renewals.</p>}
         <ul className="min-h-0 flex-1 overflow-y-auto">
           {list.map((entry) => (
-            <UpcomingRow key={`${entry.kind}-${entry.id}`} entry={entry} store={store} unit={unit} now={now} open={open} notify={notify} showCar />
+            <UpcomingRow key={`${entry.kind}-${entry.id}`} entry={entry} store={store} unit={unit} now={now} may={may} open={open} notify={notify} showCar />
           ))}
         </ul>
       </section>
@@ -96,7 +101,7 @@ export function Overview({ store, unit, open, notify, onCar, onOpen }: ScreenPro
             </button>
           </div>
           {next ? (
-            <button type="button" className="-mx-2 mt-1 w-[calc(100%+1rem)] rounded-xl px-2 py-1 text-left hover:bg-stone-50" onClick={() => open({ kind: 'appointment', appointment: next })}>
+            <button type="button" className="-mx-2 mt-1 w-[calc(100%+1rem)] rounded-xl px-2 py-1 text-left hover:bg-stone-50" onClick={() => may.change(next) && open({ kind: 'appointment', appointment: next })}>
               <p className="text-2xl font-semibold text-stone-800">{next.title}</p>
               <p className="mt-0.5 text-lg text-stone-700">
                 <span className="font-semibold text-forest-700">{relativeDay(next.at, now)}</span> · {formatDayLong(next.at)}, {formatTime(next.at)}

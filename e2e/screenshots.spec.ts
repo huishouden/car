@@ -11,6 +11,29 @@ const tab = (name: string) => async (p: import('@playwright/test').Page) => {
   await p.getByRole('button', { name, exact: true }).click();
 };
 
+// Roles: the household's helper (sample data, `?role=helper`) keeps the log but changes no cars,
+// settings or anyone else's records; admins and members can keep an appointment private.
+test('helper: cars', ({ page }) =>
+  captureScreenshot(page, 'helper-cars', {
+    path: '/?role=helper',
+    fixedTime,
+    prepare: async (p) => {
+      await tab('Cars')(p);
+      await expect(p.getByText('Only admins and members can change settings.')).toBeVisible();
+    },
+  }));
+
+test('appointment: private', ({ page }) =>
+  captureScreenshot(page, 'appointment-private', {
+    fixedTime,
+    prepare: async (p) => {
+      await tab('Appointments')(p);
+      await p.getByRole('button', { name: 'Add appointment' }).click();
+      await p.getByLabel('What').fill('Body shop quote');
+      await p.getByText('Only admins and members').click();
+    },
+  }));
+
 test('overview', ({ page }) =>
   captureScreenshot(page, 'overview', {
     fixedTime,

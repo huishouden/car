@@ -6,7 +6,7 @@ import { cardClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
 import { UpcomingRow } from './rows';
 
 /** Registration, insurance, inspection stickers and toll accounts for every car, soonest first. */
-export function Renewals({ store, unit, open, notify }: ScreenProps) {
+export function Renewals({ store, unit, may, open, notify }: ScreenProps) {
   const { now } = useClock();
   const list = upcoming({ ...store.data, serviceItems: [] }, unit, now);
   return (
@@ -21,7 +21,7 @@ export function Renewals({ store, unit, open, notify }: ScreenProps) {
         {list.length === 0 && <p className="p-6 text-lg text-stone-600">No renewals yet. Add the registration, insurance and inspection sticker so none of them lapses.</p>}
         <ul>
           {list.map((entry) => (
-            <UpcomingRow key={entry.id} entry={entry} store={store} unit={unit} now={now} open={open} notify={notify} showCar />
+            <UpcomingRow key={entry.id} entry={entry} store={store} unit={unit} now={now} may={may} open={open} notify={notify} showCar />
           ))}
         </ul>
       </section>

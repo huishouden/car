@@ -27,6 +27,7 @@ describe('saving a shop', () => {
       mapsUrl: undefined,
       notes: undefined,
       apps: ['car'],
+      private: false,
     });
   });
 

@@ -86,6 +86,8 @@ export function appointmentAgenda(appointment: Appointment, data: Pick<CarData, 
       ...(detail ? { detail } : {}),
       url: appUrl,
       ...(vehicle ? { who: vehicle.name } : {}),
+      // A private appointment stays private on the household agenda.
+      ...(appointment.private ? { private: true } : {}),
     },
   ];
 }

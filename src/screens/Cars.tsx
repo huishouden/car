@@ -6,9 +6,10 @@ import { useClock } from '@huishouden/pwa-kit/react/clock';
 import type { ScreenProps } from '../CarApp';
 import { Chip, cardClass, ghostButton, iconButton, overline, primaryButton } from '@huishouden/pwa-kit/react/ui';
 import { UpcomingRow } from './rows';
+import { RoleNote } from '@huishouden/pwa-kit/react/roles';
 
 /** One car at a time: its details, odometer, service schedule and renewals. */
-export function Cars({ store, unit, open, notify, carId, onCar }: ScreenProps & { carId: string | null; onCar: (id: string) => void }) {
+export function Cars({ store, unit, may, open, notify, carId, onCar }: ScreenProps & { carId: string | null; onCar: (id: string) => void }) {
   const { now } = useClock();
   const { data, actions } = store;
   const cars = [...data.vehicles].sort((a, b) => a.createdAt - b.createdAt || a.name.localeCompare(b.name));
@@ -22,11 +23,13 @@ export function Cars({ store, unit, open, notify, carId, onCar }: ScreenProps & 
             {v.name}
           </Chip>
         ))}
-        <button type="button" className={ghostButton} onClick={() => open({ kind: 'vehicle', vehicle: null })}>
-          <Plus size={18} /> Add car
-        </button>
+        {may.settings && (
+          <button type="button" className={ghostButton} onClick={() => open({ kind: 'vehicle', vehicle: null })}>
+            <Plus size={18} /> Add car
+          </button>
+        )}
       </div>
-      <UnitChoice unit={unit} onChange={(u) => actions.setDistanceUnit(u)} />
+      {may.settings ? <UnitChoice unit={unit} onChange={(u) => actions.setDistanceUnit(u)} /> : <RoleNote action="change-settings" />}
     </div>
   );
 
@@ -55,9 +58,11 @@ export function Cars({ store, unit, open, notify, carId, onCar }: ScreenProps & 
                 <h2 className="text-2xl font-semibold text-stone-800">{car.name}</h2>
                 {(car.year || car.make || car.model) && <p className="text-lg text-stone-600">{[car.year, car.make, car.model].filter(Boolean).join(' ')}</p>}
               </div>
-              <button type="button" className={iconButton} onClick={() => open({ kind: 'vehicle', vehicle: car })} aria-label={`Edit ${car.name}`}>
-                <Pencil size={18} />
-              </button>
+              {may.settings && (
+                <button type="button" className={iconButton} onClick={() => open({ kind: 'vehicle', vehicle: car })} aria-label={`Edit ${car.name}`}>
+                  <Pencil size={18} />
+                </button>
+              )}
             </div>
             {car.notes && <p className="mt-2 text-base whitespace-pre-line text-stone-600">{car.notes}</p>}
           </section>
@@ -83,14 +88,16 @@ export function Cars({ store, unit, open, notify, carId, onCar }: ScreenProps & 
                   <li key={r.id} className="flex items-center gap-3 border-b border-stone-200 py-1 last:border-b-0">
                     <span className="w-28 shrink-0 text-base text-stone-600">{formatYmd(r.date)}</span>
                     <span className="min-w-0 flex-1 text-base text-stone-800 tabular-nums">{formatDistance(r.reading, unit)}</span>
-                    <button
-                      type="button"
-                      className={iconButton}
-                      aria-label={`Delete reading ${formatReading(r.reading)} from ${formatYmd(r.date)}`}
-                      onClick={() => notify(`Deleted reading ${formatReading(r.reading)}`, actions.deleteReading(r.id))}
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    {may.change(r) && (
+                      <button
+                        type="button"
+                        className={iconButton}
+                        aria-label={`Delete reading ${formatReading(r.reading)} from ${formatYmd(r.date)}`}
+                        onClick={() => notify(`Deleted reading ${formatReading(r.reading)}`, actions.deleteReading(r.id))}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -109,7 +116,7 @@ export function Cars({ store, unit, open, notify, carId, onCar }: ScreenProps & 
             {items.length === 0 && <p className="px-5 py-4 text-base text-stone-600">Nothing scheduled. Add an oil change, tire rotation or inspection.</p>}
             <ul>
               {items.map((entry) => (
-                <UpcomingRow key={entry.id} entry={entry} store={store} unit={unit} now={now} open={open} notify={notify} showCar={false} />
+                <UpcomingRow key={entry.id} entry={entry} store={store} unit={unit} now={now} may={may} open={open} notify={notify} showCar={false} />
               ))}
             </ul>
           </section>
@@ -124,7 +131,7 @@ export function Cars({ store, unit, open, notify, carId, onCar }: ScreenProps & 
             {renewals.length === 0 && <p className="px-5 py-4 text-base text-stone-600">No renewals for this car. Registration and the inspection sticker go here.</p>}
             <ul>
               {renewals.map((entry) => (
-                <UpcomingRow key={entry.id} entry={entry} store={store} unit={unit} now={now} open={open} notify={notify} showCar={false} />
+                <UpcomingRow key={entry.id} entry={entry} store={store} unit={unit} now={now} may={may} open={open} notify={notify} showCar={false} />
               ))}
             </ul>
           </section>

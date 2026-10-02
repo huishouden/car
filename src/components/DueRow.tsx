@@ -10,7 +10,8 @@ export function DueRow({ kind, state, text, meta, onDone, doneLabel, onEdit, edi
   meta: ReactNode;
   onDone?: () => void;
   doneLabel: string;
-  onEdit: () => void;
+  /** Left out where the person may not edit it (a helper on someone else's item). */
+  onEdit?: () => void;
   editLabel: string;
 }) {
   const Icon = kind === 'service' ? Wrench : FileText;
@@ -30,9 +31,11 @@ export function DueRow({ kind, state, text, meta, onDone, doneLabel, onEdit, edi
           <CheckCircle2 size={18} aria-hidden="true" /> {doneLabel}
         </button>
       )}
-      <button type="button" className={iconButton} onClick={onEdit} aria-label={editLabel}>
-        <Pencil size={18} />
-      </button>
+      {onEdit && (
+        <button type="button" className={iconButton} onClick={onEdit} aria-label={editLabel}>
+          <Pencil size={18} />
+        </button>
+      )}
       </div>
     </li>
   );

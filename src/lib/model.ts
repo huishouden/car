@@ -76,6 +76,8 @@ export interface AppointmentData extends Stamp {
   /** The Google Calendar event it came from, so an import never adds it twice. */
   calendarEventId?: string;
   calendarLink?: string;
+  /** Only admins and members see it; always written, since one without it is hidden from helpers and kids. */
+  private?: boolean;
 }
 
 /** carSettings/main */
