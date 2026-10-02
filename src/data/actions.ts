@@ -6,6 +6,7 @@ import { nextRenewalDate } from '../lib/renewals';
 import { DEFAULT_SCHEDULE, afterVisit } from '../lib/schedule';
 import { appointmentDoc, readingDoc, renewalDoc, serviceItemDoc, vehicleDoc, visitDoc } from './build';
 import type { CarActions, Undo } from './types';
+import { track } from '@huishouden/pwa-kit/observability';
 
 // The car actions, written once over a small storage interface that the live (Firestore) and the
 // demo (memory) stores each implement. Every change returns an Undo that writes back exactly the
@@ -80,6 +81,8 @@ export function createActions(backend: Backend, data: () => CarData, me: string,
     setDistanceUnit: (unit) => backend.saveSettings(unit, me, clock()),
 
     saveVehicle: (id, input, options = {}) => {
+
+      track('save vehicle');
       const vehicleId = id ?? backend.newId('carVehicles');
       const ops: Op[] = [{ type: 'set', col: 'carVehicles', id: vehicleId, data: vehicleDoc(input, stampFor('carVehicles', id)) }];
       if (!id && options.defaultSchedule) {
@@ -108,11 +111,15 @@ export function createActions(backend: Backend, data: () => CarData, me: string,
     saveServiceItem: save('carServiceItems', serviceItemDoc),
     deleteServiceItem: remove('carServiceItems'),
 
-    logReading: (input) => save('carOdometer', readingDoc)(null, input),
+    logReading: (input) => {
+      track('log odometer');
+      return save('carOdometer', readingDoc)(null, input);
+    },
     deleteReading: remove('carOdometer'),
 
     saveRenewal: save('carRenewals', renewalDoc),
     markRenewed: (id) => {
+      track('mark renewed');
       const r = data().renewals.find((x) => x.id === id);
       const next = r && nextRenewalDate(r, clock());
       if (!r || !next) return () => {};
@@ -121,6 +128,8 @@ export function createActions(backend: Backend, data: () => CarData, me: string,
     deleteRenewal: remove('carRenewals'),
 
     saveVisit: (id, input) => {
+
+      track('log service');
       const visitId = id ?? backend.newId('carServiceLog');
       const doc = visitDoc(input, stampFor('carServiceLog', id));
       const ops: Op[] = [{ type: 'set', col: 'carServiceLog', id: visitId, data: doc }];
