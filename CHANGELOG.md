@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/huishouden/car/compare/v1.3.1...v1.4.0) (2026-10-02)
+
+
+### Features
+
+* error, speed and anonymous usage reports (pwa-kit observability) ([#15](https://github.com/huishouden/car/issues/15)) ([c26cf81](https://github.com/huishouden/car/commit/c26cf81d230c31d53d2fe9ce09a55162a9e19352))
+* **roles:** helpers keep the log and tick things off; cars, settings and others' records for admins and members ([#19](https://github.com/huishouden/car/issues/19)) ([774ce7e](https://github.com/huishouden/car/commit/774ce7ec5b454eee8d2e16fba963b385a65ed71b))
+
 ## [1.3.1](https://github.com/huishouden/car/compare/v1.3.0...v1.3.1) (2026-10-02)
 
 
