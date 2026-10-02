@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/huishouden/car/compare/v1.0.0...v1.1.0) (2026-10-02)
+
+
+### Features
+
+* the kit's Huishouden app bar replaces the hand-built header ([#3](https://github.com/huishouden/car/issues/3)) ([d841fac](https://github.com/huishouden/car/commit/d841facfd79fcd6a14f902461d85d16651febe4f))
+
 ## 1.0.0 (2026-10-02)
 
 
