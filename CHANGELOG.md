@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/huishouden/car/compare/v1.1.0...v1.1.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* Google API tokens from Google Identity Services, not Firebase sign-in (kit v0.23.0) ([#6](https://github.com/huishouden/car/issues/6)) ([666335a](https://github.com/huishouden/car/commit/666335aa57a4498ca9c610abeab4044ff91b42bf))
+
 ## [1.1.0](https://github.com/huishouden/car/compare/v1.0.0...v1.1.0) (2026-10-02)
 
 
