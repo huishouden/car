@@ -6,6 +6,7 @@ import { auth, db, googleClientId, signInWithGoogle, signOutEverywhere } from '.
 import { useLiveStore } from './data/useLiveStore';
 import { useDemoStore } from './data/useDemoStore';
 import { DEMO_NOW } from './lib/demo';
+import { PORTAL_URL } from './lib/portal';
 import { ClockProvider } from './clock';
 import { CarApp } from './CarApp';
 import { Header } from './components/Header';
@@ -80,7 +81,7 @@ function SignedIn({ user, ...frame }: FrameProps & { user: User }) {
         {user.email} isn't a member of a Huishouden household. Ask someone in your household to invite this address from the Huishouden home screen, then open
         Car again. If you use another Google account for the household, sign out and sign in with that one.
       </p>
-      <a className={`${primaryButton} mt-5`} href="https://huishouden-piekstra.web.app">
+      <a className={`${primaryButton} mt-5`} href={PORTAL_URL}>
         Open Huishouden
       </a>
     </Plain>
