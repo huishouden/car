@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/huishouden/car/compare/v1.2.0...v1.3.0) (2026-10-02)
+
+
+### Features
+
+* offer new calendar events on the main screen ([#13](https://github.com/huishouden/car/issues/13)) ([35a1c5f](https://github.com/huishouden/car/commit/35a1c5f1a25f24a5b4f69a8d00f350835f223274))
+
 ## [1.2.0](https://github.com/huishouden/car/compare/v1.1.1...v1.2.0) (2026-10-02)
 
 
