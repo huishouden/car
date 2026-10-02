@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import type { Renewal, RenewalKind, Vehicle } from '../lib/model';
 import { LIMITS, RENEWAL_KINDS, RENEWAL_LABELS } from '../lib/model';
-import { DEFAULT_RENEWAL_MONTHS, describeRenewalInterval } from '../lib/renewals';
-import { addMonths, isYmd, toYmd } from '../lib/time';
+import { describeMonths } from '@huishouden/pwa-kit/schedule';
+import { DEFAULT_RENEWAL_MONTHS } from '../lib/renewals';
+import { addMonths, isYmd, toYmd } from '@huishouden/pwa-kit/time';
 import type { RenewalInput } from '../data/types';
-import { Chip, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton, selectClass } from './ui';
+import { Chip, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton, selectClass } from '@huishouden/pwa-kit/react/ui';
 
 const REPEATS = [0, 1, 3, 6, 12, 24];
 
@@ -108,7 +109,7 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
           <select className={selectClass} value={every} onChange={(e) => setEvery(Number(e.target.value))}>
             {[...new Set([...REPEATS, every])].sort((a, b) => a - b).map((m) => (
               <option key={m} value={m}>
-                {describeRenewalInterval(m || undefined)}
+                {describeMonths(m || undefined)}
               </option>
             ))}
           </select>

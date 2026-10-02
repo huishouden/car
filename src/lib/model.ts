@@ -1,5 +1,5 @@
 import type { DistanceUnit } from './distance';
-import type { Ymd } from './time';
+import type { Ymd } from '@huishouden/pwa-kit/time';
 
 // Firestore shapes under households/{householdId}. The project's rules accept exactly these keys,
 // so writers build documents from these types (data/build.ts) and never add fields.

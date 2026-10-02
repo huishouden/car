@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 import { DEMO_NOW, demoData } from './demo';
-import { parseYmd } from './time';
+import { parseYmd } from '@huishouden/pwa-kit/time';
 
 // The repo is public: the sample household must be plainly invented.
 const data = demoData();

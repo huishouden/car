@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { CheckCircle2, FileText, Pencil, Wrench } from 'lucide-react';
-import { StatusPill, iconButton, secondaryButton, type Attention } from './ui';
+import { StatusPill, iconButton, secondaryButton, type Attention } from '@huishouden/pwa-kit/react/ui';
 
 /** One thing to do: the glanceable line, its state, what it is about, and the one action. */
 export function DueRow({ kind, state, text, meta, onDone, doneLabel, onEdit, editLabel }: {

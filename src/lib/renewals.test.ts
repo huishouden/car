@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import fixture from './__fixtures__/renewals.json';
 import type { RenewalKind } from './model';
-import { describeRenewalInterval, nextRenewalDate, renewalDue, renewalText } from './renewals';
+import { nextRenewalDate, renewalDue, renewalText } from './renewals';
 
 const now = new Date(fixture.now).getTime();
 
@@ -29,12 +29,4 @@ describe('marking renewed', () => {
   test('a one-off has no next date', () => {
     expect(nextRenewalDate({ dueDate: '2031-04-27' }, now)).toBeNull();
   });
-
-  test.each([
-    [undefined, 'Once'],
-    [12, 'Every year'],
-    [24, 'Every 2 years'],
-    [6, 'Every 6 months'],
-    [1, 'Every month'],
-  ])('%p months reads %s', (m, text) => expect(describeRenewalInterval(m)).toBe(text));
 });

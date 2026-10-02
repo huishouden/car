@@ -4,13 +4,12 @@ import type { ServiceLogEntry } from '../lib/model';
 import { LIMITS } from '../lib/model';
 import type { CarData } from '../lib/demo';
 import { UNIT_NAMES, formatDistance, formatReading, parseReading, type DistanceUnit } from '../lib/distance';
-import { centsInput, parseMoney } from '../lib/money';
-import { formatYmd } from '../lib/format';
-import { isYmd, toYmd } from '../lib/time';
+import { centsToInput, parseCents } from '@huishouden/pwa-kit/money';
+import { formatYmd, isYmd, toYmd } from '@huishouden/pwa-kit/time';
 import { carOdometer } from '../lib/upcoming';
 import { joinNames } from '../lib/words';
 import type { VisitInput } from '../data/types';
-import { Checkbox, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton, selectClass } from './ui';
+import { Checkbox, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton, selectClass } from '@huishouden/pwa-kit/react/ui';
 
 export function VisitDialog({ visit, prefill, data, unit, now, onSave, onDelete, onClose }: {
   visit: ServiceLogEntry | null;
@@ -32,11 +31,11 @@ export function VisitDialog({ visit, prefill, data, unit, now, onSave, onDelete,
   const latest = carOdometer(vehicleId, data.readings, data.serviceLog, data.serviceItems).latest;
   const [odometer, setOdometer] = useState(start.odometer !== undefined ? formatReading(start.odometer) : '');
   const [shopId, setShopId] = useState(start.shopId ?? '');
-  const [cost, setCost] = useState(centsInput(start.costCents));
+  const [cost, setCost] = useState(centsToInput(start.costCents));
   const [notes, setNotes] = useState(start.notes ?? '');
 
   const reading = odometer.trim() ? parseReading(odometer) : undefined;
-  const cents = parseMoney(cost);
+  const cents = parseCents(cost, { max: LIMITS.maxCostCents });
   const valid = !!vehicleId && what.trim().length > 0 && isYmd(date) && reading !== null && cents !== null && (cents === undefined || cents <= LIMITS.maxCostCents);
   const missingShop = shopId && !data.contacts.some((c) => c.id === shopId);
 

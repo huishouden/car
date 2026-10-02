@@ -1,11 +1,10 @@
 import { CalendarPlus, FilePlus, Gauge, Pencil, Plus, Trash2 } from 'lucide-react';
 import { UNIT_NAMES, formatDistance, formatReading, type DistanceUnit } from '../lib/distance';
-import { formatYmd } from '../lib/format';
+import { daysAgo, daysUntil, formatYmd } from '@huishouden/pwa-kit/time';
 import { carOdometer, upcoming } from '../lib/upcoming';
-import { daysAgo, daysUntil } from '../lib/time';
-import { useClock } from '../clock';
+import { useClock } from '@huishouden/pwa-kit/react/clock';
 import type { ScreenProps } from '../CarApp';
-import { Chip, cardClass, ghostButton, iconButton, overline, primaryButton } from '../components/ui';
+import { Chip, cardClass, ghostButton, iconButton, overline, primaryButton } from '@huishouden/pwa-kit/react/ui';
 import { UpcomingRow } from './rows';
 
 /** One car at a time: its details, odometer, service schedule and renewals. */

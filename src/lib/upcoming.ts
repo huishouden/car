@@ -1,6 +1,6 @@
 import type { DistanceUnit } from './distance';
 import type { OdometerReading, Renewal, ServiceItem, ServiceLogEntry, Vehicle } from './model';
-import { dailyPace, latestReading, type OdometerPoint } from './odometer';
+import { dailyPace, latestReading, type MeterReading as OdometerPoint } from '@huishouden/pwa-kit/schedule';
 import { renewalDue, renewalText, type RenewalState } from './renewals';
 import { dueText, serviceDue, type DueState, type ServiceDue } from './schedule';
 

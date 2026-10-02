@@ -3,20 +3,21 @@ import type { User } from 'firebase/auth';
 import type { Contact } from '@huishouden/pwa-kit/contacts';
 import type { Appointment, Renewal, ServiceItem, ServiceLogEntry, Vehicle } from './lib/model';
 import type { DistanceUnit } from './lib/distance';
-import { formatYmd } from './lib/format';
+import { formatYmd } from '@huishouden/pwa-kit/time';
 import { carOdometer } from './lib/upcoming';
-import { useClock } from './clock';
+import { useClock } from '@huishouden/pwa-kit/react/clock';
 import type { CarStore, VisitInput } from './data/types';
-import { calendarAvailable } from './data/calendar';
+import { calendarAvailable } from '@huishouden/pwa-kit/react/calendar';
 import { Header, type Tab } from './components/Header';
-import { Toast, type ToastState } from './components/ui';
+import { Toast, type ToastState } from '@huishouden/pwa-kit/react/ui';
 import { VehicleDialog } from './components/VehicleDialog';
 import { ServiceItemDialog } from './components/ServiceItemDialog';
 import { ReadingDialog } from './components/ReadingDialog';
 import { RenewalDialog } from './components/RenewalDialog';
 import { VisitDialog } from './components/VisitDialog';
 import { AppointmentDialog } from './components/AppointmentDialog';
-import { ContactDialog } from './components/ContactDialog';
+import { ContactDialog } from '@huishouden/pwa-kit/react/contacts';
+import { APP, ROLES } from './lib/contacts';
 import { Overview } from './screens/Overview';
 import { Cars } from './screens/Cars';
 import { Renewals } from './screens/Renewals';
@@ -199,6 +200,10 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
       {dialog?.kind === 'contact' && (
         <ContactDialog
           contact={dialog.contact}
+          app={APP}
+          roles={ROLES}
+          title={{ add: 'New shop', edit: 'Edit shop' }}
+          namePlaceholder="Example Auto Service"
           onClose={close}
           onSave={(input) => {
             actions.saveContact(dialog.contact?.id ?? null, input);

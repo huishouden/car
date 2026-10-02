@@ -3,6 +3,7 @@ import { collection, doc, onSnapshot, setDoc, writeBatch } from 'firebase/firest
 import { addContact, removeContactFromApp, restoreContact, updateContact, watchContacts, type Contact } from '@huishouden/pwa-kit/contacts';
 import type { CarData } from '../lib/demo';
 import type { SettingsData } from '../lib/model';
+import { readError } from '@huishouden/pwa-kit/feedback';
 import { APP } from '../lib/contacts';
 import { db } from './firebase';
 import { COLLECTIONS, createActions, type Backend, type CollectionName } from './actions';
@@ -89,11 +90,4 @@ export function useLiveStore(householdId: string, me: string, onError: (message:
 
   const ready = (Object.keys(COLLECTIONS) as string[]).every((c) => answered.has(c)) && answered.has('settings');
   return { data, ready, actions, me };
-}
-
-export function readError(e: unknown, prefix: string): string {
-  const code = (e as { code?: string })?.code;
-  if (code === 'permission-denied') return `${prefix}: this household doesn't allow it yet.`;
-  if (code === 'unavailable') return `${prefix}: offline. It will retry when the connection is back.`;
-  return `${prefix}.`;
 }

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
-import type { CalendarMatch } from '@huishouden/pwa-kit/calendar';
+import { calendarError, isImported, notImported, plainText, type CalendarMatch } from '@huishouden/pwa-kit/calendar';
 import fixture from './__fixtures__/calendar-matches.json';
-import { calendarError, fromCalendar, guessVehicle, isImported, notImported, plainText } from './calendarImport';
+import { fromCalendar, guessVehicle } from './calendarImport';
 import type { Appointment } from './model';
 import { LIMITS } from './model';
 
@@ -16,7 +16,7 @@ describe('notes from a calendar description', () => {
 
   test('plain text passes through; long text is cut to the limit', () => {
     expect(plainText(dmv.description)).toBe('Line one\nLine two');
-    const out = plainText('word '.repeat(400));
+    const out = plainText('word '.repeat(400), LIMITS.appointmentNotes);
     expect(out.length).toBeLessThanOrEqual(LIMITS.appointmentNotes);
     expect(out.endsWith('…')).toBe(true);
   });

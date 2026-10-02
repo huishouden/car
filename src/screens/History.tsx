@@ -2,12 +2,11 @@ import { useState } from 'react';
 import { Pencil, Phone, Wrench } from 'lucide-react';
 import { telHref } from '@huishouden/pwa-kit/places';
 import { formatDistance } from '../lib/distance';
-import { formatCents } from '../lib/money';
-import { formatYmd } from '../lib/format';
-import { toYmd } from '../lib/time';
-import { useClock } from '../clock';
+import { formatCents } from '@huishouden/pwa-kit/money';
+import { formatYmd, toYmd } from '@huishouden/pwa-kit/time';
+import { useClock } from '@huishouden/pwa-kit/react/clock';
 import type { ScreenProps } from '../CarApp';
-import { Chip, cardClass, iconButton, linkClass, primaryButton } from '../components/ui';
+import { Chip, cardClass, iconButton, linkClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
 
 /** Every service visit, newest first, with what it cost. */
 export function History({ store, unit, open }: ScreenProps) {

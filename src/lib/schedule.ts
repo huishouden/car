@@ -1,13 +1,14 @@
 import type { DistanceUnit } from './distance';
 import { formatDistance } from './distance';
-import type { OdometerPoint } from './odometer';
 import type { ServiceItemData } from './model';
-import { addMonths, daysAgo, daysUntil, formatSpan, inDays, type Ymd } from './time';
+import { afterUsage, usageDue, type MeterReading, type UsageState } from '@huishouden/pwa-kit/schedule';
+import { daysAgo, daysUntil, formatSpan, inDays, type Ymd } from '@huishouden/pwa-kit/time';
 
 // When a service item is next due: by time (every N months from the last time), by distance
-// (every N miles from the odometer then), whichever comes first.
+// (every N miles from the odometer then), whichever comes first. The arithmetic is the kit's
+// usage schedule (@huishouden/pwa-kit/schedule); the wording and the defaults are Car's.
 
-export type DueState = 'overdue' | 'soon' | 'ok' | 'unknown';
+export type DueState = UsageState;
 
 /** Within this many days, an item counts as coming up soon. */
 export const SOON_DAYS = 30;
@@ -32,31 +33,15 @@ export interface ServiceDue {
 
 type Schedule = Pick<ServiceItemData, 'everyMonths' | 'everyDistance' | 'lastDate' | 'lastOdometer'>;
 
-export function serviceDue(item: Schedule, latest: OdometerPoint | null, pace: number | null, now: number): ServiceDue {
-  const dueDate = item.everyMonths && item.lastDate ? addMonths(item.lastDate, item.everyMonths) : null;
-  const daysLeft = dueDate ? daysUntil(dueDate, now) : null;
-  const dueAt = item.everyDistance && item.lastOdometer !== undefined ? item.lastOdometer + item.everyDistance : null;
-  const distanceLeft = dueAt !== null && latest ? dueAt - latest.reading : null;
-  // The pace estimate counts from the day of the latest reading, not from today.
-  const distanceDays =
-    distanceLeft !== null && pace && distanceLeft > 0 && latest ? Math.max(0, Math.floor(distanceLeft / pace) - Math.max(0, -daysUntil(latest.date, now))) : null;
-
-  // Passing the due mileage sorts like a day overdue: either way it needs doing now.
-  const byDistance = distanceLeft === null ? null : distanceLeft < 0 ? -1 : distanceLeft === 0 ? 0 : distanceDays;
-  const candidates = [daysLeft, byDistance].filter((d): d is number => d !== null);
-  const sortDays = candidates.length ? Math.min(...candidates) : Number.POSITIVE_INFINITY;
-
-  let state: DueState;
-  if (daysLeft === null && distanceLeft === null) state = 'unknown';
-  else if ((daysLeft !== null && daysLeft < 0) || (distanceLeft !== null && distanceLeft < 0)) state = 'overdue';
-  else if (
-    (daysLeft !== null && daysLeft <= SOON_DAYS) ||
-    (distanceDays !== null && distanceDays <= SOON_DAYS) ||
-    (distanceLeft !== null && !!item.everyDistance && distanceLeft <= item.everyDistance * SOON_SHARE)
-  )
-    state = 'soon';
-  else state = 'ok';
-
+export function serviceDue(item: Schedule, latest: MeterReading | null, pace: number | null, now: number): ServiceDue {
+  const due = usageDue(
+    { everyMonths: item.everyMonths, everyMeter: item.everyDistance, lastDate: item.lastDate, lastReading: item.lastOdometer },
+    latest,
+    pace,
+    now,
+    { soonDays: SOON_DAYS, soonShare: SOON_SHARE },
+  );
+  const { state, dueDate, daysLeft, dueAt, meterLeft: distanceLeft, meterDays: distanceDays, sortDays } = due;
   return { state, dueDate, daysLeft, dueAt, distanceLeft, distanceDays, sortDays };
 }
 
@@ -99,8 +84,9 @@ export function describeLast(item: Pick<ServiceItemData, 'lastDate' | 'lastOdome
 
 /** The schedule fields a visit on `date` at `odometer` writes, unless the item has a later record. */
 export function afterVisit(item: Schedule, date: Ymd, odometer: number | undefined): Pick<ServiceItemData, 'lastDate' | 'lastOdometer'> | null {
-  if (item.lastDate && item.lastDate > date) return null;
-  return { lastDate: date, ...(odometer !== undefined ? { lastOdometer: odometer } : item.lastDate === date ? { lastOdometer: item.lastOdometer } : {}) };
+  const next = afterUsage({ lastDate: item.lastDate, lastReading: item.lastOdometer }, date, odometer);
+  if (!next) return null;
+  return { lastDate: next.lastDate, ...('lastReading' in next ? { lastOdometer: next.lastReading } : {}) };
 }
 
 /** The usual schedule a new car starts with; distances in miles, converted by the caller. */

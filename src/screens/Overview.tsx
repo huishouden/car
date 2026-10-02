@@ -1,11 +1,10 @@
 import { CalendarClock, CarFront, ChevronRight, Gauge, MapPin, Plus, Wrench } from 'lucide-react';
 import { formatDistance, formatReading, UNIT_NAMES } from '../lib/distance';
-import { formatDayLong, formatTime } from '../lib/format';
+import { daysAgo, daysUntil, formatDayLong, formatTime, relativeDay } from '@huishouden/pwa-kit/time';
 import { carOdometer, needsAttention, upcoming } from '../lib/upcoming';
-import { daysAgo, daysUntil, relativeDay } from '../lib/time';
-import { useClock } from '../clock';
+import { useClock } from '@huishouden/pwa-kit/react/clock';
 import type { ScreenProps, TabId } from '../CarApp';
-import { cardClass, ghostButton, overline, primaryButton, secondaryButton } from '../components/ui';
+import { cardClass, ghostButton, overline, primaryButton, secondaryButton } from '@huishouden/pwa-kit/react/ui';
 import { UpcomingRow } from './rows';
 
 /** What needs doing across every car, each car's odometer, and the next appointment. */

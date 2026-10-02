@@ -1,9 +1,9 @@
 import type { DistanceUnit } from '../lib/distance';
-import { formatYmd } from '../lib/format';
+import { formatYmd, toYmd } from '@huishouden/pwa-kit/time';
 import { carOdometer, type UpcomingItem } from '../lib/upcoming';
-import { describeRenewalInterval, nextRenewalDate } from '../lib/renewals';
+import { describeMonths } from '@huishouden/pwa-kit/schedule';
+import { nextRenewalDate } from '../lib/renewals';
 import { describeInterval, describeLast } from '../lib/schedule';
-import { toYmd } from '../lib/time';
 import type { CarStore } from '../data/types';
 import type { Notify, Open } from '../CarApp';
 import { DueRow, Meta } from '../components/DueRow';
@@ -54,7 +54,7 @@ export function UpcomingRow({ entry, store, unit, now, open, notify, showCar }: 
       kind="renewal"
       state={entry.state}
       text={entry.text}
-      meta={<Meta parts={[showCar && car, formatYmd(renewal.dueDate, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }), describeRenewalInterval(renewal.everyMonths)]} />}
+      meta={<Meta parts={[showCar && car, formatYmd(renewal.dueDate, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }), describeMonths(renewal.everyMonths)]} />}
       doneLabel="Renewed"
       onDone={
         next
