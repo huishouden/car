@@ -1,0 +1,79 @@
+{
+  "now": "2031-04-15T09:30:00",
+  "latest": { "date": "2031-04-12", "reading": 41400 },
+  "pace": 34,
+  "cases": [
+    {
+      "label": "both known, distance and time both ahead",
+      "item": { "everyMonths": 6, "everyDistance": 5000, "lastDate": "2030-11-08", "lastOdometer": 37000 },
+      "state": "soon",
+      "daysLeft": 23,
+      "distanceLeft": 600,
+      "text": "Oil change due in 600 miles or 3 weeks"
+    },
+    {
+      "label": "far off on both",
+      "item": { "everyMonths": 6, "everyDistance": 6000, "lastDate": "2031-01-20", "lastOdometer": 38600 },
+      "state": "ok",
+      "daysLeft": 96,
+      "distanceLeft": 3200,
+      "text": "Oil change due in 3,200 miles or 3 months"
+    },
+    {
+      "label": "time only, passed",
+      "item": { "everyMonths": 12, "lastDate": "2030-03-28" },
+      "state": "overdue",
+      "daysLeft": -18,
+      "distanceLeft": null,
+      "text": "Oil change overdue by 2 weeks"
+    },
+    {
+      "label": "distance passed, time not yet",
+      "item": { "everyMonths": 6, "everyDistance": 3000, "lastDate": "2031-01-02", "lastOdometer": 38000 },
+      "state": "overdue",
+      "daysLeft": 78,
+      "distanceLeft": -400,
+      "text": "Oil change overdue by 400 miles"
+    },
+    {
+      "label": "both passed",
+      "item": { "everyMonths": 3, "everyDistance": 3000, "lastDate": "2030-12-01", "lastOdometer": 37000 },
+      "state": "overdue",
+      "daysLeft": -45,
+      "distanceLeft": -1400,
+      "text": "Oil change overdue by 1,400 miles and 6 weeks"
+    },
+    {
+      "label": "distance only, with a pace estimate",
+      "item": { "everyDistance": 7500, "lastDate": "2031-01-10", "lastOdometer": 39000 },
+      "state": "ok",
+      "daysLeft": null,
+      "distanceLeft": 5100,
+      "text": "Oil change due in 5,100 miles (about 4 months)"
+    },
+    {
+      "label": "distance runs out within the soon window at this pace",
+      "item": { "everyDistance": 10000, "lastOdometer": 32200 },
+      "state": "soon",
+      "daysLeft": null,
+      "distanceLeft": 800,
+      "text": "Oil change due in 800 miles (about 2 weeks)"
+    },
+    {
+      "label": "time due today",
+      "item": { "everyMonths": 12, "lastDate": "2030-04-15" },
+      "state": "soon",
+      "daysLeft": 0,
+      "distanceLeft": null,
+      "text": "Oil change due today"
+    },
+    {
+      "label": "never recorded",
+      "item": { "everyMonths": 12 },
+      "state": "unknown",
+      "daysLeft": null,
+      "distanceLeft": null,
+      "text": "Oil change: no record yet"
+    }
+  ]
+}

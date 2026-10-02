@@ -1,0 +1,14 @@
+{
+  "now": "2031-04-15T09:30:00",
+  "cases": [
+    { "kind": "registration", "name": "Registration", "dueDate": "2031-04-27", "state": "soon", "text": "Registration expires in 12 days" },
+    { "kind": "registration", "name": "Registration", "dueDate": "2031-04-11", "state": "overdue", "text": "Registration expired 4 days ago" },
+    { "kind": "registration", "name": "Registration", "dueDate": "2031-04-15", "state": "soon", "text": "Registration expires today" },
+    { "kind": "inspection", "name": "Inspection sticker", "dueDate": "2031-04-16", "state": "soon", "text": "Inspection sticker expires tomorrow" },
+    { "kind": "insurance", "name": "Insurance", "dueDate": "2031-06-01", "state": "ok", "text": "Insurance renews in 6 weeks" },
+    { "kind": "insurance", "name": "Insurance", "dueDate": "2031-03-30", "state": "overdue", "text": "Insurance renewal is 2 weeks overdue" },
+    { "kind": "toll", "name": "Toll account", "dueDate": "2031-09-30", "state": "ok", "text": "Toll account renews in 5 months" },
+    { "kind": "other", "name": "Emissions test", "dueDate": "2031-05-15", "state": "soon", "text": "Emissions test due in 4 weeks" },
+    { "kind": "other", "name": "Parking permit", "dueDate": "2031-04-01", "state": "overdue", "text": "Parking permit overdue by 2 weeks" }
+  ]
+}
