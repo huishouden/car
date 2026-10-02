@@ -3,7 +3,8 @@ import { CalendarArrowDown, CalendarPlus, CarFront, ChevronDown, ChevronUp, Exte
 import type { Contact } from '@huishouden/pwa-kit/contacts';
 import { telHref } from '@huishouden/pwa-kit/places';
 import type { Appointment, Vehicle } from '../lib/model';
-import { CAR_CALENDAR_QUERIES, fromCalendar, guessVehicle } from '../lib/calendarImport';
+import { CAR_CALENDAR_QUERIES } from '../lib/calendarImport';
+import type { CalendarMatch } from '@huishouden/pwa-kit/calendar';
 import { formatDayLong, formatTime, monthShort, relativeDay } from '@huishouden/pwa-kit/time';
 import { useClock } from '@huishouden/pwa-kit/react/clock';
 import { CalendarHint, CalendarImportDialog, useCalendarSearch } from '@huishouden/pwa-kit/react/calendar';
@@ -13,7 +14,11 @@ import { cardClass, ghostButton, iconButton, linkClass, primaryButton, secondary
 import type { ScreenProps } from '../CarApp';
 
 /** Service appointments: coming up first, the past folded away; Import from calendar finds them. */
-export function Appointments({ store, open, notify, calendarAvailable }: ScreenProps & { calendarAvailable: boolean }) {
+export function Appointments({ store, open, calendarAvailable, onImport }: ScreenProps & {
+  calendarAvailable: boolean;
+  /** Adds calendar events as appointments, with a toast. */
+  onImport: (list: CalendarMatch[]) => void;
+}) {
   const onAdd = () => open({ kind: 'appointment', appointment: null });
   const onEdit = (a: Appointment) => open({ kind: 'appointment', appointment: a });
   const vehicles = store.data.vehicles;
@@ -87,10 +92,7 @@ export function Appointments({ store, open, notify, calendarAvailable }: ScreenP
           allImported="Every car event in your calendar is already in Car."
           records={all}
           onRetry={runScan}
-          onAdd={(list) => {
-            const undos = list.map((m) => store.actions.saveAppointment(null, { ...fromCalendar(m), vehicleId: guessVehicle(m, vehicles) }));
-            notify(list.length === 1 ? `Added ${list[0].title}` : `Added ${list.length} appointments`, () => undos.forEach((u) => u()));
-          }}
+          onAdd={onImport}
           onClose={() => {
             setImporting(false);
             scan.reset();

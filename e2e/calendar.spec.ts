@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { stubCalendar } from '@huishouden/pwa-kit/e2e';
 import { calendarEvents, mockCalendar } from './fixtures/calendar';
 
 // Google Calendar has no emulator, and the sample app has no Google account: these tests stand in
@@ -72,4 +73,52 @@ test.describe('with a calendar', () => {
     await expect(alert).toContainText('Calendar access was not allowed');
     await expect(alert.getByRole('button', { name: 'Try again' })).toBeVisible();
   });
+});
+
+// Something an assistant put in the calendar shows up on the main screen on its own, but only on a
+// device that already has a calendar token (stubbed here): the app never asks on open.
+test.describe('new in your calendar', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.clock.setFixedTime('2031-04-15T09:30:00');
+    await stubCalendar(page, { events: calendarEvents });
+    await page.goto('/');
+  });
+
+  test('offers new events on the main screen; Add picks the car, Not this one hides it', async ({ page }) => {
+    const card = page.getByRole('region', { name: 'New in your calendar' });
+    await expect(card).toContainText('New in your calendar: Registration renewal');
+    await expect(card).not.toContainText('Oil change');
+    await card.getByRole('button', { name: '+2 more' }).click();
+    await expect(card.getByRole('list', { name: 'More new calendar events' }).getByRole('listitem')).toHaveCount(2);
+
+    await card.getByRole('button', { name: 'Add Tire rotation - Commuter' }).click();
+    await expect(page.getByText('Added Tire rotation - Commuter')).toBeVisible();
+    await expect(card.getByRole('button', { name: '+1 more' })).toBeVisible();
+
+    await card.getByRole('button', { name: 'Not this one: Registration renewal' }).click();
+    await expect(card).toContainText('New in your calendar: Car wash');
+    await expect(card.getByRole('button', { name: /more/ })).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Appointments', exact: true }).click();
+    await expect(card).toHaveCount(0);
+    await page.getByRole('region', { name: 'Upcoming appointments' }).getByRole('button', { name: 'Edit Tire rotation - Commuter' }).click();
+    await expect(page.getByRole('dialog').getByLabel('Car')).toHaveValue('demo-car-commuter');
+  });
+
+  test('a dismissed event stays dismissed after reopening', async ({ page }) => {
+    const card = page.getByRole('region', { name: 'New in your calendar' });
+    await card.getByRole('button', { name: 'Not this one: Registration renewal' }).click();
+    await page.reload();
+    await expect(card).toContainText('New in your calendar: Tire rotation - Commuter');
+    await expect(card).not.toContainText('Registration renewal');
+  });
+});
+
+test('no calendar token on the device: no card and no Google window', async ({ page }) => {
+  await page.clock.setFixedTime('2031-04-15T09:30:00');
+  await stubCalendar(page, { events: calendarEvents, cachedToken: false });
+  await page.goto('/');
+  await expect(page.getByRole('heading').first()).toBeVisible();
+  await expect(page.getByRole('region', { name: 'New in your calendar' })).toHaveCount(0);
+  expect(page.context().pages()).toHaveLength(1);
 });
