@@ -3,9 +3,9 @@ import { Trash2 } from 'lucide-react';
 import type { ServiceItem } from '../lib/model';
 import { LIMITS } from '../lib/model';
 import { UNIT_NAMES, formatReading, parseReading, type DistanceUnit } from '../lib/distance';
-import { isYmd, toYmd } from '../lib/time';
+import { isYmd, toYmd } from '@huishouden/pwa-kit/time';
 import type { ServiceItemInput } from '../data/types';
-import { Chip, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton } from './ui';
+import { Chip, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
 
 const SUGGESTIONS = ['Oil change', 'Tire rotation', 'Inspection', 'Wiper blades', 'Brake check', 'Engine air filter', 'Cabin air filter', 'Battery check'];
 

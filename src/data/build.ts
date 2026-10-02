@@ -1,6 +1,6 @@
 import type { AppointmentData, OdometerData, RenewalData, ServiceItemData, ServiceLogData, VehicleData } from '../lib/model';
 import { LIMITS, RENEWAL_KINDS } from '../lib/model';
-import { isYmd } from '../lib/time';
+import { isYmd } from '@huishouden/pwa-kit/time';
 import type { AppointmentInput, ReadingInput, RenewalInput, ServiceItemInput, VehicleInput, VisitInput } from './types';
 
 // Builds documents with exactly the keys and limits the rules accept; shared by the live and demo

@@ -1,8 +1,8 @@
 import { FilePlus } from 'lucide-react';
 import { upcoming } from '../lib/upcoming';
-import { useClock } from '../clock';
+import { useClock } from '@huishouden/pwa-kit/react/clock';
 import type { ScreenProps } from '../CarApp';
-import { cardClass, primaryButton } from '../components/ui';
+import { cardClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
 import { UpcomingRow } from './rows';
 
 /** Registration, insurance, inspection stickers and toll accounts for every car, soonest first. */

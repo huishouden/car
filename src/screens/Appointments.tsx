@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { CalendarArrowDown, CalendarPlus, CarFront, ChevronDown, ChevronUp, ExternalLink, MapPin, Pencil, Phone, Plus, Store } from 'lucide-react';
-import type { CalendarMatch } from '@huishouden/pwa-kit/calendar';
+import { CalendarArrowDown, CalendarPlus, CarFront, ChevronDown, ChevronUp, ExternalLink, MapPin, Pencil, Phone, Store } from 'lucide-react';
 import type { Contact } from '@huishouden/pwa-kit/contacts';
 import { telHref } from '@huishouden/pwa-kit/places';
 import type { Appointment, Vehicle } from '../lib/model';
-import { CAR_CALENDAR_QUERIES, fromCalendar, guessVehicle, notImported } from '../lib/calendarImport';
-import { relativeDay } from '../lib/time';
-import { formatDayLong, formatDayShort, formatTime, monthShort } from '../lib/format';
-import { useClock } from '../clock';
-import { useCalendarSearch } from '../data/calendar';
-import { CalendarHint } from '../components/AppointmentDialog';
-import { Dialog, ErrorNotice, cardClass, ghostButton, iconButton, linkClass, primaryButton, secondaryButton } from '../components/ui';
+import { CAR_CALENDAR_QUERIES, fromCalendar, guessVehicle } from '../lib/calendarImport';
+import { formatDayLong, formatTime, monthShort, relativeDay } from '@huishouden/pwa-kit/time';
+import { useClock } from '@huishouden/pwa-kit/react/clock';
+import { CalendarHint, CalendarImportDialog, useCalendarSearch } from '@huishouden/pwa-kit/react/calendar';
+import { auth } from '../data/firebase';
+import { cardClass, ghostButton, iconButton, linkClass, primaryButton, secondaryButton } from '@huishouden/pwa-kit/react/ui';
 
 import type { ScreenProps } from '../CarApp';
 
@@ -22,7 +20,7 @@ export function Appointments({ store, open, notify, calendarAvailable }: ScreenP
   const { now } = useClock();
   const [showPast, setShowPast] = useState(false);
   const [importing, setImporting] = useState(false);
-  const scan = useCalendarSearch();
+  const scan = useCalendarSearch(auth, 'Car');
   const all = store.data.appointments;
   const contacts = store.data.contacts;
   const upcoming = all.filter((a) => a.at >= now - 3_600_000).sort((a, b) => a.at - b.at);
@@ -53,7 +51,7 @@ export function Appointments({ store, open, notify, calendarAvailable }: ScreenP
           </div>
         </div>
         <div className="mt-1 flex justify-end text-right">
-          <CalendarHint available={calendarAvailable} />
+          <CalendarHint app="Car" available={calendarAvailable} />
         </div>
       </div>
 
@@ -82,9 +80,12 @@ export function Appointments({ store, open, notify, calendarAvailable }: ScreenP
       )}
 
       {importing && (
-        <ImportDialog
+        <CalendarImportDialog
           state={scan.state}
-          appointments={all}
+          intro="Oil changes, service, tires, inspection, registration and other car events from last week to a year ahead."
+          noneFound="No car events found in your calendars."
+          allImported="Every car event in your calendar is already in Car."
+          records={all}
           onRetry={runScan}
           onAdd={(list) => {
             const undos = list.map((m) => store.actions.saveAppointment(null, { ...fromCalendar(m), vehicleId: guessVehicle(m, vehicles) }));
@@ -148,75 +149,5 @@ function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; no
         <Pencil size={18} />
       </button>
     </li>
-  );
-}
-
-function ImportDialog({ state, appointments, onRetry, onAdd, onClose }: {
-  state: ReturnType<typeof useCalendarSearch>['state'];
-  appointments: Appointment[];
-  onRetry: () => void;
-  onAdd: (matches: CalendarMatch[]) => void;
-  onClose: () => void;
-}) {
-  // Recomputed as appointments arrive, so an added event leaves the list.
-  const fresh = state.status === 'done' ? notImported(state.matches, appointments) : [];
-  return (
-    <Dialog
-      title="Import from calendar"
-      onClose={onClose}
-      footer={
-        <>
-          <button type="button" className={ghostButton} onClick={onClose}>
-            Done
-          </button>
-          {fresh.length > 1 && (
-            <button
-              type="button"
-              className={primaryButton}
-              onClick={() => {
-                onAdd(fresh);
-                onClose();
-              }}
-            >
-              Add all {fresh.length}
-            </button>
-          )}
-        </>
-      }
-    >
-      <p className="text-base text-stone-600">Oil changes, service, tires, inspection, registration and other car events from last week to a year ahead.</p>
-      <div className="mt-4">
-        {(state.status === 'searching' || state.status === 'idle') && (
-          <p role="status" className="text-base text-stone-600">
-            Searching your calendars
-          </p>
-        )}
-        {state.status === 'error' && <ErrorNotice message={state.message} onRetry={onRetry} />}
-        {state.status === 'done' && fresh.length === 0 && (
-          <p role="status" className="text-base text-stone-600">
-            {state.matches.length ? 'Every car event in your calendar is already in Car.' : 'No car events found in your calendars.'}
-          </p>
-        )}
-        {fresh.length > 0 && (
-          <ul className="divide-y divide-stone-200 rounded-2xl border border-stone-200" aria-label="Calendar events">
-            {fresh.map((m) => (
-              <li key={`${m.id}-${m.start}`} className="flex items-center gap-3 px-3 py-2">
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-stone-800 [overflow-wrap:anywhere]">{m.title}</p>
-                  <p className="text-sm text-stone-600">
-                    {formatDayShort(m.start)}
-                    {m.allDay ? ', all day' : `, ${formatTime(m.start)}`} · {m.calendarName}
-                  </p>
-                  {m.location && <p className="text-sm text-stone-600 [overflow-wrap:anywhere]">{m.location}</p>}
-                </div>
-                <button type="button" className={secondaryButton} onClick={() => onAdd([m])} aria-label={`Add ${m.title}`}>
-                  <Plus size={18} /> Add
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </Dialog>
   );
 }

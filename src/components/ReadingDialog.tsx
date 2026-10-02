@@ -2,11 +2,10 @@ import { useState } from 'react';
 import type { Vehicle } from '../lib/model';
 import { LIMITS } from '../lib/model';
 import { UNIT_NAMES, formatDistance, parseReading, type DistanceUnit } from '../lib/distance';
-import type { OdometerPoint } from '../lib/odometer';
-import { formatYmd } from '../lib/format';
-import { isYmd, toYmd } from '../lib/time';
+import type { MeterReading as OdometerPoint } from '@huishouden/pwa-kit/schedule';
+import { formatYmd, isYmd, toYmd } from '@huishouden/pwa-kit/time';
 import type { ReadingInput } from '../data/types';
-import { Dialog, Field, ghostButton, inputClass, primaryButton } from './ui';
+import { Dialog, Field, ghostButton, inputClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
 
 export function ReadingDialog({ vehicle, latest, unit, now, onSave, onClose }: {
   vehicle: Vehicle | null;

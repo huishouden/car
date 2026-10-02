@@ -3,7 +3,7 @@ import { Trash2 } from 'lucide-react';
 import type { Vehicle } from '../lib/model';
 import { LIMITS } from '../lib/model';
 import type { VehicleInput } from '../data/types';
-import { Checkbox, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton } from './ui';
+import { Checkbox, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
 
 export function VehicleDialog({ vehicle, onSave, onDelete, onClose }: {
   vehicle: Vehicle | null;
