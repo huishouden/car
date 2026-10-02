@@ -7,7 +7,10 @@ import { formatYmd } from '@huishouden/pwa-kit/time';
 import { carOdometer } from './lib/upcoming';
 import { useClock } from '@huishouden/pwa-kit/react/clock';
 import type { CarStore, VisitInput } from './data/types';
-import { calendarAvailable } from '@huishouden/pwa-kit/react/calendar';
+import { CalendarSuggestions, calendarAvailable, useCalendarSuggestions } from '@huishouden/pwa-kit/react/calendar';
+import { isImported, type CalendarMatch } from '@huishouden/pwa-kit/calendar';
+import { CAR_CALENDAR_QUERIES, fromCalendar, guessVehicle } from './lib/calendarImport';
+import { auth } from './data/firebase';
 import { Header, type Tab } from './components/Header';
 import { Toast, type ToastState } from '@huishouden/pwa-kit/react/ui';
 import { VehicleDialog } from './components/VehicleDialog';
@@ -78,6 +81,13 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
   const { data, actions } = store;
   const unit: DistanceUnit = data.settings?.distanceUnit ?? 'mi';
   const calendar = calendarAvailable(user);
+  const suggested = useCalendarSuggestions({ auth, words: CAR_CALENDAR_QUERIES, isImported: (m) => isImported(m, data.appointments), app: 'Car' });
+
+  /** Calendar events in as appointments, with the car guessed: Import from calendar and the new-in-your-calendar card. */
+  const importEvents = (list: CalendarMatch[]) => {
+    const undos = list.map((m) => actions.saveAppointment(null, { ...fromCalendar(m), vehicleId: guessVehicle(m, data.vehicles) }));
+    notify(list.length === 1 ? `Added ${list[0].title}` : `Added ${list.length} appointments`, () => undos.forEach((u) => u()));
+  };
   const close = () => setDialog(null);
 
   useEffect(() => {
@@ -95,7 +105,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
   else if (tab === 'cars') content = <Cars {...screen} carId={carId} onCar={setCarId} />;
   else if (tab === 'renewals') content = <Renewals {...screen} />;
   else if (tab === 'history') content = <History {...screen} />;
-  else if (tab === 'appointments') content = <Appointments {...screen} calendarAvailable={calendar} />;
+  else if (tab === 'appointments') content = <Appointments {...screen} calendarAvailable={calendar} onImport={importEvents} />;
   else if (tab === 'shops') content = <Shops {...screen} />;
   else content = <Overview {...screen} onCar={showCar} onOpen={setTab} />;
 
@@ -106,6 +116,9 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
       <Header tabs={TABS as Tab[]} tab={tab} onTab={(id) => setTab(id as TabId)} user={user} onSignIn={onSignIn} onSignOut={onSignOut} signingIn={signingIn} />
       <main className="mx-auto flex w-full max-w-[1200px] min-h-0 flex-1 flex-col gap-4 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pt-6 sm:pb-6">
         {banner}
+        {tab === 'overview' && store.ready && (
+          <CalendarSuggestions suggestions={suggested.suggestions} now={now} onAdd={(m) => importEvents([m])} onDismiss={suggested.dismiss} />
+        )}
         <div className="min-h-0 flex-1">{content}</div>
       </main>
 
