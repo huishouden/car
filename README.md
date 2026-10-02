@@ -56,6 +56,12 @@ in [huishouden/tasks](https://github.com/huishouden/tasks), which owns the proje
 in uses Google with no extra scopes; the household comes from the shared `households` document, so one
 invite from the portal opens every Huishouden app.
 
+Car publishes its dates to the household agenda (`households/{id}/agenda`, app `car`, through
+`@huishouden/pwa-kit/agenda`) for the portal's calendar and Today view: each service item's next due
+day (`due`; mileage-only items when the recent pace gives an estimated day), every renewal
+(`renewal`) and every appointment (`appointment`, with the shop's name). Saves replace the changed
+records' items; opening the app reconciles them all. The signed-out sample never writes.
+
 Find in my calendar and Import from calendar read Google Calendar (read-only) through
 `@huishouden/pwa-kit/calendar`; Google asks once for permission the first time. Find a business looks
 places up on OpenStreetMap (`@huishouden/pwa-kit/places`), only when Search is pressed.

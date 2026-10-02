@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { cleanContact } from '@huishouden/pwa-kit/contacts';
 import { DEMO_MEMBERS, demoData, type CarData } from '../lib/demo';
 import { APP } from '../lib/contacts';
-import { COLLECTIONS, createActions, type Backend } from './actions';
+import { applyOps, createActions, type Backend } from './actions';
 import type { CarStore } from './types';
 
 /**
@@ -24,16 +24,7 @@ export function useDemoStore(clock: () => number): CarStore {
     };
     const backend: Backend = {
       newId: (col) => `local-${col}-${Date.now()}-${seq++}`,
-      write: (ops) =>
-        patch((d) => {
-          const next = { ...d };
-          for (const op of ops) {
-            const key = COLLECTIONS[op.col];
-            const list = (next[key] as { id: string }[]).filter((x) => x.id !== op.id);
-            (next as Record<string, unknown>)[key] = op.type === 'set' ? [...list, { id: op.id, ...op.data }] : list;
-          }
-          return next;
-        }),
+      write: (ops) => patch((d) => applyOps(d, ops)),
       saveSettings: (distanceUnit, by, now) => patch((d) => ({ ...d, settings: { distanceUnit, updatedAt: now, updatedBy: by } })),
       saveContact: (id, input) =>
         patch((d) => {

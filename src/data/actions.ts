@@ -33,6 +33,17 @@ export interface Backend {
   restoreContact(contact: Contact): void;
 }
 
+/** `data` with the operations applied, as the stores hold it once a write lands. */
+export function applyOps(data: CarData, ops: Op[]): CarData {
+  const next = { ...data };
+  for (const op of ops) {
+    const key = COLLECTIONS[op.col];
+    const list = (next[key] as { id: string }[]).filter((x) => x.id !== op.id);
+    (next as Record<string, unknown>)[key] = op.type === 'set' ? [...list, { id: op.id, ...op.data }] : list;
+  }
+  return next;
+}
+
 const withoutId = <T extends { id: string }>({ id: _id, ...rest }: T) => rest;
 
 export function createActions(backend: Backend, data: () => CarData, me: string, clock: () => number): CarActions {
