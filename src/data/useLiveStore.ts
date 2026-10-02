@@ -6,7 +6,8 @@ import type { SettingsData } from '../lib/model';
 import { readError } from '@huishouden/pwa-kit/feedback';
 import { APP } from '../lib/contacts';
 import { db } from './firebase';
-import { COLLECTIONS, createActions, type Backend, type CollectionName } from './actions';
+import { COLLECTIONS, applyOps, createActions, type Backend, type CollectionName } from './actions';
+import { publishChanges, syncAll } from './publishAgenda';
 import type { CarStore } from './types';
 
 const EMPTY: CarData = { vehicles: [], serviceItems: [], readings: [], renewals: [], serviceLog: [], appointments: [], contacts: [], settings: null };
@@ -61,7 +62,15 @@ export function useLiveStore(householdId: string, me: string, onError: (message:
         },
         fail('settings'),
       ),
-      watchContacts(db, householdId, (contacts) => setData((d) => ({ ...d, contacts })), { app: APP, onError: fail('contacts') }),
+      watchContacts(
+        db,
+        householdId,
+        (contacts) => {
+          setData((d) => ({ ...d, contacts }));
+          answer('contacts');
+        },
+        { app: APP, onError: fail('contacts') },
+      ),
     );
     return () => unsubs.forEach((u) => u());
   }, [base, householdId]);
@@ -73,11 +82,13 @@ export function useLiveStore(householdId: string, me: string, onError: (message:
       write: (ops) => {
         const batch = writeBatch(db);
         for (const op of ops) {
-          const ref = doc(db, base, op.col, op.id);
-          if (op.type === 'set') batch.set(ref, op.data);
-          else batch.delete(ref);
+          const target = doc(db, base, op.col, op.id);
+          if (op.type === 'set') batch.set(target, op.data);
+          else batch.delete(target);
         }
         report(batch.commit());
+        const before = ref.current;
+        publishChanges(householdId, me, before, applyOps(before, ops), ops);
       },
       saveSettings: (distanceUnit, by, now) => report(setDoc(doc(db, base, 'carSettings', 'main'), { distanceUnit, updatedAt: Math.round(now), updatedBy: by })),
       saveContact: (id, input) => report(id ? updateContact(db, householdId, id, input, me) : addContact(db, householdId, input, me)),
@@ -89,5 +100,23 @@ export function useLiveStore(householdId: string, me: string, onError: (message:
   }, [base, householdId, me]);
 
   const ready = (Object.keys(COLLECTIONS) as string[]).every((c) => answered.has(c)) && answered.has('settings');
+
+  // Once per open, with every collection loaded: repairs what another device or an older version
+  // left on the household agenda, and moves items whose day has passed to overdue.
+  const synced = useRef(false);
+  const loaded = ready && answered.has('contacts');
+  useEffect(() => {
+    if (!loaded || synced.current || !me) return;
+    synced.current = true;
+    syncAll(householdId, me, ref.current);
+  }, [loaded, householdId, me]);
+
+  // A shop renamed or removed changes the appointments that name it.
+  const shops = useRef(data.contacts);
+  useEffect(() => {
+    const before = shops.current;
+    shops.current = data.contacts;
+    if (synced.current && before !== data.contacts) publishChanges(householdId, me, { ...ref.current, contacts: before }, ref.current, []);
+  }, [data.contacts, householdId, me]);
   return { data, ready, actions, me };
 }
