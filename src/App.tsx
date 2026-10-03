@@ -11,7 +11,7 @@ import { PORTAL_URL } from './lib/portal';
 import { ClockProvider } from '@huishouden/pwa-kit/react/clock';
 import { CarApp } from './CarApp';
 import { Header } from './components/Header';
-import { cardClass, primaryButton, useToast } from '@huishouden/pwa-kit/react/ui';
+import { cardClass, primaryButton, SampleBanner, useToast } from '@huishouden/pwa-kit/react/ui';
 
 export default function App() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
@@ -115,12 +115,7 @@ function DemoApp({ signInError, ...frame }: FrameProps & { signInError: string |
 function DemoInner({ read, signInError, ...frame }: FrameProps & { read: () => number; signInError: string | null }) {
   const { toast, notify, clear } = useToast();
   const store = useDemoStore(read);
-  const banner = (
-    <div className={`${cardClass} flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2`} role="note">
-      <span className="rounded-full bg-terracotta-light px-3 py-1 text-sm font-semibold text-terracotta-dark">Sample data</span>
-      <p className="min-w-0 flex-1 text-base text-stone-600">{signInError ?? 'An invented household’s cars. Nothing is saved. Sign in to use your own.'}</p>
-    </div>
-  );
+  const banner = <SampleBanner text="An invented household’s cars. Nothing is saved. Sign in to use your own." notice={signInError ?? undefined} />;
   return <CarApp store={store} user={null} {...frame} toast={toast} notify={notify} clearToast={clear} banner={banner} />;
 }
 
