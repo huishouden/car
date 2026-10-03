@@ -15,7 +15,8 @@ export type VisitInput = Input<ServiceLogData>;
 export type AppointmentInput = Input<AppointmentData>;
 
 /** Puts back what an action changed. Every action that changes data returns one, for the toast's Undo. */
-export type Undo = () => void;
+export type { Undo } from '@huishouden/pwa-kit/store';
+import type { Undo } from '@huishouden/pwa-kit/store';
 
 /** Writes return at once (Firestore queues them offline); failures arrive through the store's onError. */
 export interface CarActions {

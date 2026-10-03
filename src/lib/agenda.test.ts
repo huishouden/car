@@ -105,9 +105,7 @@ function act(run: (a: ReturnType<typeof createActions>) => void, start: CarData 
       current = applyOps(current, ops);
     },
     saveSettings: () => {},
-    saveContact: () => {},
-    deleteContact: () => {},
-    restoreContact: () => {},
+    contacts: { save: () => {}, remove: () => {}, restore: () => {} },
   };
   run(createActions(backend, () => current, 'alex@example.com', () => DEMO_NOW));
   return agendaChanges(start, current, writes.flat(), DEMO_NOW);
