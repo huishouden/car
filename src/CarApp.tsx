@@ -223,6 +223,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           roles={ROLES}
           title={{ add: 'New shop', edit: 'Edit shop' }}
           namePlaceholder="Example Auto Service"
+          auth={auth}
           canMarkPrivate={may.seePrivate}
           onClose={close}
           onSave={(input) => {

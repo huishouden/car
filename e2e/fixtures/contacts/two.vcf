@@ -1,0 +1,15 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:Sam Sample
+N:Sample;Sam;;;
+TEL;TYPE=CELL:555-010-0134
+item1.ORG:Example Motors
+CATEGORIES:myContacts
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+FN:Example Car Wash
+ORG:Example Car Wash
+TEL;TYPE=WORK:555-010-0135
+CATEGORIES:myContacts
+END:VCARD

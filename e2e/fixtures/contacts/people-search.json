@@ -1,0 +1,14 @@
+{
+  "results": [
+    {
+      "person": {
+        "resourceName": "people/c3001",
+        "names": [{ "metadata": { "primary": true }, "displayName": "Morgan Example" }],
+        "phoneNumbers": [{ "metadata": { "primary": true }, "value": "(555) 010-0132", "type": "mobile", "formattedType": "Mobile" }],
+        "emailAddresses": [{ "metadata": { "primary": true }, "value": "morgan@brakes.example.com" }],
+        "addresses": [{ "metadata": { "primary": true }, "formattedValue": "80 Example Road\nSpringfield, IL 62704" }],
+        "organizations": [{ "metadata": { "primary": true }, "name": "Example Brake & Tire" }]
+      }
+    }
+  ]
+}
