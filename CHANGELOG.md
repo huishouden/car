@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/huishouden/car/compare/v1.7.0...v1.7.1) (2026-10-03)
+
+
+### Bug Fixes
+
+* dialogs keep focus where it was tapped on phones (pwa-kit 0.51.0) ([#27](https://github.com/huishouden/car/issues/27)) ([a21d3c1](https://github.com/huishouden/car/commit/a21d3c1f6a01233498866e5d64d40742d42a298c))
+
 ## [1.7.0](https://github.com/huishouden/car/compare/v1.6.0...v1.7.0) (2026-10-03)
 
 
