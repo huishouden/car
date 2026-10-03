@@ -40,7 +40,10 @@ export interface UpcomingInput {
   renewals: Renewal[];
 }
 
-/** Every service item and renewal, overdue first, then soonest; items with no record last. */
+/**
+ * Every service item and renewal, overdue first, then soonest; items with no record last. Paused
+ * items and closed renewals don't come due: `setAside` lists them.
+ */
 export function upcoming(data: UpcomingInput, unit: DistanceUnit, now: number): UpcomingItem[] {
   const byId = new Map(data.vehicles.map((v) => [v.id, v]));
   const odometers = new Map(data.vehicles.map((v) => [v.id, carOdometer(v.id, data.readings, data.serviceLog, data.serviceItems)]));
@@ -48,14 +51,14 @@ export function upcoming(data: UpcomingInput, unit: DistanceUnit, now: number): 
   for (const item of data.serviceItems) {
     const vehicle = byId.get(item.vehicleId);
     // A schedule left behind by a deleted car is not the household's to do any more.
-    if (!vehicle) continue;
+    if (!vehicle || item.pausedAt) continue;
     const odo = odometers.get(item.vehicleId)!;
     const due = serviceDue(item, odo.latest, odo.pace, now);
     out.push({ kind: 'service', id: item.id, vehicle, item, due, state: due.state, text: dueText(item.name, due, unit), sortDays: due.sortDays });
   }
   for (const renewal of data.renewals) {
     const vehicle = renewal.vehicleId ? (byId.get(renewal.vehicleId) ?? null) : null;
-    if (renewal.vehicleId && !vehicle) continue;
+    if ((renewal.vehicleId && !vehicle) || renewal.closedAt) continue;
     const due = renewalDue(renewal, now);
     out.push({ kind: 'renewal', id: renewal.id, vehicle, renewal, state: due.state, text: renewalText(renewal, now), sortDays: due.days });
   }
@@ -64,3 +67,22 @@ export function upcoming(data: UpcomingInput, unit: DistanceUnit, now: number): 
 
 /** How many need attention now (overdue or within the soon window). */
 export const needsAttention = (items: UpcomingItem[]) => items.filter((i) => i.state === 'overdue' || i.state === 'soon').length;
+
+export type SetAsideItem =
+  | { kind: 'service'; id: string; vehicle: Vehicle; item: ServiceItem; at: number }
+  | { kind: 'renewal'; id: string; vehicle: Vehicle | null; renewal: Renewal; at: number };
+
+/** Paused service items and closed renewals of cars that still exist, most recently set aside first. */
+export function setAside(data: Pick<UpcomingInput, 'vehicles' | 'serviceItems' | 'renewals'>): SetAsideItem[] {
+  const byId = new Map(data.vehicles.map((v) => [v.id, v]));
+  const out: SetAsideItem[] = [];
+  for (const item of data.serviceItems) {
+    const vehicle = byId.get(item.vehicleId);
+    if (vehicle && item.pausedAt) out.push({ kind: 'service', id: item.id, vehicle, item, at: item.pausedAt });
+  }
+  for (const renewal of data.renewals) {
+    const vehicle = renewal.vehicleId ? (byId.get(renewal.vehicleId) ?? null) : null;
+    if ((!renewal.vehicleId || vehicle) && renewal.closedAt) out.push({ kind: 'renewal', id: renewal.id, vehicle, renewal, at: renewal.closedAt });
+  }
+  return out.sort((a, b) => b.at - a.at);
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { CirclePause, Trash2 } from 'lucide-react';
 import type { ServiceItem } from '../lib/model';
 import { LIMITS } from '../lib/model';
 import { UNIT_NAMES, formatReading, parseReading, type DistanceUnit } from '../lib/distance';
@@ -9,12 +9,14 @@ import { Chip, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButt
 
 const SUGGESTIONS = ['Oil change', 'Tire rotation', 'Inspection', 'Wiper blades', 'Brake check', 'Engine air filter', 'Cabin air filter', 'Battery check'];
 
-export function ServiceItemDialog({ item, unit, now, onSave, onDelete, onClose }: {
+export function ServiceItemDialog({ item, unit, now, onSave, onDelete, onPause, onClose }: {
   item: ServiceItem | null;
   unit: DistanceUnit;
   now: number;
   onSave: (input: Omit<ServiceItemInput, 'vehicleId'>) => void;
   onDelete?: () => void;
+  /** Left out for a new one, and where the person may not change it. */
+  onPause?: () => void;
   onClose: () => void;
 }) {
   const [name, setName] = useState(item?.name ?? '');
@@ -55,6 +57,18 @@ export function ServiceItemDialog({ item, unit, now, onSave, onDelete, onClose }
               }}
             >
               <Trash2 size={18} /> Remove
+            </button>
+          )}
+          {onPause && (
+            <button
+              type="button"
+              className={ghostButton}
+              onClick={() => {
+                onPause();
+                onClose();
+              }}
+            >
+              <CirclePause size={18} /> Pause
             </button>
           )}
           <button type="button" className={ghostButton} onClick={onClose}>

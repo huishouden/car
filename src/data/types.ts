@@ -27,12 +27,18 @@ export interface CarActions {
   deleteVehicle(id: string): Undo;
   saveServiceItem(id: string | null, input: ServiceItemInput): Undo;
   deleteServiceItem(id: string): Undo;
+  /** Stops it coming due (kept, shown as paused) until resumed. */
+  pauseServiceItem(id: string): Undo;
+  resumeServiceItem(id: string): Undo;
   logReading(input: ReadingInput): Undo;
   deleteReading(id: string): Undo;
   saveRenewal(id: string | null, input: RenewalInput): Undo;
   /** Moves a repeating renewal to its next due date. */
   markRenewed(id: string): Undo;
   deleteRenewal(id: string): Undo;
+  /** Marks it handled without renewing: it stops coming due and shows as closed until reopened. */
+  closeRenewal(id: string): Undo;
+  reopenRenewal(id: string): Undo;
   /** Saves a visit and moves the schedule items it covered forward. */
   saveVisit(id: string | null, input: VisitInput): Undo;
   deleteVisit(id: string): Undo;

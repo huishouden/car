@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Archive, Trash2 } from 'lucide-react';
 import type { Renewal, RenewalKind, Vehicle } from '../lib/model';
 import { LIMITS, RENEWAL_KINDS, RENEWAL_LABELS } from '../lib/model';
 import { describeMonths } from '@huishouden/pwa-kit/schedule';
@@ -10,7 +10,7 @@ import { Chip, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButt
 
 const REPEATS = [0, 1, 3, 6, 12, 24];
 
-export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDelete, onClose }: {
+export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDelete, onHandled, onClose }: {
   renewal: Renewal | null;
   /** Prefills the car for a new renewal. */
   vehicleId?: string;
@@ -18,6 +18,8 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
   now: number;
   onSave: (input: RenewalInput) => void;
   onDelete?: () => void;
+  /** Left out for a new one, and where the person may not change it. */
+  onHandled?: () => void;
   onClose: () => void;
 }) {
   const [kind, setKind] = useState<RenewalKind>(renewal?.kind ?? 'registration');
@@ -59,6 +61,18 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
               }}
             >
               <Trash2 size={18} /> Delete
+            </button>
+          )}
+          {onHandled && (
+            <button
+              type="button"
+              className={ghostButton}
+              onClick={() => {
+                onHandled();
+                onClose();
+              }}
+            >
+              <Archive size={18} /> Mark handled
             </button>
           )}
           <button type="button" className={ghostButton} onClick={onClose}>

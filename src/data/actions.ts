@@ -46,6 +46,19 @@ export function createActions(backend: Backend, data: () => CarData, me: string,
   };
   const remove = (col: CollectionName) => (id: string) => change([{ col, id, data: null }]);
 
+  /** Pauses or resumes a service item (`pausedAt`): the whole record, rebuilt. */
+  const setPaused = (id: string, pausedAt: number | undefined) => {
+    const item = data().serviceItems.find((i) => i.id === id);
+    if (!item) return () => {};
+    return change([{ col: 'carServiceItems', id, data: serviceItemDoc({ ...withoutId(item), pausedAt }, stamp('carServiceItems', id)) }]);
+  };
+  /** Closes or reopens a renewal (`closedAt`). */
+  const setClosed = (id: string, closedAt: number | undefined) => {
+    const r = data().renewals.find((x) => x.id === id);
+    if (!r) return () => {};
+    return change([{ col: 'carRenewals', id, data: renewalDoc({ ...withoutId(r), closedAt }, stamp('carRenewals', id)) }]);
+  };
+
   return {
     setDistanceUnit: (unit) => backend.saveSettings(unit, me, clock()),
 
@@ -77,8 +90,11 @@ export function createActions(backend: Backend, data: () => CarData, me: string,
       return change(ops);
     },
 
-    saveServiceItem: save('carServiceItems', serviceItemDoc),
+    // An edit keeps the item paused (and a renewal closed): the dialogs don't carry those.
+    saveServiceItem: (id, input) => save('carServiceItems', serviceItemDoc)(id, { pausedAt: id ? data().serviceItems.find((i) => i.id === id)?.pausedAt : undefined, ...input }),
     deleteServiceItem: remove('carServiceItems'),
+    pauseServiceItem: (id) => setPaused(id, clock()),
+    resumeServiceItem: (id) => setPaused(id, undefined),
 
     logReading: (input) => {
       track('log odometer');
@@ -86,7 +102,9 @@ export function createActions(backend: Backend, data: () => CarData, me: string,
     },
     deleteReading: remove('carOdometer'),
 
-    saveRenewal: save('carRenewals', renewalDoc),
+    saveRenewal: (id, input) => save('carRenewals', renewalDoc)(id, { closedAt: id ? data().renewals.find((r) => r.id === id)?.closedAt : undefined, ...input }),
+    closeRenewal: (id) => setClosed(id, clock()),
+    reopenRenewal: (id) => setClosed(id, undefined),
     markRenewed: (id) => {
       track('mark renewed');
       const r = data().renewals.find((x) => x.id === id);

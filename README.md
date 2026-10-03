@@ -62,6 +62,14 @@ day (`due`; mileage-only items when the recent pace gives an estimated day), eve
 (`renewal`) and every appointment (`appointment`, with the shop's name). Saves replace the changed
 records' items; opening the app reconciles them all. The signed-out sample never writes.
 
+It also publishes to the household to-do list (`households/{id}/todos`, through
+`@huishouden/pwa-kit/todos`) the service items and renewals that are overdue or due within 30 days,
+on open and a few seconds after a change. Each carries the writes Car itself makes: Done logs a visit
+today and moves the item on (anyone); Pause sets the item's `pausedAt` (admins, members, whoever
+added it); Renewed moves a repeating renewal's due date a cycle on (anyone) or closes one that doesn't
+repeat; Mark handled sets the renewal's `closedAt`. Paused items and closed renewals don't come due
+anywhere; Car lists them on the car's page, marked, with Resume and Reopen.
+
 Find in my calendar and Import from calendar read Google Calendar (read-only) through
 `@huishouden/pwa-kit/calendar`; Google asks once for permission the first time. Find a business looks
 places up on OpenStreetMap (`@huishouden/pwa-kit/places`), only when Search is pressed.

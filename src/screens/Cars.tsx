@@ -1,11 +1,11 @@
 import { CalendarPlus, FilePlus, Gauge, Pencil, Plus, Trash2 } from 'lucide-react';
 import { UNIT_NAMES, formatDistance, formatReading, type DistanceUnit } from '../lib/distance';
 import { daysAgo, daysUntil, formatYmd } from '@huishouden/pwa-kit/time';
-import { carOdometer, upcoming } from '../lib/upcoming';
+import { carOdometer, setAside, upcoming } from '../lib/upcoming';
 import { useClock } from '@huishouden/pwa-kit/react/clock';
 import type { ScreenProps } from '../CarApp';
 import { Chip, cardClass, ghostButton, iconButton, overline, primaryButton } from '@huishouden/pwa-kit/react/ui';
-import { UpcomingRow } from './rows';
+import { SetAsideRow, UpcomingRow } from './rows';
 import { RoleNote } from '@huishouden/pwa-kit/react/roles';
 
 /** One car at a time: its details, odometer, service schedule and renewals. */
@@ -44,6 +44,8 @@ export function Cars({ store, unit, may, open, notify, carId, onCar }: ScreenPro
   const odo = carOdometer(car.id, data.readings, data.serviceLog, data.serviceItems);
   const items = upcoming({ ...data, vehicles: [car], renewals: [] }, unit, now);
   const renewals = upcoming({ ...data, vehicles: [car], serviceItems: [], renewals: data.renewals.filter((r) => r.vehicleId === car.id) }, unit, now);
+  const asideItems = setAside({ vehicles: [car], serviceItems: data.serviceItems, renewals: [] });
+  const asideRenewals = setAside({ vehicles: [car], serviceItems: [], renewals: data.renewals.filter((r) => r.vehicleId === car.id) });
   const readings = data.readings.filter((r) => r.vehicleId === car.id).sort((a, b) => b.date.localeCompare(a.date) || b.reading - a.reading);
   const monthly = odo.pace ? Math.round((odo.pace * 30.44) / 10) * 10 : null;
 
@@ -113,10 +115,13 @@ export function Cars({ store, unit, may, open, notify, carId, onCar }: ScreenPro
                 <CalendarPlus size={18} /> Add item
               </button>
             </div>
-            {items.length === 0 && <p className="px-5 py-4 text-base text-stone-600">Nothing scheduled. Add an oil change, tire rotation or inspection.</p>}
+            {items.length === 0 && asideItems.length === 0 && <p className="px-5 py-4 text-base text-stone-600">Nothing scheduled. Add an oil change, tire rotation or inspection.</p>}
             <ul>
               {items.map((entry) => (
                 <UpcomingRow key={entry.id} entry={entry} store={store} unit={unit} now={now} may={may} open={open} notify={notify} showCar={false} />
+              ))}
+              {asideItems.map((entry) => (
+                <SetAsideRow key={entry.id} entry={entry} store={store} unit={unit} may={may} notify={notify} showCar={false} />
               ))}
             </ul>
           </section>
@@ -128,10 +133,13 @@ export function Cars({ store, unit, may, open, notify, carId, onCar }: ScreenPro
                 <FilePlus size={18} /> Add renewal
               </button>
             </div>
-            {renewals.length === 0 && <p className="px-5 py-4 text-base text-stone-600">No renewals for this car. Registration and the inspection sticker go here.</p>}
+            {renewals.length === 0 && asideRenewals.length === 0 && <p className="px-5 py-4 text-base text-stone-600">No renewals for this car. Registration and the inspection sticker go here.</p>}
             <ul>
               {renewals.map((entry) => (
                 <UpcomingRow key={entry.id} entry={entry} store={store} unit={unit} now={now} may={may} open={open} notify={notify} showCar={false} />
+              ))}
+              {asideRenewals.map((entry) => (
+                <SetAsideRow key={entry.id} entry={entry} store={store} unit={unit} may={may} notify={notify} showCar={false} />
               ))}
             </ul>
           </section>

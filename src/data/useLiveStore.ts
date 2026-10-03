@@ -9,8 +9,11 @@ import { readError } from '@huishouden/pwa-kit/feedback';
 import { APP } from '../lib/contacts';
 import { db } from './firebase';
 import { COLLECTIONS, applyOps, createActions, type Backend, type CollectionName } from './actions';
-import { publishChanges, syncAll } from './publishAgenda';
+import { publishChanges, syncAll, syncTodoList } from './publishAgenda';
 import type { CarStore } from './types';
+
+/** How long after a change the to-do list is brought up to date. */
+const TODO_DELAY = 3000;
 
 const EMPTY: CarData = { vehicles: [], serviceItems: [], readings: [], renewals: [], serviceLog: [], appointments: [], contacts: [], settings: null };
 
@@ -79,6 +82,7 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
     return () => unsubs.forEach((u) => u());
   }, [base, householdId, restricted]);
 
+  const synced = useRef(false);
   const actions = useMemo(() => {
     const report = (p: Promise<unknown>) => void p.catch((e) => errorRef.current(readError(e, "Couldn't save")));
     const backend: Backend = {
@@ -86,7 +90,10 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
       write: (ops) => {
         report(commitOps(db, base, ops));
         const before = ref.current;
-        publishChanges(householdId, me, before, applyOps(before, ops), ops, Date.now(), restricted);
+        const after = applyOps(before, ops);
+        publishChanges(householdId, me, before, after, ops, Date.now(), restricted);
+        // At once as well as after the snapshot: someone may close the app right after a tap.
+        if (synced.current) syncTodoList(householdId, me, after, Date.now(), restricted);
       },
       saveSettings: (distanceUnit, by, now) => report(setDoc(doc(db, base, 'carSettings', 'main'), { distanceUnit, updatedAt: Math.round(now), updatedBy: by })),
       contacts: householdContacts(db, householdId, APP, me, report),
@@ -98,7 +105,6 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
 
   // Once per open, with every collection loaded: repairs what another device or an older version
   // left on the household agenda, and moves items whose day has passed to overdue.
-  const synced = useRef(false);
   const loaded = ready && answered.has('contacts');
   useEffect(() => {
     if (!loaded || synced.current || !me) return;
@@ -108,6 +114,14 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
     // with `private: false`: an admin's or member's device does that once.
     if (can(role, 'see-private')) markUnflaggedOpen(db, householdId, 'carAppointments', ref.current.appointments).catch(() => {});
   }, [loaded, householdId, me, restricted, role]);
+
+  // The to-do list follows the data a few seconds after it changes (here or on another device),
+  // once the first sync has run.
+  useEffect(() => {
+    if (!synced.current || !me) return;
+    const t = setTimeout(() => syncTodoList(householdId, me, ref.current, Date.now(), restricted), TODO_DELAY);
+    return () => clearTimeout(t);
+  }, [data, householdId, me, restricted]);
 
   // A shop renamed or removed changes the appointments that name it.
   const shops = useRef(data.contacts);
