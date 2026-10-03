@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/huishouden/car/compare/v1.5.0...v1.6.0) (2026-10-03)
+
+
+### Features
+
+* **shops:** add a shop from your own contacts ([#23](https://github.com/huishouden/car/issues/23)) ([211b758](https://github.com/huishouden/car/commit/211b7584e45bfea275d56df66b92776039d12098))
+
 ## [1.5.0](https://github.com/huishouden/car/compare/v1.4.0...v1.5.0) (2026-10-03)
 
 
