@@ -44,7 +44,9 @@ test('cars', ({ page }) =>
   captureScreenshot(page, 'cars', {
     fixedTime,
     prepare: async (p) => {
-      await tab('Cars')(p);
+      // On a phone Cars is under More in the bottom bar.
+      await p.getByRole('navigation', { name: 'Sections' }).getByRole('button', { name: 'More' }).click();
+      await p.getByRole('dialog', { name: 'More' }).getByRole('button', { name: 'Cars' }).click();
       await expect(p.getByRole('region', { name: 'Service schedule' })).toBeVisible();
     },
   }));
@@ -134,7 +136,9 @@ test('phone: cars', async ({ page }) => {
   await captureScreenshot(page, 'phone-cars', {
     fixedTime,
     prepare: async (p) => {
-      await tab('Cars')(p);
+      // On a phone Cars is under More in the bottom bar.
+      await p.getByRole('navigation', { name: 'Sections' }).getByRole('button', { name: 'More' }).click();
+      await p.getByRole('dialog', { name: 'More' }).getByRole('button', { name: 'Cars' }).click();
       await expect(p.getByRole('region', { name: 'Service schedule' })).toBeVisible();
     },
   });
