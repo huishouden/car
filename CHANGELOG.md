@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/huishouden/car/compare/v1.4.0...v1.5.0) (2026-10-03)
+
+
+### Features
+
+* **security:** security headers; one-line Sample data banner on phones ([#20](https://github.com/huishouden/car/issues/20)) ([46e699e](https://github.com/huishouden/car/commit/46e699eee4b6e4bdf82c39b46c483f0386488bbe))
+
 ## [1.4.0](https://github.com/huishouden/car/compare/v1.3.1...v1.4.0) (2026-10-02)
 
 
