@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.0](https://github.com/huishouden/car/compare/v1.9.0...v1.10.0) (2026-10-03)
+
+
+### Features
+
+* dark mode that follows the suite's theme ([#33](https://github.com/huishouden/car/issues/33)) ([46cf6e5](https://github.com/huishouden/car/commit/46cf6e5cc4d90bd01e4749574a5d8dc47e017dd6))
+
 ## [1.9.0](https://github.com/huishouden/car/compare/v1.8.0...v1.9.0) (2026-10-03)
 
 
