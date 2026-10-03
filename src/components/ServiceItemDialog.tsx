@@ -100,29 +100,29 @@ export function ServiceItemDialog({ item, unit, now, onSave, onDelete, onPause, 
           </div>
         )}
         <fieldset>
-          <legend className="mb-1.5 block text-sm font-medium text-stone-700">Every</legend>
+          <legend className="mb-1.5 block text-sm font-medium text-ink-soft">Every</legend>
           <div className="grid grid-cols-2 gap-3">
             <label className="flex items-center gap-2">
               <input className={inputClass} inputMode="numeric" value={months} onChange={(e) => setMonths(e.target.value.replace(/\D/g, ''))} aria-label="Every how many months" aria-invalid={!monthsValid} />
-              <span className="text-base text-stone-700">months</span>
+              <span className="text-base text-ink-soft">months</span>
             </label>
             <label className="flex items-center gap-2">
               <input className={inputClass} inputMode="numeric" value={distance} onChange={(e) => setDistance(e.target.value)} aria-label={`Every how many ${units}`} aria-invalid={!distanceValid} />
-              <span className="text-base text-stone-700">{units}</span>
+              <span className="text-base text-ink-soft">{units}</span>
             </label>
           </div>
-          <p className="mt-1 text-sm text-stone-600">Fill in one or both. It is due at whichever comes first.</p>
+          <p className="mt-1 text-sm text-muted">Fill in one or both. It is due at whichever comes first.</p>
         </fieldset>
         <fieldset>
-          <legend className="mb-1.5 block text-sm font-medium text-stone-700">Last done (optional)</legend>
+          <legend className="mb-1.5 block text-sm font-medium text-ink-soft">Last done (optional)</legend>
           <div className="grid grid-cols-2 gap-3">
             <input className={inputClass} type="date" value={lastDate} max={toYmd(now)} onChange={(e) => setLastDate(e.target.value)} aria-label="Last done on" />
             <label className="flex items-center gap-2">
               <input className={inputClass} inputMode="numeric" value={lastOdometer} onChange={(e) => setLastOdometer(e.target.value)} aria-label="Last done at" placeholder="Odometer" aria-invalid={odometer === null} />
-              <span className="text-base text-stone-700">{units}</span>
+              <span className="text-base text-ink-soft">{units}</span>
             </label>
           </div>
-          <p className="mt-1 text-sm text-stone-600">Logging a service in History fills these in.</p>
+          <p className="mt-1 text-sm text-muted">Logging a service in History fills these in.</p>
         </fieldset>
         <Field label="Notes (optional)">
           <textarea className={`${inputClass} min-h-20`} value={notes} maxLength={LIMITS.itemNotes} onChange={(e) => setNotes(e.target.value)} placeholder="Synthetic 0W-20" />

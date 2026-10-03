@@ -115,7 +115,7 @@ export function VisitDialog({ visit, prefill, data, unit, now, onSave, onDelete,
         )}
         {items.length > 0 && (
           <fieldset>
-            <legend className="mb-1 block text-sm font-medium text-stone-700">Covers</legend>
+            <legend className="mb-1 block text-sm font-medium text-ink-soft">Covers</legend>
             <div className="grid sm:grid-cols-2">
               {items.map((i) => (
                 <Checkbox key={i.id} checked={itemIds.includes(i.id)} onChange={(on) => toggle(i.id, on)}>

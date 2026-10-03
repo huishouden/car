@@ -16,14 +16,14 @@ export function DueRow({ kind, state, text, meta, onDone, doneLabel, onEdit, edi
 }) {
   const Icon = kind === 'service' ? Wrench : FileText;
   return (
-    <li className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-stone-200 px-4 py-3 last:border-b-0 sm:flex-nowrap sm:px-5">
-      <Icon size={22} strokeWidth={2.2} className={`shrink-0 ${state === 'overdue' ? 'text-terracotta' : 'text-stone-600'}`} aria-hidden="true" />
+    <li className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line px-4 py-3 last:border-b-0 sm:flex-nowrap sm:px-5">
+      <Icon size={22} strokeWidth={2.2} className={`shrink-0 ${state === 'overdue' ? 'text-attention-fill' : 'text-muted'}`} aria-hidden="true" />
       <div className="min-w-0 flex-1 basis-[calc(100%-2.5rem)] sm:basis-0">
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-          <p className="text-lg font-semibold text-stone-800">{text}</p>
+          <p className="text-lg font-semibold text-ink">{text}</p>
           <StatusPill state={state} />
         </div>
-        <p className="mt-0.5 text-base text-stone-600">{meta}</p>
+        <p className="mt-0.5 text-base text-muted">{meta}</p>
       </div>
       <div className="ml-9.5 flex items-center gap-1 sm:ml-0">
       {onDone && (

@@ -92,7 +92,7 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
         }}
       >
         <fieldset>
-          <legend className="mb-1.5 block text-sm font-medium text-stone-700">Kind</legend>
+          <legend className="mb-1.5 block text-sm font-medium text-ink-soft">Kind</legend>
           <div className="flex flex-wrap gap-2">
             {RENEWAL_KINDS.map((k) => (
               <Chip key={k} active={kind === k} onClick={() => pickKind(k)}>
