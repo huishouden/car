@@ -5,7 +5,7 @@ test('loads without runtime errors and shows the sample cars', async ({ page }) 
   await expectCleanLoad(page);
   await expect(page.getByText('Sample data')).toBeVisible();
   await expect(page.getByText('Oil change due in 600 miles or 3 weeks')).toBeVisible();
-  await expectHuishoudenFrame(page, { app: 'Car', portalUrl: 'https://huishouden-piekstra.web.app' });
+  await expectHuishoudenFrame(page, { app: 'Car', portalUrl: '/' });
 });
 
 test('is installable', ({ page, request }) => expectInstallable(page, request));
@@ -15,6 +15,6 @@ test('Google sign-in popup reaches Google with an allowed redirect URI', ({ page
     await p.getByRole('button', { name: 'Sign in with Google' }).first().click();
   }));
 
-test('sends the security headers and leaves sign-in un-framed', ({ request }) => expectSecurityHeaders(request, '/', { camera: true }));
+test('sends the security headers and leaves sign-in un-framed', ({ request }) => expectSecurityHeaders(request, './', { camera: true }));
 
-test('Sample data banner is one line on a phone', ({ page }) => expectCompactSampleBanner(page, '/'));
+test('Sample data banner is one line on a phone', ({ page }) => expectCompactSampleBanner(page, './'));

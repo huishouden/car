@@ -15,7 +15,7 @@ const tab = (name: string) => async (p: import('@playwright/test').Page) => {
 // settings or anyone else's records; admins and members can keep an appointment private.
 test('helper: cars', ({ page }) =>
   captureScreenshot(page, 'helper-cars', {
-    path: '/?role=helper',
+    path: './?role=helper',
     fixedTime,
     prepare: async (p) => {
       await tab('Cars')(p);

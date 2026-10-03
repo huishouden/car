@@ -11,7 +11,7 @@ Something is due at whichever comes first: the months since it was last done, or
 measured against the latest odometer reading. With a year of readings the app also estimates when the
 miles will run out ("Tire rotation due in 4,550 miles (about 6 months)").
 
-Live at https://huishouden-car.web.app, also linked from the [Huishouden portal](https://huishouden-piekstra.web.app).
+Live at https://huishouden-piekstra.web.app/car/, also linked from the [Huishouden portal](https://huishouden-piekstra.web.app). The old address, huishouden-car.web.app, redirects there.
 Installable on the tablet, phones and laptops, and works offline (entries sync when the connection is back).
 
 ## Screenshots
