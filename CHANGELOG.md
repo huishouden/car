@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/huishouden/car/compare/v1.7.1...v1.8.0) (2026-10-03)
+
+
+### Features
+
+* sections in a bottom bar on phones (kit 0.52.0) ([#29](https://github.com/huishouden/car/issues/29)) ([0ca0d1d](https://github.com/huishouden/car/commit/0ca0d1da12e92d8a8a1d4aca689779b852ff0862))
+
 ## [1.7.1](https://github.com/huishouden/car/compare/v1.7.0...v1.7.1) (2026-10-03)
 
 
