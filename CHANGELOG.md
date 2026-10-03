@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/huishouden/car/compare/v1.8.0...v1.9.0) (2026-10-03)
+
+
+### Features
+
+* publish due service and renewals to the household to-do list ([#31](https://github.com/huishouden/car/issues/31)) ([14a5d3c](https://github.com/huishouden/car/commit/14a5d3c7c247e25b9cdc2bf99dc76975d78880bd))
+
 ## [1.8.0](https://github.com/huishouden/car/compare/v1.7.1...v1.8.0) (2026-10-03)
 
 
