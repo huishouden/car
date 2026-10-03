@@ -11,6 +11,15 @@ const tab = (name: string) => async (p: import('@playwright/test').Page) => {
   await p.getByRole('button', { name, exact: true }).click();
 };
 
+// On a phone, sections the bottom bar has no room for are under More (a build without the bar has none).
+const phoneTab = (name: string) => async (p: import('@playwright/test').Page) => {
+  const more = p.getByRole('navigation', { name: 'Sections' }).getByRole('button', { name: /^More/ });
+  if (await more.isVisible()) {
+    await more.click();
+    await p.getByRole('dialog', { name: 'More' }).getByRole('button', { name, exact: true }).click();
+  } else await tab(name)(p);
+};
+
 // Roles: the household's helper (sample data, `?role=helper`) keeps the log but changes no cars,
 // settings or anyone else's records; admins and members can keep an appointment private.
 test('helper: cars', ({ page }) =>
@@ -44,9 +53,7 @@ test('cars', ({ page }) =>
   captureScreenshot(page, 'cars', {
     fixedTime,
     prepare: async (p) => {
-      // On a phone Cars is under More in the bottom bar.
-      await p.getByRole('navigation', { name: 'Sections' }).getByRole('button', { name: 'More' }).click();
-      await p.getByRole('dialog', { name: 'More' }).getByRole('button', { name: 'Cars' }).click();
+      await tab('Cars')(p);
       await expect(p.getByRole('region', { name: 'Service schedule' })).toBeVisible();
     },
   }));
@@ -136,9 +143,7 @@ test('phone: cars', async ({ page }) => {
   await captureScreenshot(page, 'phone-cars', {
     fixedTime,
     prepare: async (p) => {
-      // On a phone Cars is under More in the bottom bar.
-      await p.getByRole('navigation', { name: 'Sections' }).getByRole('button', { name: 'More' }).click();
-      await p.getByRole('dialog', { name: 'More' }).getByRole('button', { name: 'Cars' }).click();
+      await phoneTab('Cars')(p);
       await expect(p.getByRole('region', { name: 'Service schedule' })).toBeVisible();
     },
   });
