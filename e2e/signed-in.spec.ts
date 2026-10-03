@@ -68,14 +68,16 @@ test('a renewal due today is renewed from the household to-do list', async ({ pa
   } finally {
     await signInTestUser(page, { email: 'test-a@example.com' });
     await openTestCar(page);
-    const edit = renewals.getByRole('button', { name: `Edit ${name}` });
-    if (await edit.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await edit.click();
-      await page.getByRole('dialog', { name: `Edit ${name}` }).getByRole('button', { name: 'Delete' }).click();
-      await expect(edit).toHaveCount(0);
-      // Its to-do (if the portal didn't already clear it) leaves with it.
-      await page.waitForTimeout(PUBLISH_MS);
+    // This run's renewal, and any an interrupted earlier run left behind.
+    const edits = renewals.getByRole('button', { name: /^Edit E2E renewal / });
+    await expect(renewals.getByRole('button', { name: 'Add renewal' })).toBeVisible();
+    for (let n = await edits.count(); n > 0; n--) {
+      await edits.first().click();
+      await page.getByRole('dialog', { name: /^Edit E2E renewal / }).getByRole('button', { name: 'Delete' }).click();
+      await expect(edits).toHaveCount(n - 1);
     }
+    // Their to-dos (if the portal didn't already clear them) leave with them.
+    await page.waitForTimeout(PUBLISH_MS);
     if (addedCar) {
       await page.getByRole('button', { name: `Edit ${CAR}` }).click();
       await page.getByRole('dialog').getByRole('button', { name: 'Delete' }).click();
