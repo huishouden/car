@@ -54,16 +54,19 @@ test('a renewal due today is renewed from the household to-do list', async ({ pa
 
     // Published to the household's to-do list a few seconds later; Renewed there, as another
     // member would from the portal.
+    // Other repos' staging runs reseed the shared test users, which can end a session: sign in
+    // afresh for each step that leaves the page.
+    await signInTestUser(page, { email: 'test-a@example.com', path: '/todo' });
     await runPortalTodo(page, `Renew ${name}`, { timeout: 60_000 });
 
     // Back in Car the renewal moved a year on from its due date.
-    await page.goto('./');
+    await signInTestUser(page, { email: 'test-a@example.com' });
     await openTestCar(page);
     await renewals.getByRole('button', { name: `Edit ${name}` }).click();
     await expect(page.getByRole('dialog', { name: `Edit ${name}` }).getByLabel('Due on')).toHaveValue(addMonths(today, 12), { timeout: 20_000 });
     await page.getByRole('dialog', { name: `Edit ${name}` }).getByRole('button', { name: 'Cancel' }).click();
   } finally {
-    await page.goto('./');
+    await signInTestUser(page, { email: 'test-a@example.com' });
     await openTestCar(page);
     const edit = renewals.getByRole('button', { name: `Edit ${name}` });
     if (await edit.isVisible({ timeout: 5_000 }).catch(() => false)) {
