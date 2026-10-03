@@ -37,7 +37,7 @@ export function Cars({ store, unit, may, open, notify, carId, onCar }: ScreenPro
     return (
       <div className="space-y-6">
         {header}
-        <p className={`${cardClass} p-6 text-lg text-stone-600`}>No cars yet. Add one with its nickname, make and model.</p>
+        <p className={`${cardClass} p-6 text-lg text-muted`}>No cars yet. Add one with its nickname, make and model.</p>
       </div>
     );
 
@@ -57,8 +57,8 @@ export function Cars({ store, unit, may, open, notify, carId, onCar }: ScreenPro
           <section className={`${cardClass} px-5 py-4`} aria-label={`${car.name} details`}>
             <div className="flex items-start gap-2">
               <div className="min-w-0 flex-1">
-                <h2 className="text-2xl font-semibold text-stone-800">{car.name}</h2>
-                {(car.year || car.make || car.model) && <p className="text-lg text-stone-600">{[car.year, car.make, car.model].filter(Boolean).join(' ')}</p>}
+                <h2 className="text-2xl font-semibold text-ink">{car.name}</h2>
+                {(car.year || car.make || car.model) && <p className="text-lg text-muted">{[car.year, car.make, car.model].filter(Boolean).join(' ')}</p>}
               </div>
               {may.settings && (
                 <button type="button" className={iconButton} onClick={() => open({ kind: 'vehicle', vehicle: car })} aria-label={`Edit ${car.name}`}>
@@ -66,30 +66,30 @@ export function Cars({ store, unit, may, open, notify, carId, onCar }: ScreenPro
                 </button>
               )}
             </div>
-            {car.notes && <p className="mt-2 text-base whitespace-pre-line text-stone-600">{car.notes}</p>}
+            {car.notes && <p className="mt-2 text-base whitespace-pre-line text-muted">{car.notes}</p>}
           </section>
 
           <section className={`${cardClass} px-5 py-4`} aria-label="Odometer">
             <p className={overline}>Odometer</p>
             {odo.latest ? (
-              <p className="mt-1 text-stone-800">
+              <p className="mt-1 text-ink">
                 <span className="text-4xl font-semibold tracking-tight tabular-nums">{formatReading(odo.latest.reading)}</span>
-                <span className="ml-2 text-lg text-stone-600">{UNIT_NAMES[unit].many}</span>
-                <span className="block text-base text-stone-600">Read {daysAgo(-daysUntil(odo.latest.date, now))}</span>
-                {monthly && <span className="block text-base text-stone-600">About {formatDistance(monthly, unit)} a month</span>}
+                <span className="ml-2 text-lg text-muted">{UNIT_NAMES[unit].many}</span>
+                <span className="block text-base text-muted">Read {daysAgo(-daysUntil(odo.latest.date, now))}</span>
+                {monthly && <span className="block text-base text-muted">About {formatDistance(monthly, unit)} a month</span>}
               </p>
             ) : (
-              <p className="mt-1 text-base text-stone-600">No reading yet. Log one to see what is due by mileage.</p>
+              <p className="mt-1 text-base text-muted">No reading yet. Log one to see what is due by mileage.</p>
             )}
             <button type="button" className={`${primaryButton} mt-3 w-full`} onClick={() => open({ kind: 'reading', vehicleId: car.id })}>
               <Gauge size={20} /> Log odometer
             </button>
             {readings.length > 0 && (
-              <ul className="mt-3 border-t border-stone-200" aria-label="Readings">
+              <ul className="mt-3 border-t border-line" aria-label="Readings">
                 {readings.slice(0, 4).map((r) => (
-                  <li key={r.id} className="flex items-center gap-3 border-b border-stone-200 py-1 last:border-b-0">
-                    <span className="w-28 shrink-0 text-base text-stone-600">{formatYmd(r.date)}</span>
-                    <span className="min-w-0 flex-1 text-base text-stone-800 tabular-nums">{formatDistance(r.reading, unit)}</span>
+                  <li key={r.id} className="flex items-center gap-3 border-b border-line py-1 last:border-b-0">
+                    <span className="w-28 shrink-0 text-base text-muted">{formatYmd(r.date)}</span>
+                    <span className="min-w-0 flex-1 text-base text-ink tabular-nums">{formatDistance(r.reading, unit)}</span>
                     {may.change(r) && (
                       <button
                         type="button"
@@ -109,13 +109,13 @@ export function Cars({ store, unit, may, open, notify, carId, onCar }: ScreenPro
 
         <div className="flex flex-col gap-6 lg:min-h-0 lg:overflow-y-auto">
           <section className={cardClass} aria-label="Service schedule">
-            <div className="flex items-center justify-between gap-3 border-b border-stone-200 px-5 py-3">
-              <h3 className="text-xl font-semibold text-stone-800">Service schedule</h3>
+            <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
+              <h3 className="text-xl font-semibold text-ink">Service schedule</h3>
               <button type="button" className={ghostButton} onClick={() => open({ kind: 'item', vehicleId: car.id, item: null })}>
                 <CalendarPlus size={18} /> Add item
               </button>
             </div>
-            {items.length === 0 && asideItems.length === 0 && <p className="px-5 py-4 text-base text-stone-600">Nothing scheduled. Add an oil change, tire rotation or inspection.</p>}
+            {items.length === 0 && asideItems.length === 0 && <p className="px-5 py-4 text-base text-muted">Nothing scheduled. Add an oil change, tire rotation or inspection.</p>}
             <ul>
               {items.map((entry) => (
                 <UpcomingRow key={entry.id} entry={entry} store={store} unit={unit} now={now} may={may} open={open} notify={notify} showCar={false} />
@@ -127,13 +127,13 @@ export function Cars({ store, unit, may, open, notify, carId, onCar }: ScreenPro
           </section>
 
           <section className={cardClass} aria-label={`${car.name} renewals`}>
-            <div className="flex items-center justify-between gap-3 border-b border-stone-200 px-5 py-3">
-              <h3 className="text-xl font-semibold text-stone-800">Renewals</h3>
+            <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
+              <h3 className="text-xl font-semibold text-ink">Renewals</h3>
               <button type="button" className={ghostButton} onClick={() => open({ kind: 'renewal', renewal: null, vehicleId: car.id })}>
                 <FilePlus size={18} /> Add renewal
               </button>
             </div>
-            {renewals.length === 0 && asideRenewals.length === 0 && <p className="px-5 py-4 text-base text-stone-600">No renewals for this car. Registration and the inspection sticker go here.</p>}
+            {renewals.length === 0 && asideRenewals.length === 0 && <p className="px-5 py-4 text-base text-muted">No renewals for this car. Registration and the inspection sticker go here.</p>}
             <ul>
               {renewals.map((entry) => (
                 <UpcomingRow key={entry.id} entry={entry} store={store} unit={unit} now={now} may={may} open={open} notify={notify} showCar={false} />
@@ -153,7 +153,7 @@ export function Cars({ store, unit, may, open, notify, carId, onCar }: ScreenPro
 function UnitChoice({ unit, onChange }: { unit: DistanceUnit; onChange: (u: DistanceUnit) => void }) {
   return (
     <div className="flex items-center gap-2" role="group" aria-label="Distance unit">
-      <span className="text-base text-stone-600">Odometers read in</span>
+      <span className="text-base text-muted">Odometers read in</span>
       {(['mi', 'km'] as const).map((u) => (
         <Chip key={u} active={unit === u} onClick={() => onChange(u)}>
           {UNIT_NAMES[u].label}

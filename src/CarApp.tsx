@@ -109,7 +109,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
   };
 
   let content: ReactNode;
-  if (!store.ready) content = <p className="p-2 text-lg text-stone-600">Loading the cars</p>;
+  if (!store.ready) content = <p className="p-2 text-lg text-muted">Loading the cars</p>;
   else if (tab === 'cars') content = <Cars {...screen} carId={carId} onCar={setCarId} />;
   else if (tab === 'renewals') content = <Renewals {...screen} />;
   else if (tab === 'history') content = <History {...screen} />;
@@ -120,7 +120,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
   const vehicleName = (id: string | undefined) => data.vehicles.find((v) => v.id === id)?.name;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-cream font-sans text-stone-800 antialiased lg:h-dvh lg:overflow-hidden">
+    <div className="flex min-h-dvh flex-col bg-page font-sans text-ink antialiased lg:h-dvh lg:overflow-hidden">
       <Header tabs={TABS as Tab[]} tab={tab} onTab={(id) => setTab(id as TabId)} user={user} onSignIn={onSignIn} onSignOut={onSignOut} signingIn={signingIn} />
       <main className="mx-auto flex w-full max-w-[1200px] min-h-0 flex-1 flex-col gap-4 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pt-6 sm:pb-6">
         {banner}

@@ -22,9 +22,9 @@ export function Overview({ store, unit, may, open, notify, onCar, onOpen }: Scre
   if (cars.length === 0)
     return (
       <section className={`${cardClass} mx-auto max-w-2xl p-8`} aria-label="No cars yet">
-        <CarFront size={32} className="text-forest-700" aria-hidden="true" />
-        <h2 className="mt-3 text-2xl font-semibold text-stone-800">No cars yet</h2>
-        <p className="mt-2 text-lg text-stone-600">Add a car to see when its oil change, inspection and registration are due.</p>
+        <CarFront size={32} className="text-link" aria-hidden="true" />
+        <h2 className="mt-3 text-2xl font-semibold text-ink">No cars yet</h2>
+        <p className="mt-2 text-lg text-muted">Add a car to see when its oil change, inspection and registration are due.</p>
         {may.settings ? (
           <button type="button" className={`${primaryButton} mt-5`} onClick={() => open({ kind: 'vehicle', vehicle: null })}>
             <Plus size={20} /> Add a car
@@ -38,10 +38,10 @@ export function Overview({ store, unit, may, open, notify, onCar, onOpen }: Scre
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_380px]">
       <section className={`${cardClass} flex min-h-0 flex-col`} aria-label="Coming up">
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-stone-200 px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line px-5 py-4">
           <div>
-            <h2 className="text-2xl font-semibold text-stone-800">Coming up</h2>
-            <p className="text-base text-stone-600" aria-live="polite">
+            <h2 className="text-2xl font-semibold text-ink">Coming up</h2>
+            <p className="text-base text-muted" aria-live="polite">
               {attention === 0 ? 'Nothing needs doing in the next month.' : `${attention} ${attention === 1 ? 'thing needs' : 'things need'} doing soon`}
             </p>
           </div>
@@ -49,7 +49,7 @@ export function Overview({ store, unit, may, open, notify, onCar, onOpen }: Scre
             <Wrench size={20} /> Log a service
           </button>
         </div>
-        {list.length === 0 && <p className="p-5 text-lg text-stone-600">No schedule or renewals yet. Add them from Cars and Renewals.</p>}
+        {list.length === 0 && <p className="p-5 text-lg text-muted">No schedule or renewals yet. Add them from Cars and Renewals.</p>}
         <ul className="min-h-0 flex-1 overflow-y-auto">
           {list.map((entry) => (
             <UpcomingRow key={`${entry.kind}-${entry.id}`} entry={entry} store={store} unit={unit} now={now} may={may} open={open} notify={notify} showCar />
@@ -63,22 +63,22 @@ export function Overview({ store, unit, may, open, notify, onCar, onOpen }: Scre
           const age = odo.latest ? -daysUntil(odo.latest.date, now) : null;
           return (
             <section key={v.id} className={`${cardClass} px-5 py-4`} aria-label={v.name}>
-              <button type="button" className="-mx-2 flex min-h-11 w-[calc(100%+1rem)] items-center gap-2 rounded-xl px-2 text-left hover:bg-stone-50" onClick={() => onCar(v.id)}>
+              <button type="button" className="-mx-2 flex min-h-11 w-[calc(100%+1rem)] items-center gap-2 rounded-xl px-2 text-left hover:bg-sunken" onClick={() => onCar(v.id)}>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-xl font-semibold text-stone-800">{v.name}</span>
-                  {(v.year || v.make || v.model) && <span className="block text-base text-stone-600">{[v.year, v.make, v.model].filter(Boolean).join(' ')}</span>}
+                  <span className="block text-xl font-semibold text-ink">{v.name}</span>
+                  {(v.year || v.make || v.model) && <span className="block text-base text-muted">{[v.year, v.make, v.model].filter(Boolean).join(' ')}</span>}
                 </span>
-                <ChevronRight size={20} className="text-stone-600" aria-hidden="true" />
+                <ChevronRight size={20} className="text-muted" aria-hidden="true" />
               </button>
               <div className="mt-2 flex items-end justify-between gap-3">
                 {odo.latest ? (
-                  <p className="text-stone-800">
+                  <p className="text-ink">
                     <span className="text-4xl font-semibold tracking-tight tabular-nums">{formatReading(odo.latest.reading)}</span>
-                    <span className="ml-2 text-lg text-stone-600">{UNIT_NAMES[unit].many}</span>
-                    <span className="block text-base text-stone-600">Read {age === null ? '' : daysAgo(age)}</span>
+                    <span className="ml-2 text-lg text-muted">{UNIT_NAMES[unit].many}</span>
+                    <span className="block text-base text-muted">Read {age === null ? '' : daysAgo(age)}</span>
                   </p>
                 ) : (
-                  <p className="text-base text-stone-600">No odometer reading yet.</p>
+                  <p className="text-base text-muted">No odometer reading yet.</p>
                 )}
                 <button
                   type="button"
@@ -101,24 +101,24 @@ export function Overview({ store, unit, may, open, notify, onCar, onOpen }: Scre
             </button>
           </div>
           {next ? (
-            <button type="button" className="-mx-2 mt-1 w-[calc(100%+1rem)] rounded-xl px-2 py-1 text-left hover:bg-stone-50" onClick={() => may.change(next) && open({ kind: 'appointment', appointment: next })}>
-              <p className="text-2xl font-semibold text-stone-800">{next.title}</p>
-              <p className="mt-0.5 text-lg text-stone-700">
-                <span className="font-semibold text-forest-700">{relativeDay(next.at, now)}</span> · {formatDayLong(next.at)}, {formatTime(next.at)}
+            <button type="button" className="-mx-2 mt-1 w-[calc(100%+1rem)] rounded-xl px-2 py-1 text-left hover:bg-sunken" onClick={() => may.change(next) && open({ kind: 'appointment', appointment: next })}>
+              <p className="text-2xl font-semibold text-ink">{next.title}</p>
+              <p className="mt-0.5 text-lg text-ink-soft">
+                <span className="font-semibold text-link">{relativeDay(next.at, now)}</span> · {formatDayLong(next.at)}, {formatTime(next.at)}
               </p>
               {(nextCar || shop) && (
-                <p className="mt-0.5 flex items-center gap-1.5 text-base text-stone-600">
+                <p className="mt-0.5 flex items-center gap-1.5 text-base text-muted">
                   <CalendarClock size={16} aria-hidden="true" /> {[nextCar?.name, shop?.name].filter(Boolean).join(' at ')}
                 </p>
               )}
               {next.location && !shop && (
-                <p className="mt-0.5 flex items-center gap-1.5 text-base text-stone-600">
+                <p className="mt-0.5 flex items-center gap-1.5 text-base text-muted">
                   <MapPin size={16} aria-hidden="true" /> {next.location}
                 </p>
               )}
             </button>
           ) : (
-            <p className="mt-1 text-base text-stone-600">No appointments coming up.</p>
+            <p className="mt-1 text-base text-muted">No appointments coming up.</p>
           )}
         </section>
       </div>

@@ -95,14 +95,14 @@ export function SetAsideRow({ entry, store, unit, may, notify, showCar }: {
       ? notify(`Resumed ${name}`, store.actions.resumeServiceItem(entry.id))
       : notify(`Reopened ${name}`, store.actions.reopenRenewal(entry.id));
   return (
-    <li className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-stone-200 px-4 py-3 last:border-b-0 sm:flex-nowrap sm:px-5">
+    <li className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line px-4 py-3 last:border-b-0 sm:flex-nowrap sm:px-5">
       <Icon size={22} strokeWidth={2.2} className="shrink-0 text-stone-400" aria-hidden="true" />
       <div className="min-w-0 flex-1 basis-[calc(100%-2.5rem)] sm:basis-0">
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-          <p className="text-lg font-semibold text-stone-600">{name}</p>
-          <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-sm font-medium text-stone-700">{label}</span>
+          <p className="text-lg font-semibold text-muted">{name}</p>
+          <span className="rounded-full bg-sunken px-2.5 py-0.5 text-sm font-medium text-ink-soft">{label}</span>
         </div>
-        <p className="mt-0.5 text-base text-stone-600">
+        <p className="mt-0.5 text-base text-muted">
           <Meta
             parts={[
               showCar && car,

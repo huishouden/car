@@ -35,7 +35,7 @@ export function VehicleDialog({ vehicle, onSave, onDelete, onClose }: {
       footer={
         confirming ? (
           <>
-            <p className="mr-auto text-base text-stone-700">Delete {vehicle?.name} with its schedule, readings, renewals and history?</p>
+            <p className="mr-auto text-base text-ink-soft">Delete {vehicle?.name} with its schedule, readings, renewals and history?</p>
             <button type="button" className={ghostButton} onClick={() => setConfirming(false)}>
               Keep it
             </button>
@@ -96,7 +96,7 @@ export function VehicleDialog({ vehicle, onSave, onDelete, onClose }: {
             <Checkbox checked={schedule} onChange={setSchedule}>
               Start with the usual schedule
             </Checkbox>
-            <p className="ml-9 text-sm text-stone-600">Oil change, tire rotation, inspection and wiper blades. Change or remove any of them later.</p>
+            <p className="ml-9 text-sm text-muted">Oil change, tire rotation, inspection and wiper blades. Change or remove any of them later.</p>
           </div>
         )}
         <button type="submit" hidden />

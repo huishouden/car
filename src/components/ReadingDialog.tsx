@@ -54,7 +54,7 @@ export function ReadingDialog({ vehicle, latest, unit, now, onSave, onClose }: {
           <input className={`${inputClass} text-2xl font-semibold tabular-nums`} inputMode="numeric" value={reading} onChange={(e) => setReading(e.target.value)} placeholder="42,180" autoComplete="off" />
         </Field>
         {lower && (
-          <p role="status" className="rounded-xl bg-terracotta-light px-3 py-2 text-base text-terracotta-dark">
+          <p role="status" className="rounded-xl bg-attention-tint px-3 py-2 text-base text-attention">
             That is lower than the last reading. Save anyway if the last one was wrong.
           </p>
         )}

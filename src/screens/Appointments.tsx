@@ -37,7 +37,7 @@ export function Appointments({ store, may, open, calendarAvailable, onImport }: 
     <div className="mx-auto max-w-3xl space-y-6 lg:h-full lg:overflow-y-auto">
       <div>
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-          <h2 className="text-2xl font-semibold text-stone-800">Appointments</h2>
+          <h2 className="text-2xl font-semibold text-ink">Appointments</h2>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -62,7 +62,7 @@ export function Appointments({ store, may, open, calendarAvailable, onImport }: 
       </div>
 
       <section className={cardClass} aria-label="Upcoming appointments">
-        {upcoming.length === 0 && <p className="p-6 text-lg text-stone-600">No appointments coming up.</p>}
+        {upcoming.length === 0 && <p className="p-6 text-lg text-muted">No appointments coming up.</p>}
         <ul>
           {upcoming.map((a, i) => (
             <Row key={a.id} a={a} now={now} contacts={contacts} vehicles={vehicles} first={i === 0} onEdit={onEdit(a)} />
@@ -109,24 +109,24 @@ function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; no
   const who = a.shopId ? contacts.find((c) => c.id === a.shopId) : undefined;
   const car = a.vehicleId ? vehicles.find((v) => v.id === a.vehicleId) : undefined;
   return (
-    <li className="flex items-start gap-5 border-b border-stone-200 p-5 last:border-b-0">
-      <div className={`flex w-16 shrink-0 flex-col items-center rounded-xl py-2 ${first ? 'bg-forest-700 text-white' : 'bg-forest-50 text-forest-700'}`}>
+    <li className="flex items-start gap-5 border-b border-line p-5 last:border-b-0">
+      <div className={`flex w-16 shrink-0 flex-col items-center rounded-xl py-2 ${first ? 'bg-primary text-on-primary' : 'bg-tint text-link'}`}>
         <span className="text-sm font-medium">{monthShort(a.at)}</span>
         <span className="text-2xl font-semibold tabular-nums">{d.getDate()}</span>
       </div>
       <div className="min-w-0 flex-1">
-        <p className={`${first ? 'text-2xl' : 'text-xl'} font-semibold text-stone-800`}>{a.title}</p>
+        <p className={`${first ? 'text-2xl' : 'text-xl'} font-semibold text-ink`}>{a.title}</p>
         {a.private && <PrivateMark />}
-        <p className="mt-0.5 text-base text-stone-700">
-          <span className="font-medium text-forest-700">{relativeDay(a.at, now)}</span> · {formatDayLong(a.at)}, {formatTime(a.at)}
+        <p className="mt-0.5 text-base text-ink-soft">
+          <span className="font-medium text-link">{relativeDay(a.at, now)}</span> · {formatDayLong(a.at)}, {formatTime(a.at)}
         </p>
         {car && (
-          <p className="mt-0.5 flex items-center gap-1.5 text-base text-stone-600">
+          <p className="mt-0.5 flex items-center gap-1.5 text-base text-muted">
             <CarFront size={16} aria-hidden="true" /> {car.name}
           </p>
         )}
         {who && (
-          <div className="flex flex-wrap items-center gap-x-4 text-base text-stone-600">
+          <div className="flex flex-wrap items-center gap-x-4 text-base text-muted">
             <span className="flex items-center gap-1.5">
               <Store size={16} aria-hidden="true" /> {who.name}
             </span>
@@ -138,11 +138,11 @@ function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; no
           </div>
         )}
         {a.location && (
-          <p className="mt-0.5 flex items-center gap-1.5 text-base text-stone-600">
+          <p className="mt-0.5 flex items-center gap-1.5 text-base text-muted">
             <MapPin size={16} aria-hidden="true" /> {a.location}
           </p>
         )}
-        {a.notes && <p className="mt-1 text-base whitespace-pre-line text-stone-600">{a.notes}</p>}
+        {a.notes && <p className="mt-1 text-base whitespace-pre-line text-muted">{a.notes}</p>}
         {a.calendarLink && (
           <a className={linkClass} href={a.calendarLink} target="_blank" rel="noopener noreferrer">
             <ExternalLink size={16} aria-hidden="true" /> Open in Calendar

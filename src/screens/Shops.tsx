@@ -14,13 +14,13 @@ export function Shops({ store, may, open, notify }: ScreenProps) {
   return (
     <div className="space-y-6 lg:h-full lg:overflow-y-auto">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-2xl font-semibold text-stone-800">Shops</h2>
+        <h2 className="text-2xl font-semibold text-ink">Shops</h2>
         <button type="button" className={primaryButton} onClick={onAdd}>
           <Plus size={20} /> Add shop
         </button>
       </div>
       {groups.length === 0 && (
-        <p className={`${cardClass} p-6 text-lg text-stone-600`}>No shops yet. Add the mechanic, dealer and tire shop so their numbers are one tap away.</p>
+        <p className={`${cardClass} p-6 text-lg text-muted`}>No shops yet. Add the mechanic, dealer and tire shop so their numbers are one tap away.</p>
       )}
       <div className="grid items-start gap-6 md:grid-cols-2">
         {groups.flatMap((g) =>
