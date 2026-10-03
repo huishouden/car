@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectCleanLoad, expectCompactSampleBanner, expectGoogleSignInPopup, expectHuishoudenFrame, expectInstallable, expectSecurityHeaders } from '@huishouden/pwa-kit/e2e';
+import { expectBottomNav, expectCleanLoad, expectCompactSampleBanner, expectGoogleSignInPopup, expectHuishoudenFrame, expectInstallable, expectSecurityHeaders } from '@huishouden/pwa-kit/e2e';
 
 test('loads without runtime errors and shows the sample cars', async ({ page }) => {
   await expectCleanLoad(page);
@@ -18,3 +18,5 @@ test('Google sign-in popup reaches Google with an allowed redirect URI', ({ page
 test('sends the security headers and leaves sign-in un-framed', ({ request }) => expectSecurityHeaders(request, './', { camera: true }));
 
 test('Sample data banner is one line on a phone', ({ page }) => expectCompactSampleBanner(page, './'));
+
+test('on a phone the sections are a bottom bar, with Cars and Shops under More', ({ page }) => expectBottomNav(page, { path: './', labels: ['Overview', 'Renewals', 'History', 'Bookings', 'More'], more: ['Cars', 'Shops'] }));

@@ -1,3 +1,4 @@
+import { CalendarCheck, CalendarClock, CarFront, History as HistoryIcon, LayoutDashboard, Store } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import type { User } from 'firebase/auth';
 import type { Contact } from '@huishouden/pwa-kit/contacts';
@@ -33,13 +34,15 @@ import { Shops } from './screens/Shops';
 
 export type TabId = 'overview' | 'cars' | 'renewals' | 'history' | 'appointments' | 'shops';
 
-const TABS: { id: TabId; label: string }[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'cars', label: 'Cars' },
-  { id: 'renewals', label: 'Renewals' },
-  { id: 'history', label: 'History' },
-  { id: 'appointments', label: 'Appointments' },
-  { id: 'shops', label: 'Shops' },
+// On phones the four primaries sit in the bottom bar (what is due, then what is booked and done);
+// the cars' details and the shops are under More.
+const TABS: (Tab & { id: TabId })[] = [
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard, primary: true },
+  { id: 'cars', label: 'Cars', icon: CarFront },
+  { id: 'renewals', label: 'Renewals', icon: CalendarClock, primary: true },
+  { id: 'history', label: 'History', icon: HistoryIcon, primary: true },
+  { id: 'appointments', label: 'Appointments', short: 'Bookings', icon: CalendarCheck, primary: true },
+  { id: 'shops', label: 'Shops', icon: Store },
 ];
 
 /** Which dialog is open, and what it was opened with. */
