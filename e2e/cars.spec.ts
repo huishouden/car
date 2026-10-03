@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime('2031-04-15T09:30:00');
-  await page.goto('/');
+  await page.goto('./');
   await page.getByRole('button', { name: 'Cars', exact: true }).click();
 });
 

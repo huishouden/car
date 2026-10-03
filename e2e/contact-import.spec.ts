@@ -9,7 +9,7 @@ import otherContacts from './fixtures/contacts/other-contacts.json' with { type:
 const fixture = (name: string) => new URL(`./fixtures/contacts/${name}`, import.meta.url).pathname;
 
 const newShop = async (page: Page) => {
-  await page.goto('/');
+  await page.goto('./');
   await page.getByRole('button', { name: 'Shops', exact: true }).click();
   await page.getByRole('button', { name: 'Add shop' }).click();
   return page.getByRole('dialog', { name: 'New shop' });

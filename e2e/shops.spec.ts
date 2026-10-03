@@ -5,7 +5,7 @@ import places from './fixtures/nominatim.json' with { type: 'json' };
 // Nominatim, stubbed here with invented results.
 
 const openShops = async (page: Page) => {
-  await page.goto('/');
+  await page.goto('./');
   await page.getByRole('button', { name: 'Shops', exact: true }).click();
 };
 
@@ -57,7 +57,7 @@ test('deleting a shop can be undone', async ({ page }) => {
 });
 
 test('a shop on an appointment fills the place and shows its phone', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await page.getByRole('button', { name: 'Appointments', exact: true }).click();
   await page.getByRole('button', { name: 'Add appointment' }).click();
   const dialog = page.getByRole('dialog', { name: 'New appointment' });

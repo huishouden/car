@@ -1,5 +1,6 @@
 import type { AgendaInput } from '@huishouden/pwa-kit/agenda';
 import { allDayStart } from '@huishouden/pwa-kit/agenda';
+import { appUrl } from '@huishouden/pwa-kit/site';
 import { addDays, toYmd, type Ymd } from '@huishouden/pwa-kit/time';
 import type { CarData } from './demo';
 import { formatDistance, type DistanceUnit } from './distance';
@@ -13,8 +14,11 @@ import { carOdometer, upcoming, type CarOdometer } from './upcoming';
 // publish what a save changed and reconcile everything when the app opens.
 
 export const AGENDA_APP = 'car';
-/** The app's public address; there are no routes, so every item links to the app itself. */
-export const APP_URL = 'https://huishouden-car.web.app/';
+/**
+ * The app's address on the suite's one site; there are no routes, so every item links to the app
+ * itself. In the browser the origin is the page's, so staging links to staging.
+ */
+export const APP_URL = appUrl(import.meta.env.BASE_URL ?? '/car/', '', globalThis.location?.origin ?? 'https://huishouden-piekstra.web.app');
 
 /** An item without its ref: what replaceAgenda takes for one record. */
 export type AgendaEntry = Omit<AgendaInput, 'ref'>;
