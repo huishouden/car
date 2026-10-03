@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
-import { setDoc, writeBatch } from '@huishouden/pwa-kit/firestore';
-import { addContact, markUnflaggedOpen, removeContactFromApp, restoreContact, updateContact, watchContacts, type Contact } from '@huishouden/pwa-kit/contacts';
+import { commitOps, setDoc } from '@huishouden/pwa-kit/firestore';
+import { householdContacts, markUnflaggedOpen, watchContacts } from '@huishouden/pwa-kit/contacts';
 import { can, isRestricted, type Role } from '@huishouden/pwa-kit/roles';
 import type { CarData } from '../lib/demo';
 import type { SettingsData } from '../lib/model';
@@ -84,21 +84,12 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
     const backend: Backend = {
       newId: (col) => doc(collection(db, base, col)).id,
       write: (ops) => {
-        const batch = writeBatch(db);
-        for (const op of ops) {
-          const target = doc(db, base, op.col, op.id);
-          if (op.type === 'set') batch.set(target, op.data);
-          else batch.delete(target);
-        }
-        report(batch.commit());
+        report(commitOps(db, base, ops));
         const before = ref.current;
         publishChanges(householdId, me, before, applyOps(before, ops), ops, Date.now(), restricted);
       },
       saveSettings: (distanceUnit, by, now) => report(setDoc(doc(db, base, 'carSettings', 'main'), { distanceUnit, updatedAt: Math.round(now), updatedBy: by })),
-      saveContact: (id, input) => report(id ? updateContact(db, householdId, id, input, me) : addContact(db, householdId, input, me)),
-      // A shop other apps also show stays for them; Car only stops showing it.
-      deleteContact: (c: Contact) => report(removeContactFromApp(db, householdId, c, APP, me)),
-      restoreContact: (c: Contact) => report(restoreContact(db, householdId, c)),
+      contacts: householdContacts(db, householdId, APP, me, report),
     };
     return createActions(backend, () => ref.current, me, () => Date.now());
   }, [base, householdId, me, restricted]);

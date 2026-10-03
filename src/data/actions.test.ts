@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { DEMO_NOW, demoData, type CarData } from '../lib/demo';
-import { COLLECTIONS, createActions, type Backend, type Op } from './actions';
+import { applyOps, createActions, type Backend, type Op } from './actions';
 
 // The actions over a memory backend that records every write, as the live store's batches would.
 function setup() {
@@ -11,16 +11,10 @@ function setup() {
     newId: (col) => `${col}-${seq++}`,
     write: (ops) => {
       writes.push(ops);
-      for (const op of ops) {
-        const key = COLLECTIONS[op.col];
-        const list = (data[key] as { id: string }[]).filter((x) => x.id !== op.id);
-        data = { ...data, [key]: op.type === 'set' ? [...list, { id: op.id, ...op.data }] : list };
-      }
+      data = applyOps(data, ops);
     },
     saveSettings: () => {},
-    saveContact: () => {},
-    deleteContact: () => {},
-    restoreContact: () => {},
+    contacts: { save: () => {}, remove: () => {}, restore: () => {} },
   };
   const actions = createActions(backend, () => data, 'alex@example.com', () => DEMO_NOW);
   return { actions, writes, get: () => data };
@@ -31,7 +25,7 @@ describe('a logged visit', () => {
     const { actions, writes, get } = setup();
     const before = get().serviceItems.find((i) => i.id === 'demo-item-van-oil')!;
     const undo = actions.saveVisit(null, { vehicleId: 'demo-car-van', date: '2031-04-15', odometer: 41450, what: 'Oil change', serviceItemIds: ['demo-item-van-oil'], costCents: 8999 });
-    expect(writes.at(-1)!.map((o) => `${o.type} ${o.col}`)).toEqual(['set carServiceLog', 'set carServiceItems']);
+    expect(writes.at(-1)!.map((o) => `${o.data ? 'set' : 'delete'} ${o.col}`)).toEqual(['set carServiceLog', 'set carServiceItems']);
     const after = get().serviceItems.find((i) => i.id === 'demo-item-van-oil')!;
     expect(after).toMatchObject({ lastDate: '2031-04-15', lastOdometer: 41450, by: before.by, createdAt: before.createdAt, updatedAt: DEMO_NOW });
     undo();

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { DEMO_NOW, demoData, type CarData } from '../lib/demo';
 import { appointmentAgenda } from '../lib/agenda';
 import { mayFor } from '../lib/may';
-import { COLLECTIONS, createActions, type Backend, type Op } from './actions';
+import { applyOps, createActions, type Backend, type Op } from './actions';
 import { appointmentDoc } from './build';
 
 // What a helper's device writes must fit the rules: on someone else's record, only the fields that
@@ -17,16 +17,10 @@ function setup(me: string) {
     newId: (col) => `${col}-${seq++}`,
     write: (ops) => {
       writes.push(ops);
-      for (const op of ops) {
-        const key = COLLECTIONS[op.col];
-        const list = (data[key] as { id: string }[]).filter((x) => x.id !== op.id);
-        data = { ...data, [key]: op.type === 'set' ? [...list, { id: op.id, ...op.data }] : list };
-      }
+      data = applyOps(data, ops);
     },
     saveSettings: () => {},
-    saveContact: () => {},
-    deleteContact: () => {},
-    restoreContact: () => {},
+    contacts: { save: () => {}, remove: () => {}, restore: () => {} },
   };
   return { actions: createActions(backend, () => data, me, () => DEMO_NOW), writes, get: () => data };
 }
@@ -39,7 +33,7 @@ describe('a helper ticking off someone else’s records', () => {
     const { actions, writes, get } = setup(HELPER);
     const { id: _id, ...before } = get().serviceItems.find((i) => i.id === 'demo-item-van-oil')!;
     actions.saveVisit(null, { vehicleId: 'demo-car-van', date: '2031-04-15', odometer: 41450, what: 'Oil change', serviceItemIds: ['demo-item-van-oil'] });
-    const [visit, item] = writes.at(-1)! as Extract<Op, { type: 'set' }>[];
+    const [visit, item] = writes.at(-1)! as (Op & { data: object })[];
     expect((visit.data as { by: string }).by).toBe(HELPER);
     expect(changed(before, item.data)).toEqual(['lastDate', 'lastOdometer', 'updatedAt']);
   });
@@ -49,7 +43,7 @@ describe('a helper ticking off someone else’s records', () => {
     const renewal = get().renewals.find((r) => r.everyMonths)!;
     const { id: _id, ...before } = renewal;
     actions.markRenewed(renewal.id);
-    expect(changed(before, (writes.at(-1)![0] as Extract<Op, { type: 'set' }>).data)).toEqual(['dueDate', 'updatedAt']);
+    expect(changed(before, (writes.at(-1)![0] as Op & { data: object }).data)).toEqual(['dueDate', 'updatedAt']);
   });
 });
 
