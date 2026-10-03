@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/huishouden/car/compare/v1.6.0...v1.7.0) (2026-10-03)
+
+
+### Features
+
+* Car moves to /car/ on the suite's one site (pwa-kit 0.48.0) ([#25](https://github.com/huishouden/car/issues/25)) ([86ab967](https://github.com/huishouden/car/commit/86ab967305ebdee28b87537307573c699d24e6d6))
+
 ## [1.6.0](https://github.com/huishouden/car/compare/v1.5.0...v1.6.0) (2026-10-03)
 
 
