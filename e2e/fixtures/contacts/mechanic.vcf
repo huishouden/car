@@ -1,0 +1,16 @@
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 17.5//EN
+N:Example;Morgan;;;
+FN:Morgan Example
+ORG:Example Brake & Tire;
+TITLE:Mechanic
+item1.TEL;type=pref:(555) 010-0132
+item1.X-ABLabel:_$!<Mobile>!$_
+TEL;type=WORK;type=VOICE:(555) 010-0133
+item2.EMAIL;type=INTERNET;type=pref:morgan@brakes.example.com
+item3.ADR;type=WORK;type=pref:;;80 Example Road\nBay 2;Springfield;IL;62704;United States
+NOTE:Ask for Morgan.
+PHOTO;ENCODING=b;TYPE=JPEG:/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+ HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+END:VCARD
