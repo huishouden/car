@@ -9,6 +9,8 @@ import { seedTestHousehold } from '@huishouden/pwa-kit/staging';
 test.skip(!process.env.HH_STAGING_SA, 'signed-in tests run against staging, in CI');
 
 const CAR = 'Test car';
+/** Time for a publish to the household to-do list to reach the server before the page is left. */
+const PUBLISH_MS = 5_000;
 
 /**
  * The Cars screen on the test car, which is added the first time the household runs this.
@@ -47,6 +49,8 @@ test('a renewal due today is renewed from the household to-do list', async ({ pa
     await dialog.getByLabel('Repeats').selectOption('12');
     await dialog.getByRole('button', { name: 'Save' }).click();
     await expect(renewals.getByText(`${name} due today`)).toBeVisible();
+    // Car publishes as it saves; the write needs a moment to reach the server before the page goes.
+    await page.waitForTimeout(PUBLISH_MS);
 
     // Published to the household's to-do list a few seconds later; Renewed there, as another
     // member would from the portal.
@@ -66,6 +70,8 @@ test('a renewal due today is renewed from the household to-do list', async ({ pa
       await edit.click();
       await page.getByRole('dialog', { name: `Edit ${name}` }).getByRole('button', { name: 'Delete' }).click();
       await expect(edit).toHaveCount(0);
+      // Its to-do (if the portal didn't already clear it) leaves with it.
+      await page.waitForTimeout(PUBLISH_MS);
     }
     if (addedCar) {
       await page.getByRole('button', { name: `Edit ${CAR}` }).click();

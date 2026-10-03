@@ -82,6 +82,7 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
     return () => unsubs.forEach((u) => u());
   }, [base, householdId, restricted]);
 
+  const synced = useRef(false);
   const actions = useMemo(() => {
     const report = (p: Promise<unknown>) => void p.catch((e) => errorRef.current(readError(e, "Couldn't save")));
     const backend: Backend = {
@@ -89,7 +90,10 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
       write: (ops) => {
         report(commitOps(db, base, ops));
         const before = ref.current;
-        publishChanges(householdId, me, before, applyOps(before, ops), ops, Date.now(), restricted);
+        const after = applyOps(before, ops);
+        publishChanges(householdId, me, before, after, ops, Date.now(), restricted);
+        // At once as well as after the snapshot: someone may close the app right after a tap.
+        if (synced.current) syncTodoList(householdId, me, after, Date.now(), restricted);
       },
       saveSettings: (distanceUnit, by, now) => report(setDoc(doc(db, base, 'carSettings', 'main'), { distanceUnit, updatedAt: Math.round(now), updatedBy: by })),
       contacts: householdContacts(db, householdId, APP, me, report),
@@ -101,7 +105,6 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
 
   // Once per open, with every collection loaded: repairs what another device or an older version
   // left on the household agenda, and moves items whose day has passed to overdue.
-  const synced = useRef(false);
   const loaded = ready && answered.has('contacts');
   useEffect(() => {
     if (!loaded || synced.current || !me) return;
