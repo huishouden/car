@@ -9,8 +9,11 @@ import { readError } from '@huishouden/pwa-kit/feedback';
 import { APP } from '../lib/contacts';
 import { db } from './firebase';
 import { COLLECTIONS, applyOps, createActions, type Backend, type CollectionName } from './actions';
-import { publishChanges, syncAll } from './publishAgenda';
+import { publishChanges, syncAll, syncTodoList } from './publishAgenda';
 import type { CarStore } from './types';
+
+/** How long after a change the to-do list is brought up to date. */
+const TODO_DELAY = 3000;
 
 const EMPTY: CarData = { vehicles: [], serviceItems: [], readings: [], renewals: [], serviceLog: [], appointments: [], contacts: [], settings: null };
 
@@ -108,6 +111,14 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
     // with `private: false`: an admin's or member's device does that once.
     if (can(role, 'see-private')) markUnflaggedOpen(db, householdId, 'carAppointments', ref.current.appointments).catch(() => {});
   }, [loaded, householdId, me, restricted, role]);
+
+  // The to-do list follows the data a few seconds after it changes (here or on another device),
+  // once the first sync has run.
+  useEffect(() => {
+    if (!synced.current || !me) return;
+    const t = setTimeout(() => syncTodoList(householdId, me, ref.current, Date.now(), restricted), TODO_DELAY);
+    return () => clearTimeout(t);
+  }, [data, householdId, me, restricted]);
 
   // A shop renamed or removed changes the appointments that name it.
   const shops = useRef(data.contacts);

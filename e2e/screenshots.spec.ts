@@ -161,3 +161,14 @@ test('account menu', ({ page }) =>
       await expect(p.getByRole('link', { name: 'All apps' })).toBeVisible();
     },
   }));
+
+// Paused service items and closed renewals stay on the car's page, marked, with Resume / Reopen.
+test('cars: paused and closed', ({ page }) =>
+  captureScreenshot(page, 'cars-set-aside', {
+    fixedTime,
+    prepare: async (p) => {
+      await phoneTab('Cars')(p);
+      await p.getByRole('group', { name: 'Car' }).getByRole('button', { name: 'Commuter', exact: true }).click();
+      await expect(p.getByRole('button', { name: 'Resume Underbody wash' })).toBeVisible();
+    },
+  }));

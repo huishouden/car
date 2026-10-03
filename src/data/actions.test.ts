@@ -72,3 +72,37 @@ test('marking a renewal renewed keeps its creator and moves the date', () => {
   undo();
   expect(get().renewals.find((r) => r.id === 'demo-renewal-van-registration')!.dueDate).toBe('2031-04-27');
 });
+
+describe('pausing and closing', () => {
+  test('pause keeps the item with the time it was paused; an edit keeps it paused; resume clears it', () => {
+    const { actions, get } = setup();
+    const item = () => get().serviceItems.find((i) => i.id === 'demo-item-van-oil')!;
+    const before = item();
+    const undo = actions.pauseServiceItem('demo-item-van-oil');
+    expect(item()).toMatchObject({ pausedAt: DEMO_NOW, updatedAt: DEMO_NOW, by: before.by, lastDate: before.lastDate });
+    actions.saveServiceItem('demo-item-van-oil', { vehicleId: 'demo-car-van', name: 'Oil change', everyMonths: 6, everyDistance: 5000, notes: 'Full synthetic' });
+    expect(item()).toMatchObject({ pausedAt: DEMO_NOW, notes: 'Full synthetic' });
+    actions.resumeServiceItem('demo-item-van-oil');
+    expect('pausedAt' in item()).toBe(false);
+    undo();
+  });
+
+  test('a logged visit keeps a paused item paused', () => {
+    const { actions, get } = setup();
+    actions.saveVisit(null, { vehicleId: 'demo-car-commuter', date: '2031-04-15', what: 'Underbody wash', serviceItemIds: ['demo-item-commuter-wash'] });
+    expect(get().serviceItems.find((i) => i.id === 'demo-item-commuter-wash')).toMatchObject({ lastDate: '2031-04-15', pausedAt: new Date(2031, 0, 6, 18).getTime() });
+  });
+
+  test('closing a renewal keeps it closed through an edit; reopening and Undo put it back', () => {
+    const { actions, get } = setup();
+    const renewal = () => get().renewals.find((r) => r.id === 'demo-renewal-toll')!;
+    const before = renewal();
+    const undo = actions.closeRenewal('demo-renewal-toll');
+    expect(renewal()).toMatchObject({ closedAt: DEMO_NOW, dueDate: before.dueDate, by: before.by });
+    actions.saveRenewal('demo-renewal-toll', { kind: 'toll', name: 'Toll account', dueDate: '2031-09-30', everyMonths: 12, notes: 'Moved to the new tag' });
+    expect(renewal().closedAt).toBe(DEMO_NOW);
+    undo();
+    actions.reopenRenewal('demo-renewal-commuter-permit');
+    expect('closedAt' in get().renewals.find((r) => r.id === 'demo-renewal-commuter-permit')!).toBe(false);
+  });
+});

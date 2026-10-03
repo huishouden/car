@@ -150,11 +150,13 @@ describe('publishing a save', () => {
     expect(changes.replace).toEqual([]);
     expect(changes.remove).toEqual([
       'appointment:demo-appt-2',
+      'renewal:demo-renewal-commuter-permit',
       'renewal:demo-renewal-commuter-registration',
       'renewal:demo-renewal-commuter-sticker',
       'service:demo-item-commuter-inspection',
       'service:demo-item-commuter-oil',
       'service:demo-item-commuter-tires',
+      'service:demo-item-commuter-wash',
       'service:demo-item-commuter-wipers',
     ]);
   });
@@ -165,6 +167,12 @@ describe('publishing a save', () => {
     const before = demoData();
     const after = { ...before, contacts: before.contacts.map((c) => (c.id === 'demo-shop-auto' ? { ...c, name: 'Example Auto Care' } : c)) };
     expect(agendaChanges(before, after, [], DEMO_NOW).replace.map((c) => c.ref)).toEqual(['appointment:demo-appt-1', 'appointment:demo-appt-2']);
+  });
+
+  test('pausing a service item or closing a renewal takes it off the agenda; resuming puts it back', () => {
+    expect(act((a) => a.pauseServiceItem('demo-item-van-inspection'))).toEqual({ replace: [{ ref: 'service:demo-item-van-inspection', items: [] }], remove: [] });
+    expect(act((a) => a.closeRenewal('demo-renewal-toll'))).toEqual({ replace: [{ ref: 'renewal:demo-renewal-toll', items: [] }], remove: [] });
+    expect(act((a) => a.resumeServiceItem('demo-item-commuter-wash')).replace.map((c) => [c.ref, c.items.map((i) => i.status)])).toEqual([['service:demo-item-commuter-wash', ['overdue']]]);
   });
 
   test('a write that changes no dates publishes nothing', () => {

@@ -46,6 +46,7 @@ export function serviceItemDoc(i: ServiceItemInput, s: Stamp): ServiceItemData {
     lastDate: ymd(i.lastDate),
     lastOdometer: whole(i.lastOdometer, 0, LIMITS.maxReading),
     notes: text(i.notes, LIMITS.itemNotes),
+    pausedAt: whole(i.pausedAt, 0, Number.MAX_SAFE_INTEGER),
     ...stamp(s),
   });
 }
@@ -68,6 +69,7 @@ export function renewalDoc(r: RenewalInput, s: Stamp): RenewalData {
     dueDate: r.dueDate,
     everyMonths: whole(r.everyMonths, 1, LIMITS.maxRenewalMonths),
     notes: text(r.notes, LIMITS.renewalNotes),
+    closedAt: whole(r.closedAt, 0, Number.MAX_SAFE_INTEGER),
     ...stamp(s),
   });
 }

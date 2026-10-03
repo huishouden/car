@@ -164,6 +164,11 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
             notify(dialog.item ? `Saved ${input.name.trim()}` : `Added ${input.name.trim()} to ${vehicleName(dialog.vehicleId) ?? 'the car'}`, undo);
           }}
           onDelete={dialog.item && may.change(dialog.item) ? () => notify(`Removed ${dialog.item!.name}`, actions.deleteServiceItem(dialog.item!.id)) : undefined}
+          onPause={
+            dialog.item && !dialog.item.pausedAt && may.change(dialog.item)
+              ? () => notify(`Paused ${dialog.item!.name}. It won't come due until you resume it.`, actions.pauseServiceItem(dialog.item!.id))
+              : undefined
+          }
         />
       )}
       {dialog?.kind === 'reading' && (
@@ -185,6 +190,11 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           onClose={close}
           onSave={(input) => notify(dialog.renewal ? `Saved ${input.name.trim()}` : `Added ${input.name.trim()}`, actions.saveRenewal(dialog.renewal?.id ?? null, input))}
           onDelete={dialog.renewal && may.change(dialog.renewal) ? () => notify(`Deleted ${dialog.renewal!.name}`, actions.deleteRenewal(dialog.renewal!.id)) : undefined}
+          onHandled={
+            dialog.renewal && !dialog.renewal.closedAt && may.change(dialog.renewal)
+              ? () => notify(`Closed ${dialog.renewal!.name}. It won't come due any more.`, actions.closeRenewal(dialog.renewal!.id))
+              : undefined
+          }
         />
       )}
       {dialog?.kind === 'visit' && (

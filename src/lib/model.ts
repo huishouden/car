@@ -29,6 +29,8 @@ export interface ServiceItemData extends Stamp {
   lastDate?: Ymd;
   lastOdometer?: number;
   notes?: string;
+  /** Paused (ms): it no longer comes due anywhere until resumed. */
+  pausedAt?: number;
 }
 
 /** carOdometer/{id} */
@@ -50,6 +52,8 @@ export interface RenewalData extends Stamp {
   dueDate: Ymd;
   everyMonths?: number;
   notes?: string;
+  /** Closed (ms): handled and not renewing, so it no longer comes due; kept in the car's renewals. */
+  closedAt?: number;
 }
 
 /** carServiceLog/{id}: one visit, which may cover several schedule items. */

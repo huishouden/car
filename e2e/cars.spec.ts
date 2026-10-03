@@ -59,3 +59,28 @@ test('a wrong reading can be deleted and restored', async ({ page }) => {
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(page.getByRole('region', { name: 'Odometer' })).toContainText('41,400');
 });
+
+test('a paused item stops coming due and shows as paused until resumed', async ({ page }) => {
+  const schedule = page.getByRole('region', { name: 'Service schedule' });
+  await schedule.getByRole('button', { name: 'Edit Oil change' }).click();
+  await page.getByRole('dialog', { name: 'Edit Oil change' }).getByRole('button', { name: 'Pause' }).click();
+  await expect(page.getByText('Paused Oil change.', { exact: false })).toBeVisible();
+  await expect(schedule.getByText('Oil change due in 600 miles or 3 weeks')).toHaveCount(0);
+  await expect(schedule.getByRole('listitem').filter({ hasText: 'Oil change' })).toContainText('Paused');
+  await schedule.getByRole('button', { name: 'Resume Oil change' }).click();
+  await expect(schedule.getByText('Oil change due in 600 miles or 3 weeks')).toBeVisible();
+});
+
+test('a closed renewal stays in the car’s renewals, marked closed, and can be reopened', async ({ page }) => {
+  await page.getByRole('group', { name: 'Car' }).getByRole('button', { name: 'Commuter', exact: true }).click();
+  const renewals = page.getByRole('region', { name: 'Commuter renewals' });
+  const permit = renewals.getByRole('listitem').filter({ hasText: 'Street permit' });
+  await expect(permit).toContainText('Closed');
+  await renewals.getByRole('button', { name: 'Reopen Street permit' }).click();
+  await expect(renewals.getByText('Street permit overdue by 2 weeks')).toBeVisible();
+
+  await renewals.getByRole('button', { name: 'Edit Registration' }).click();
+  await page.getByRole('dialog', { name: 'Edit Registration' }).getByRole('button', { name: 'Mark handled' }).click();
+  await expect(renewals.getByRole('listitem').filter({ hasText: 'Registration' })).toContainText('Closed');
+  await expect(renewals.getByText(/^Registration expires/)).toHaveCount(0);
+});

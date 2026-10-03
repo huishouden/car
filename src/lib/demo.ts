@@ -54,6 +54,8 @@ export function demoData(): CarData {
     item('demo-item-commuter-tires', COMMUTER, 'Tire rotation', { everyDistance: 7500, lastDate: '2030-12-15', lastOdometer: 16800 }),
     item('demo-item-commuter-inspection', COMMUTER, 'Inspection', { everyMonths: 12, lastDate: '2030-05-02', lastOdometer: 11900 }),
     item('demo-item-commuter-wipers', COMMUTER, 'Wiper blades', { everyMonths: 12, lastDate: '2031-02-11' }),
+    // Paused over the winter: it would be overdue, but it doesn't come due until resumed.
+    item('demo-item-commuter-wash', COMMUTER, 'Underbody wash', { everyMonths: 3, lastDate: '2030-11-20', pausedAt: new Date(2031, 0, 6, 18).getTime() }),
   ];
 
   const reading = (n: number, vehicleId: string, date: string, value: number, by = SAM): OdometerReading => ({
@@ -79,6 +81,8 @@ export function demoData(): CarData {
     renewal('demo-renewal-commuter-sticker', { vehicleId: COMMUTER, kind: 'inspection', name: 'Inspection sticker', dueDate: '2031-05-31', everyMonths: 12 }),
     renewal('demo-renewal-insurance', { kind: 'insurance', name: 'Insurance', dueDate: '2031-06-01', everyMonths: 6, notes: 'Both cars on one policy.' }),
     renewal('demo-renewal-toll', { kind: 'toll', name: 'Toll account', dueDate: '2031-09-30', everyMonths: 12 }),
+    // Handled without renewing: the permit ended when the commuter moved to the garage.
+    renewal('demo-renewal-commuter-permit', { vehicleId: COMMUTER, kind: 'other', name: 'Street permit', dueDate: '2031-03-31', closedAt: new Date(2031, 2, 24, 19).getTime() }),
   ];
 
   const visit = (n: number, f: Omit<ServiceLogEntry, 'id' | 'createdAt' | 'by'>, by = SAM): ServiceLogEntry => ({
