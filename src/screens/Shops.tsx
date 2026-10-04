@@ -1,7 +1,7 @@
 import { Plus } from 'lucide-react';
 import { groupContacts, type Contact } from '@huishouden/pwa-kit/contacts';
 import { ContactCard } from '@huishouden/pwa-kit/react/contacts';
-import { roleLabels, withShownRoles } from '../lib/contacts';
+import { STORED_ROLES, shownRole, withStoredRoles } from '../lib/contacts';
 import { useT } from '../i18n';
 import type { ScreenProps } from '../CarApp';
 import { cardClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
@@ -11,9 +11,9 @@ export function Shops({ store, may, open, notify }: ScreenProps) {
   const onAdd = () => open({ kind: 'contact', contact: null });
   const onEdit = (c: Contact) => open({ kind: 'contact', contact: c });
   const t = useT();
-  // Grouped under the role names of the page's language; edits and undo keep the role as stored.
+  // Edits and undo keep the role exactly as stored.
   const stored = new Map(store.data.contacts.map((c) => [c.id, c]));
-  const groups = groupContacts(withShownRoles(store.data.contacts), roleLabels());
+  const groups = groupContacts(withStoredRoles(store.data.contacts), STORED_ROLES, shownRole);
 
   return (
     <div className="space-y-6 lg:h-full lg:overflow-y-auto">
@@ -34,7 +34,7 @@ export function Shops({ store, may, open, notify }: ScreenProps) {
             <ContactCard
               key={c.id}
               contact={c}
-              role={g.role}
+              role={shownRole(g.role)}
               onEdit={may.change(c) ? () => onEdit(c) : undefined}
               onDelete={
                 may.change(c)

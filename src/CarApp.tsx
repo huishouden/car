@@ -24,7 +24,7 @@ import { ContactDialog } from '@huishouden/pwa-kit/react/contacts';
 import { mayFor, type May } from './lib/may';
 
 export type { May };
-import { APP, roleLabels } from './lib/contacts';
+import { APP, STORED_ROLES, shownRole } from './lib/contacts';
 import { householdUnit, formatReading } from './lib/distance';
 import { useT } from './i18n';
 import { Overview } from './screens/Overview';
@@ -249,7 +249,8 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
         <ContactDialog
           contact={dialog.contact}
           app={APP}
-          roles={roleLabels()}
+          roles={STORED_ROLES}
+          roleLabel={shownRole}
           title={{ add: t('shops.new'), edit: t('shops.edit') }}
           namePlaceholder={t('shops.namePlaceholder')}
           auth={auth}
