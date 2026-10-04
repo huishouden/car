@@ -23,7 +23,6 @@ export default defineConfig({
       name: 'Huishouden Car',
       shortName: 'Car',
       description: "Keeping the cars on the road",
-      url: 'https://huishouden-piekstra.web.app/car/',
       themeColor: '#1b4332',
       backgroundColor: '#faf9f5',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
