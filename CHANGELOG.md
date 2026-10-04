@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.2](https://github.com/huishouden/car/compare/v1.11.1...v1.11.2) (2026-10-04)
+
+
+### Bug Fixes
+
+* **i18n:** contact role words as the portal's apps.json names them ([#39](https://github.com/huishouden/car/issues/39)) ([0768b94](https://github.com/huishouden/car/commit/0768b94356a9fca290b8458190629e7dcfc6a25f))
+
 ## [1.11.1](https://github.com/huishouden/car/compare/v1.11.0...v1.11.1) (2026-10-04)
 
 
