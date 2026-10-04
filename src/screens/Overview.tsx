@@ -1,5 +1,6 @@
 import { CalendarClock, CarFront, ChevronRight, Gauge, MapPin, Plus, Wrench } from 'lucide-react';
-import { formatDistance, formatReading, UNIT_NAMES } from '../lib/distance';
+import { formatDistance, formatReading, unitWord } from '../lib/distance';
+import { useT } from '../i18n';
 import { daysAgo, daysUntil, formatDayLong, formatTime, relativeDay } from '@huishouden/pwa-kit/time';
 import { carOdometer, needsAttention, upcoming } from '../lib/upcoming';
 import { useClock } from '@huishouden/pwa-kit/react/clock';
@@ -10,6 +11,7 @@ import { UpcomingRow } from './rows';
 
 /** What needs doing across every car, each car's odometer, and the next appointment. */
 export function Overview({ store, unit, may, open, notify, onCar, onOpen }: ScreenProps & { onCar: (id: string) => void; onOpen: (tab: TabId) => void }) {
+  const t = useT();
   const { now } = useClock();
   const { data } = store;
   const list = upcoming(data, unit, now);
@@ -21,13 +23,13 @@ export function Overview({ store, unit, may, open, notify, onCar, onOpen }: Scre
 
   if (cars.length === 0)
     return (
-      <section className={`${cardClass} mx-auto max-w-2xl p-8`} aria-label="No cars yet">
+      <section className={`${cardClass} mx-auto max-w-2xl p-8`} aria-label={t('overview.noCars')}>
         <CarFront size={32} className="text-link" aria-hidden="true" />
-        <h2 className="mt-3 text-2xl font-semibold text-ink">No cars yet</h2>
-        <p className="mt-2 text-lg text-muted">Add a car to see when its oil change, inspection and registration are due.</p>
+        <h2 className="mt-3 text-2xl font-semibold text-ink">{t('overview.noCars')}</h2>
+        <p className="mt-2 text-lg text-muted">{t('overview.noCarsHint')}</p>
         {may.settings ? (
           <button type="button" className={`${primaryButton} mt-5`} onClick={() => open({ kind: 'vehicle', vehicle: null })}>
-            <Plus size={20} /> Add a car
+            <Plus size={20} /> {t('overview.addCar')}
           </button>
         ) : (
           <RoleNote action="change-settings" className="mt-3" />
@@ -37,19 +39,19 @@ export function Overview({ store, unit, may, open, notify, onCar, onOpen }: Scre
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_380px]">
-      <section className={`${cardClass} flex min-h-0 flex-col`} aria-label="Coming up">
+      <section className={`${cardClass} flex min-h-0 flex-col`} aria-label={t('overview.comingUp')}>
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line px-5 py-4">
           <div>
-            <h2 className="text-2xl font-semibold text-ink">Coming up</h2>
+            <h2 className="text-2xl font-semibold text-ink">{t('overview.comingUp')}</h2>
             <p className="text-base text-muted" aria-live="polite">
-              {attention === 0 ? 'Nothing needs doing in the next month.' : `${attention} ${attention === 1 ? 'thing needs' : 'things need'} doing soon`}
+              {attention === 0 ? t('overview.nothingSoon') : t('overview.attention', { n: attention })}
             </p>
           </div>
           <button type="button" className={primaryButton} onClick={() => open({ kind: 'visit', visit: null })}>
-            <Wrench size={20} /> Log a service
+            <Wrench size={20} /> {t('visit.log')}
           </button>
         </div>
-        {list.length === 0 && <p className="p-5 text-lg text-muted">No schedule or renewals yet. Add them from Cars and Renewals.</p>}
+        {list.length === 0 && <p className="p-5 text-lg text-muted">{t('overview.empty')}</p>}
         <ul className="min-h-0 flex-1 overflow-y-auto">
           {list.map((entry) => (
             <UpcomingRow key={`${entry.kind}-${entry.id}`} entry={entry} store={store} unit={unit} now={now} may={may} open={open} notify={notify} showCar />
@@ -70,34 +72,34 @@ export function Overview({ store, unit, may, open, notify, onCar, onOpen }: Scre
                 </span>
                 <ChevronRight size={20} className="text-muted" aria-hidden="true" />
               </button>
-              <div className="mt-2 flex items-end justify-between gap-3">
+              <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
                 {odo.latest ? (
                   <p className="text-ink">
                     <span className="text-4xl font-semibold tracking-tight tabular-nums">{formatReading(odo.latest.reading)}</span>
-                    <span className="ml-2 text-lg text-muted">{UNIT_NAMES[unit].many}</span>
-                    <span className="block text-base text-muted">Read {age === null ? '' : daysAgo(age)}</span>
+                    <span className="ml-2 text-lg text-muted">{unitWord(unit)}</span>
+                    {age !== null && <span className="block text-base text-muted">{t('odometer.read', { when: daysAgo(age) })}</span>}
                   </p>
                 ) : (
-                  <p className="text-base text-muted">No odometer reading yet.</p>
+                  <p className="text-base text-muted">{t('overview.noReading')}</p>
                 )}
                 <button
                   type="button"
                   className={`${secondaryButton} whitespace-nowrap`}
                   onClick={() => open({ kind: 'reading', vehicleId: v.id })}
-                  aria-label={`Log odometer for ${v.name}${odo.latest ? `, last ${formatDistance(odo.latest.reading, unit)}` : ''}`}
+                  aria-label={odo.latest ? t('odometer.logForLast', { car: v.name, distance: formatDistance(odo.latest.reading, unit) }) : t('odometer.logFor', { car: v.name })}
                 >
-                  <Gauge size={18} aria-hidden="true" /> Log odometer
+                  <Gauge size={18} aria-hidden="true" /> {t('odometer.log')}
                 </button>
               </div>
             </section>
           );
         })}
 
-        <section className={`${cardClass} px-5 py-4`} aria-label="Next appointment">
+        <section className={`${cardClass} px-5 py-4`} aria-label={t('overview.nextAppointment')}>
           <div className="flex items-center justify-between gap-3">
-            <p className={overline}>Next appointment</p>
+            <p className={overline}>{t('overview.nextAppointment')}</p>
             <button type="button" className={ghostButton} onClick={() => onOpen('appointments')}>
-              All <ChevronRight size={18} />
+              {t('overview.all')} <ChevronRight size={18} />
             </button>
           </div>
           {next ? (
@@ -108,7 +110,7 @@ export function Overview({ store, unit, may, open, notify, onCar, onOpen }: Scre
               </p>
               {(nextCar || shop) && (
                 <p className="mt-0.5 flex items-center gap-1.5 text-base text-muted">
-                  <CalendarClock size={16} aria-hidden="true" /> {[nextCar?.name, shop?.name].filter(Boolean).join(' at ')}
+                  <CalendarClock size={16} aria-hidden="true" /> {nextCar && shop ? t('overview.carAtShop', { car: nextCar.name, shop: shop.name }) : (nextCar?.name ?? shop?.name)}
                 </p>
               )}
               {next.location && !shop && (
@@ -118,7 +120,7 @@ export function Overview({ store, unit, may, open, notify, onCar, onOpen }: Scre
               )}
             </button>
           ) : (
-            <p className="mt-1 text-base text-muted">No appointments coming up.</p>
+            <p className="mt-1 text-base text-muted">{t('appointments.none')}</p>
           )}
         </section>
       </div>

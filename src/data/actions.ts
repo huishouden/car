@@ -1,10 +1,10 @@
 import type { ContactWrites } from '@huishouden/pwa-kit/contacts';
 import { applyOps as applyKitOps, changes, stampFor, withoutId, type Backend as KitBackend, type Op as KitOp } from '@huishouden/pwa-kit/store';
 import type { DistanceUnit } from '../lib/distance';
-import { defaultDistance } from '../lib/distance';
+import { defaultDistance, householdUnit } from '../lib/distance';
 import type { CarData } from '../lib/demo';
 import { nextRenewalDate } from '../lib/renewals';
-import { DEFAULT_SCHEDULE, afterVisit } from '../lib/schedule';
+import { afterVisit, defaultSchedule } from '../lib/schedule';
 import { appointmentDoc, readingDoc, renewalDoc, serviceItemDoc, vehicleDoc, visitDoc } from './build';
 import type { CarActions } from './types';
 import { track } from '@huishouden/pwa-kit/observability';
@@ -67,9 +67,11 @@ export function createActions(backend: Backend, data: () => CarData, me: string,
       track('save vehicle');
       const vehicleId = id ?? backend.newId('carVehicles');
       const ops: Op[] = [{ col: 'carVehicles', id: vehicleId, data: vehicleDoc(input, stamp('carVehicles', id)) }];
+      const unit = householdUnit(data());
+      // The household's first car fixes the unit for every member, whatever their phones' regions.
+      if (!data().settings) backend.saveSettings(unit, me, clock());
       if (!id && options.defaultSchedule) {
-        const unit = data().settings?.distanceUnit ?? 'mi';
-        for (const d of DEFAULT_SCHEDULE) {
+        for (const d of defaultSchedule()) {
           const item = { vehicleId, name: d.name, everyMonths: d.everyMonths, everyDistance: d.everyMiles ? defaultDistance(d.everyMiles, unit) : undefined };
           ops.push({ col: 'carServiceItems', id: backend.newId('carServiceItems'), data: serviceItemDoc(item, stamp('carServiceItems', null)) });
         }

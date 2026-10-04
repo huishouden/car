@@ -5,7 +5,10 @@ import { describeMonths } from '@huishouden/pwa-kit/schedule';
 import { allDayStart } from '@huishouden/pwa-kit/agenda';
 import { APP_URL, renewalRef, serviceAgenda, serviceRef } from './agenda';
 import type { CarData } from './demo';
-import { RENEWAL_LABELS, type Renewal, type ServiceItem } from './model';
+import { LANGS, withLang } from '@huishouden/pwa-kit/i18n';
+import { RENEWAL_KINDS, renewalLabel, type Renewal, type ServiceItem } from './model';
+import { householdUnit } from './distance';
+import { t } from '../i18n';
 import { nextRenewalDate } from './renewals';
 import { carOdometer, upcoming } from './upcoming';
 
@@ -43,12 +46,12 @@ export function serviceDone(item: ServiceItem, odometer: number | undefined): To
       merge: true,
     },
   ];
-  return { label: 'Done', ops, roles: ALL };
+  return { label: t('todo.done'), ops, roles: ALL };
 }
 
 /** Pause: it stops coming due until someone resumes it in Car. Admins, members and whoever added it. */
 export const servicePause = (item: ServiceItem): TodoAction => ({
-  label: 'Pause',
+  label: t('todo.pause'),
   ops: [{ col: 'carServiceItems', id: item.id, data: { pausedAt: '$now', updatedAt: '$now' }, merge: true }],
   roles: STAFF,
   owner: true,
@@ -61,27 +64,31 @@ export const servicePause = (item: ServiceItem): TodoAction => ({
  */
 export function renewalDone(renewal: Renewal, now: number): TodoAction {
   const next = nextRenewalDate(renewal, now);
-  if (next) return { label: 'Renewed', ops: [{ col: 'carRenewals', id: renewal.id, data: { dueDate: next, updatedAt: '$now' }, merge: true }], roles: ALL };
-  return { label: 'Renewed', ops: [{ col: 'carRenewals', id: renewal.id, data: { closedAt: '$now', updatedAt: '$now' }, merge: true }], roles: STAFF, owner: true };
+  if (next) return { label: t('todo.renewed'), ops: [{ col: 'carRenewals', id: renewal.id, data: { dueDate: next, updatedAt: '$now' }, merge: true }], roles: ALL };
+  return { label: t('todo.renewed'), ops: [{ col: 'carRenewals', id: renewal.id, data: { closedAt: '$now', updatedAt: '$now' }, merge: true }], roles: STAFF, owner: true };
 }
 
 /** Mark handled: closed without renewing (sold the car, moved the policy). */
 export const renewalClose = (renewal: Renewal): TodoAction => ({
-  label: 'Mark handled',
+  label: t('todo.markHandled'),
   ops: [{ col: 'carRenewals', id: renewal.id, data: { closedAt: '$now', updatedAt: '$now' }, merge: true }],
   roles: STAFF,
   owner: true,
 });
 
-/** "Renew registration", "Renew inspection sticker", "Renew E-ZPass": a kind's own name reads lower-case. */
+/**
+ * "Renew registration", "Renew inspection sticker", "Renew E-ZPass": a kind's own name (in any of
+ * the languages, as it may have been saved in another) reads lower-case.
+ */
 export function renewalTitle(name: string): string {
-  const plain = Object.values(RENEWAL_LABELS).some((l) => l.toLowerCase() === name.trim().toLowerCase());
-  return `Renew ${plain ? name.trim().toLowerCase() : name.trim()}`;
+  const typed = name.trim();
+  const plain = RENEWAL_KINDS.some((k) => k !== 'other' && LANGS.some((l) => withLang(l, () => renewalLabel(k)).toLowerCase() === typed.toLowerCase()));
+  return t('todo.renew', { name: plain ? typed.toLowerCase() : typed });
 }
 
-/** Everything Car publishes to the to-do list: overdue and soon service items and renewals. */
+/** Everything Car publishes to the to-do list: overdue and soon service items and renewals, in the page's language (wrap in `localizeTodos`). */
 export function todoItems(data: CarData, now: number, appUrl = APP_URL): TodoInput[] {
-  const unit = data.settings?.distanceUnit ?? 'mi';
+  const unit = householdUnit(data);
   const out: TodoInput[] = [];
   for (const entry of upcoming(data, unit, now)) {
     if (entry.state !== 'overdue' && entry.state !== 'soon') continue;

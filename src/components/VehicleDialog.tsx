@@ -4,6 +4,7 @@ import type { Vehicle } from '../lib/model';
 import { LIMITS } from '../lib/model';
 import type { VehicleInput } from '../data/types';
 import { Checkbox, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
+import { useT } from '../i18n';
 
 export function VehicleDialog({ vehicle, onSave, onDelete, onClose }: {
   vehicle: Vehicle | null;
@@ -11,6 +12,7 @@ export function VehicleDialog({ vehicle, onSave, onDelete, onClose }: {
   onDelete?: () => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const [name, setName] = useState(vehicle?.name ?? '');
   const [make, setMake] = useState(vehicle?.make ?? '');
   const [model, setModel] = useState(vehicle?.model ?? '');
@@ -30,14 +32,14 @@ export function VehicleDialog({ vehicle, onSave, onDelete, onClose }: {
 
   return (
     <Dialog
-      title={vehicle ? `Edit ${vehicle.name}` : 'New car'}
+      title={vehicle ? t('row.edit', { name: vehicle.name }) : t('vehicle.new')}
       onClose={onClose}
       footer={
         confirming ? (
           <>
-            <p className="mr-auto text-base text-ink-soft">Delete {vehicle?.name} with its schedule, readings, renewals and history?</p>
+            <p className="mr-auto text-base text-ink-soft">{t('vehicle.confirmDelete', { name: vehicle?.name ?? '' })}</p>
             <button type="button" className={ghostButton} onClick={() => setConfirming(false)}>
-              Keep it
+              {t('vehicle.keep')}
             </button>
             <button
               type="button"
@@ -47,21 +49,21 @@ export function VehicleDialog({ vehicle, onSave, onDelete, onClose }: {
                 onClose();
               }}
             >
-              Delete car
+              {t('vehicle.delete')}
             </button>
           </>
         ) : (
           <>
             {onDelete && (
               <button type="button" className={deleteButton} onClick={() => setConfirming(true)}>
-                <Trash2 size={18} /> Delete
+                <Trash2 size={18} /> {t('common.delete')}
               </button>
             )}
             <button type="button" className={ghostButton} onClick={onClose}>
-              Cancel
+              {t('common.cancel')}
             </button>
             <button type="button" className={primaryButton} disabled={!valid} onClick={save}>
-              Save
+              {t('common.save')}
             </button>
           </>
         )
@@ -74,29 +76,29 @@ export function VehicleDialog({ vehicle, onSave, onDelete, onClose }: {
           save();
         }}
       >
-        <Field label="Nickname" hint="What the household calls it. No plate or VIN needed.">
-          <input className={inputClass} value={name} maxLength={LIMITS.vehicleName} onChange={(e) => setName(e.target.value)} placeholder="Family van" autoComplete="off" />
+        <Field label={t('vehicle.nickname')} hint={t('vehicle.nicknameHint')}>
+          <input className={inputClass} value={name} maxLength={LIMITS.vehicleName} onChange={(e) => setName(e.target.value)} placeholder={t('vehicle.nicknamePlaceholder')} autoComplete="off" />
         </Field>
         <div className="grid grid-cols-[1fr_1fr_6.5rem] gap-3">
-          <Field label="Make">
+          <Field label={t('vehicle.make')}>
             <input className={inputClass} value={make} maxLength={LIMITS.make} onChange={(e) => setMake(e.target.value)} autoComplete="off" />
           </Field>
-          <Field label="Model">
+          <Field label={t('vehicle.model')}>
             <input className={inputClass} value={model} maxLength={LIMITS.model} onChange={(e) => setModel(e.target.value)} autoComplete="off" />
           </Field>
-          <Field label="Year">
+          <Field label={t('vehicle.year')}>
             <input className={inputClass} inputMode="numeric" value={year} maxLength={4} onChange={(e) => setYear(e.target.value.replace(/\D/g, ''))} aria-invalid={!yearValid} />
           </Field>
         </div>
-        <Field label="Notes (optional)">
+        <Field label={t('form.notesOptional')}>
           <textarea className={`${inputClass} min-h-20`} value={notes} maxLength={LIMITS.vehicleNotes} onChange={(e) => setNotes(e.target.value)} />
         </Field>
         {!vehicle && (
           <div>
             <Checkbox checked={schedule} onChange={setSchedule}>
-              Start with the usual schedule
+              {t('vehicle.usualSchedule')}
             </Checkbox>
-            <p className="ml-9 text-sm text-muted">Oil change, tire rotation, inspection and wiper blades. Change or remove any of them later.</p>
+            <p className="ml-9 text-sm text-muted">{t('vehicle.usualScheduleHint')}</p>
           </div>
         )}
         <button type="submit" hidden />

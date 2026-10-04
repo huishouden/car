@@ -11,22 +11,23 @@ import { db } from './firebase';
 import { COLLECTIONS, applyOps, createActions, type Backend, type CollectionName } from './actions';
 import { publishChanges, syncAll, syncTodoList } from './publishAgenda';
 import type { CarStore } from './types';
+import { t } from '../i18n';
 
 /** How long after a change the to-do list is brought up to date. */
 const TODO_DELAY = 3000;
 
 const EMPTY: CarData = { vehicles: [], serviceItems: [], readings: [], renewals: [], serviceLog: [], appointments: [], contacts: [], settings: null };
 
-const WHAT: Record<CollectionName | 'settings' | 'contacts', string> = {
-  carVehicles: 'the cars',
-  carServiceItems: 'the service schedules',
-  carOdometer: 'the odometer readings',
-  carRenewals: 'the renewals',
-  carServiceLog: 'the service history',
-  carAppointments: 'the appointments',
-  settings: 'the settings',
-  contacts: 'the shops',
-};
+const WHAT = {
+  carVehicles: 'error.loadCars',
+  carServiceItems: 'error.loadSchedules',
+  carOdometer: 'error.loadReadings',
+  carRenewals: 'error.loadRenewals',
+  carServiceLog: 'error.loadHistory',
+  carAppointments: 'error.loadAppointments',
+  settings: 'error.loadSettings',
+  contacts: 'error.loadShops',
+} as const satisfies Record<CollectionName | 'settings' | 'contacts', string>;
 
 /**
  * Live household data from Firestore with onSnapshot listeners. Writes are fire-and-forget: the
@@ -45,9 +46,9 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
 
   useEffect(() => {
     const answer = (key: string) => setAnswered((a) => (a.has(key) ? a : new Set(a).add(key)));
-    const fail = (key: keyof typeof WHAT) => (e: Error) => {
+    const loadFailed = (key: keyof typeof WHAT) => (e: Error) => {
       answer(key);
-      errorRef.current(readError(e, `Couldn't load ${WHAT[key]}`));
+      errorRef.current(readError(e, t(WHAT[key])));
     };
     const unsubs = (Object.keys(COLLECTIONS) as CollectionName[]).map((col) =>
       onSnapshot(
@@ -57,7 +58,7 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
           setData((d) => ({ ...d, [COLLECTIONS[col]]: list }));
           answer(col);
         },
-        fail(col),
+        loadFailed(col),
       ),
     );
     unsubs.push(
@@ -67,7 +68,7 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
           setData((d) => ({ ...d, settings: s.exists() ? (s.data() as SettingsData) : null }));
           answer('settings');
         },
-        fail('settings'),
+        loadFailed('settings'),
       ),
       watchContacts(
         db,
@@ -76,7 +77,7 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
           setData((d) => ({ ...d, contacts }));
           answer('contacts');
         },
-        { app: APP, restricted, onError: fail('contacts') },
+        { app: APP, restricted, onError: loadFailed('contacts') },
       ),
     );
     return () => unsubs.forEach((u) => u());
@@ -84,7 +85,7 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
 
   const synced = useRef(false);
   const actions = useMemo(() => {
-    const report = (p: Promise<unknown>) => void p.catch((e) => errorRef.current(readError(e, "Couldn't save")));
+    const report = (p: Promise<unknown>) => void p.catch((e) => errorRef.current(readError(e, t('error.save'))));
     const backend: Backend = {
       newId: (col) => doc(collection(db, base, col)).id,
       write: (ops) => {

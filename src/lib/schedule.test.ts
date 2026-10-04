@@ -34,9 +34,9 @@ describe('next due by time or distance, whichever comes first', () => {
     expect(today.sortDays).toBeLessThan(later.sortDays);
   });
 
-  test('kilometres', () => {
+  test('kilometers', () => {
     const due = serviceDue({ everyMonths: 6, everyDistance: 8000, lastDate: '2030-11-08', lastOdometer: 33000 }, fixture.latest, null, now);
-    expect(dueText('Oil change', due, 'km')).toBe('Oil change overdue by 400 kilometres');
+    expect(dueText('Oil change', due, 'km')).toBe('Oil change overdue by 400 kilometers');
   });
 });
 

@@ -24,7 +24,9 @@ import { ContactDialog } from '@huishouden/pwa-kit/react/contacts';
 import { mayFor, type May } from './lib/may';
 
 export type { May };
-import { APP, ROLES } from './lib/contacts';
+import { APP, roleLabels } from './lib/contacts';
+import { householdUnit, formatReading } from './lib/distance';
+import { useT } from './i18n';
 import { Overview } from './screens/Overview';
 import { Cars } from './screens/Cars';
 import { Renewals } from './screens/Renewals';
@@ -36,14 +38,14 @@ export type TabId = 'overview' | 'cars' | 'renewals' | 'history' | 'appointments
 
 // On phones the four primaries sit in the bottom bar (what is due, then what is booked and done);
 // the cars' details and the shops are under More.
-const TABS: (Tab & { id: TabId })[] = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard, primary: true },
-  { id: 'cars', label: 'Cars', icon: CarFront },
-  { id: 'renewals', label: 'Renewals', icon: CalendarClock, primary: true },
-  { id: 'history', label: 'History', icon: HistoryIcon, primary: true },
-  { id: 'appointments', label: 'Appointments', short: 'Bookings', icon: CalendarCheck, primary: true },
-  { id: 'shops', label: 'Shops', icon: Store },
-];
+const TABS = [
+  { id: 'overview', label: 'tab.overview', icon: LayoutDashboard, primary: true },
+  { id: 'cars', label: 'tab.cars', icon: CarFront },
+  { id: 'renewals', label: 'tab.renewals', short: 'tab.renewalsShort', icon: CalendarClock, primary: true },
+  { id: 'history', label: 'tab.history', short: 'tab.historyShort', icon: HistoryIcon, primary: true },
+  { id: 'appointments', label: 'tab.appointments', short: 'tab.appointmentsShort', icon: CalendarCheck, primary: true },
+  { id: 'shops', label: 'tab.shops', icon: Store },
+] as const satisfies readonly (Omit<Tab, 'label' | 'short'> & { id: TabId; label: string; short?: string })[];
 
 /** Which dialog is open, and what it was opened with. */
 export type Open =
@@ -81,25 +83,27 @@ interface Props {
 
 /** Everything inside the frame once there is data to show (live or sample). */
 export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, notify, clearToast, banner }: Props) {
+  const t = useT();
   const { now } = useClock();
   const [tab, setTab] = useState<TabId>('overview');
   const [carId, setCarId] = useState<string | null>(null);
   const [dialog, setDialog] = useState<Open | null>(null);
   const { data, actions } = store;
-  const unit: DistanceUnit = data.settings?.distanceUnit ?? 'mi';
+  const unit: DistanceUnit = householdUnit(data);
   const calendar = calendarAvailable(user);
   const suggested = useCalendarSuggestions({ auth, words: CAR_CALENDAR_QUERIES, isImported: (m) => isImported(m, data.appointments), app: 'Car' });
 
   /** Calendar events in as appointments, with the car guessed: Import from calendar and the new-in-your-calendar card. */
   const importEvents = (list: CalendarMatch[]) => {
     const undos = list.map((m) => actions.saveAppointment(null, { ...fromCalendar(m), vehicleId: guessVehicle(m, data.vehicles) }));
-    notify(list.length === 1 ? `Added ${list[0].title}` : `Added ${list.length} appointments`, () => undos.forEach((u) => u()));
+    notify(list.length === 1 ? t('common.added', { name: list[0].title }) : t('toast.addedAppointments', { n: list.length }), () => undos.forEach((u) => u()));
   };
   const close = () => setDialog(null);
 
+  const title = t('app.title');
   useEffect(() => {
-    document.title = 'Huishouden Car';
-  }, []);
+    document.title = title;
+  }, [title]);
 
   const may = mayFor(store);
   const screen: ScreenProps = { store, unit, may, open: setDialog, notify };
@@ -109,7 +113,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
   };
 
   let content: ReactNode;
-  if (!store.ready) content = <p className="p-2 text-lg text-muted">Loading the cars</p>;
+  if (!store.ready) content = <p className="p-2 text-lg text-muted">{t('app.loading')}</p>;
   else if (tab === 'cars') content = <Cars {...screen} carId={carId} onCar={setCarId} />;
   else if (tab === 'renewals') content = <Renewals {...screen} />;
   else if (tab === 'history') content = <History {...screen} />;
@@ -121,7 +125,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
 
   return (
     <div className="flex min-h-dvh flex-col bg-page font-sans text-ink antialiased lg:h-dvh lg:overflow-hidden">
-      <Header tabs={TABS as Tab[]} tab={tab} onTab={(id) => setTab(id as TabId)} user={user} onSignIn={onSignIn} onSignOut={onSignOut} signingIn={signingIn} />
+      <Header tabs={TABS.map((x) => ({ ...x, label: t(x.label), short: 'short' in x ? t(x.short) : undefined }))} tab={tab} onTab={(id) => setTab(id as TabId)} user={user} onSignIn={onSignIn} onSignOut={onSignOut} signingIn={signingIn} />
       <main className="mx-auto flex w-full max-w-[1200px] min-h-0 flex-1 flex-col gap-4 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pt-6 sm:pb-6">
         {banner}
         {tab === 'overview' && store.ready && (
@@ -139,14 +143,14 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
             if (!dialog.vehicle) {
               setCarId(id);
               setTab('cars');
-              notify(`Added ${input.name.trim()}`, undo);
+              notify(t('common.added', { name: input.name.trim() }), undo);
             }
           }}
           onDelete={
             dialog.vehicle
               ? () => {
                   const gone = dialog.vehicle!;
-                  notify(`Deleted ${gone.name}`, actions.deleteVehicle(gone.id));
+                  notify(t('common.deleted', { name: gone.name }), actions.deleteVehicle(gone.id));
                   setCarId(null);
                 }
               : undefined
@@ -161,12 +165,17 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           onClose={close}
           onSave={(input) => {
             const undo = actions.saveServiceItem(dialog.item?.id ?? null, { ...input, vehicleId: dialog.vehicleId });
-            notify(dialog.item ? `Saved ${input.name.trim()}` : `Added ${input.name.trim()} to ${vehicleName(dialog.vehicleId) ?? 'the car'}`, undo);
+            notify(
+              dialog.item
+                ? t('toast.saved', { name: input.name.trim() })
+                : t('toast.addedTo', { name: input.name.trim(), car: vehicleName(dialog.vehicleId) ?? t('toast.theCar') }),
+              undo,
+            );
           }}
-          onDelete={dialog.item && may.change(dialog.item) ? () => notify(`Removed ${dialog.item!.name}`, actions.deleteServiceItem(dialog.item!.id)) : undefined}
+          onDelete={dialog.item && may.change(dialog.item) ? () => notify(t('toast.removed', { name: dialog.item!.name }), actions.deleteServiceItem(dialog.item!.id)) : undefined}
           onPause={
             dialog.item && !dialog.item.pausedAt && may.change(dialog.item)
-              ? () => notify(`Paused ${dialog.item!.name}. It won't come due until you resume it.`, actions.pauseServiceItem(dialog.item!.id))
+              ? () => notify(t('toast.paused', { name: dialog.item!.name }), actions.pauseServiceItem(dialog.item!.id))
               : undefined
           }
         />
@@ -178,7 +187,9 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           unit={unit}
           now={now}
           onClose={close}
-          onSave={(input) => notify(`Logged ${input.reading.toLocaleString('en-US')} for ${vehicleName(dialog.vehicleId)}`, actions.logReading({ ...input, vehicleId: dialog.vehicleId }))}
+          onSave={(input) =>
+            notify(t('toast.loggedReading', { reading: formatReading(input.reading), car: vehicleName(dialog.vehicleId) ?? t('toast.theCar') }), actions.logReading({ ...input, vehicleId: dialog.vehicleId }))
+          }
         />
       )}
       {dialog?.kind === 'renewal' && (
@@ -188,11 +199,13 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           vehicles={data.vehicles}
           now={now}
           onClose={close}
-          onSave={(input) => notify(dialog.renewal ? `Saved ${input.name.trim()}` : `Added ${input.name.trim()}`, actions.saveRenewal(dialog.renewal?.id ?? null, input))}
-          onDelete={dialog.renewal && may.change(dialog.renewal) ? () => notify(`Deleted ${dialog.renewal!.name}`, actions.deleteRenewal(dialog.renewal!.id)) : undefined}
+          onSave={(input) =>
+            notify(dialog.renewal ? t('toast.saved', { name: input.name.trim() }) : t('common.added', { name: input.name.trim() }), actions.saveRenewal(dialog.renewal?.id ?? null, input))
+          }
+          onDelete={dialog.renewal && may.change(dialog.renewal) ? () => notify(t('common.deleted', { name: dialog.renewal!.name }), actions.deleteRenewal(dialog.renewal!.id)) : undefined}
           onHandled={
             dialog.renewal && !dialog.renewal.closedAt && may.change(dialog.renewal)
-              ? () => notify(`Closed ${dialog.renewal!.name}. It won't come due any more.`, actions.closeRenewal(dialog.renewal!.id))
+              ? () => notify(t('toast.closed', { name: dialog.renewal!.name }), actions.closeRenewal(dialog.renewal!.id))
               : undefined
           }
         />
@@ -207,9 +220,12 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           onClose={close}
           onSave={(input) => {
             const undo = actions.saveVisit(dialog.visit?.id ?? null, input);
-            notify(dialog.visit ? `Saved ${input.what.trim()}` : `Logged ${input.what.trim()} on ${formatYmd(input.date, { day: 'numeric', month: 'short' })}`, undo);
+            notify(
+              dialog.visit ? t('toast.saved', { name: input.what.trim() }) : t('toast.loggedVisit', { what: input.what.trim(), date: formatYmd(input.date, { day: 'numeric', month: 'short' }) }),
+              undo,
+            );
           }}
-          onDelete={dialog.visit && may.change(dialog.visit) ? () => notify(`Deleted ${dialog.visit!.what}`, actions.deleteVisit(dialog.visit!.id)) : undefined}
+          onDelete={dialog.visit && may.change(dialog.visit) ? () => notify(t('common.deleted', { name: dialog.visit!.what }), actions.deleteVisit(dialog.visit!.id)) : undefined}
         />
       )}
       {dialog?.kind === 'appointment' && (
@@ -224,31 +240,31 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           onClose={close}
           onSave={(input) => {
             const undo = actions.saveAppointment(dialog.appointment?.id ?? null, input);
-            if (!dialog.appointment) notify(`Added ${input.title.trim()}`, undo);
+            if (!dialog.appointment) notify(t('common.added', { name: input.title.trim() }), undo);
           }}
-          onDelete={dialog.appointment && may.change(dialog.appointment) ? () => notify(`Deleted ${dialog.appointment!.title}`, actions.deleteAppointment(dialog.appointment!.id)) : undefined}
+          onDelete={dialog.appointment && may.change(dialog.appointment) ? () => notify(t('common.deleted', { name: dialog.appointment!.title }), actions.deleteAppointment(dialog.appointment!.id)) : undefined}
         />
       )}
       {dialog?.kind === 'contact' && (
         <ContactDialog
           contact={dialog.contact}
           app={APP}
-          roles={ROLES}
-          title={{ add: 'New shop', edit: 'Edit shop' }}
-          namePlaceholder="Example Auto Service"
+          roles={roleLabels()}
+          title={{ add: t('shops.new'), edit: t('shops.edit') }}
+          namePlaceholder={t('shops.namePlaceholder')}
           auth={auth}
           canMarkPrivate={may.seePrivate}
           onClose={close}
           onSave={(input) => {
             actions.saveContact(dialog.contact?.id ?? null, input);
-            if (!dialog.contact) notify(`Added ${input.name}`);
+            if (!dialog.contact) notify(t('common.added', { name: input.name }));
           }}
           onDelete={
             dialog.contact && may.change(dialog.contact)
               ? () => {
                   const gone = dialog.contact!;
                   actions.deleteContact(gone.id);
-                  notify(`Deleted ${gone.name}`, () => actions.restoreContact(gone));
+                  notify(t('common.deleted', { name: gone.name }), () => actions.restoreContact(gone));
                 }
               : undefined
           }

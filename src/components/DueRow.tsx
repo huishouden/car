@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { CheckCircle2, FileText, Pencil, Wrench } from 'lucide-react';
 import { StatusPill, iconButton, secondaryButton, type Attention } from '@huishouden/pwa-kit/react/ui';
+import { useT } from '../i18n';
 
 /** One thing to do: the glanceable line, its state, what it is about, and the one action. */
 export function DueRow({ kind, state, text, meta, onDone, doneLabel, onEdit, editLabel }: {
@@ -14,6 +15,7 @@ export function DueRow({ kind, state, text, meta, onDone, doneLabel, onEdit, edi
   onEdit?: () => void;
   editLabel: string;
 }) {
+  const t = useT();
   const Icon = kind === 'service' ? Wrench : FileText;
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line px-4 py-3 last:border-b-0 sm:flex-nowrap sm:px-5">
@@ -27,7 +29,7 @@ export function DueRow({ kind, state, text, meta, onDone, doneLabel, onEdit, edi
       </div>
       <div className="ml-9.5 flex items-center gap-1 sm:ml-0">
       {onDone && (
-        <button type="button" className={secondaryButton} onClick={onDone} aria-label={`${doneLabel}: ${text}`}>
+        <button type="button" className={secondaryButton} onClick={onDone} aria-label={t('row.doneLabel', { action: doneLabel, text })}>
           <CheckCircle2 size={18} aria-hidden="true" /> {doneLabel}
         </button>
       )}

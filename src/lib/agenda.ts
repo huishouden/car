@@ -3,7 +3,8 @@ import { allDayStart } from '@huishouden/pwa-kit/agenda';
 import { appUrl } from '@huishouden/pwa-kit/site';
 import { addDays, toYmd, type Ymd } from '@huishouden/pwa-kit/time';
 import type { CarData } from './demo';
-import { formatDistance, type DistanceUnit } from './distance';
+import { formatDistance, householdUnit, type DistanceUnit } from './distance';
+import { t } from '../i18n';
 import type { Appointment, Renewal, ServiceItem, Vehicle } from './model';
 import { renewalDue } from './renewals';
 import type { ServiceDue } from './schedule';
@@ -37,13 +38,13 @@ export function serviceAgenda(item: ServiceItem, vehicle: Vehicle, due: ServiceD
   const today = toYmd(now);
   const at = due.dueAt !== null ? formatDistance(due.dueAt, unit) : null;
   let day: Ymd | null = due.dueDate;
-  let detail = at ? `or at ${at}` : undefined;
+  let detail = at ? t('agenda.orAt', { distance: at }) : undefined;
   // Mileage passed (or reached) on the latest reading's day; otherwise the estimate from the pace.
   const byDistance =
     due.distanceLeft !== null && due.distanceLeft <= 0 && odo.latest ? odo.latest.date : due.distanceDays !== null ? addDays(today, due.distanceDays) : null;
   if (byDistance && at && (day === null || byDistance < day)) {
     day = byDistance;
-    detail = due.distanceLeft !== null && due.distanceLeft <= 0 ? `due at ${at}` : `at ${at} (estimated date)`;
+    detail = due.distanceLeft !== null && due.distanceLeft <= 0 ? t('agenda.dueAt', { distance: at }) : t('agenda.atEstimated', { distance: at });
   }
   if (!day) return [];
   return [
@@ -98,7 +99,7 @@ export function appointmentAgenda(appointment: Appointment, data: Pick<CarData, 
 
 /** Every record's items by ref. Records of a deleted car have none. */
 export function agendaByRef(data: CarData, now: number, appUrl = APP_URL): Map<string, AgendaEntry[]> {
-  const unit = data.settings?.distanceUnit ?? 'mi';
+  const unit = householdUnit(data);
   const out = new Map<string, AgendaEntry[]>();
   const odometers = new Map<string, CarOdometer>();
   const odometer = (vehicleId: string) => {
@@ -114,7 +115,7 @@ export function agendaByRef(data: CarData, now: number, appUrl = APP_URL): Map<s
   return out;
 }
 
-/** Everything Car publishes, for syncAgenda when the app opens (the kit keeps the window). */
+/** Everything Car publishes, for syncAgenda when the app opens (the kit keeps the window), in the page's language: wrap in `localizeAgenda`. */
 export function agendaItems(data: CarData, now: number, appUrl = APP_URL): AgendaInput[] {
   return [...agendaByRef(data, now, appUrl)].flatMap(([ref, items]) => items.map((i) => ({ ...i, ref })));
 }
