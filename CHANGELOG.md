@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/huishouden/car/compare/v1.10.0...v1.11.0) (2026-10-04)
+
+
+### Features
+
+* Car in Spanish and Dutch ([#35](https://github.com/huishouden/car/issues/35)) ([7b4fed3](https://github.com/huishouden/car/commit/7b4fed3d7d29149a8fba7ffec1553b0e7ebae1e1))
+
 ## [1.10.0](https://github.com/huishouden/car/compare/v1.9.0...v1.10.0) (2026-10-03)
 
 
