@@ -43,8 +43,8 @@ test('a shop role is stored in English and shown in the page language', async ()
   await setLangForTests('nl');
   await loadLang('es');
   try {
-    const groups = groupContacts(withStoredRoles([c('A', 'Mechanic'), c('B', 'Mecánico'), c('C', 'Garage')]), STORED_ROLES, shownRole);
-    expect(groups.map((g) => [g.role, shownRole(g.role), g.contacts.length])).toEqual([['Mechanic', 'Garage', 3]]);
+    const groups = groupContacts(withStoredRoles([c('A', 'Mechanic'), c('B', 'Mecánico'), c('C', 'Monteur')]), STORED_ROLES, shownRole);
+    expect(groups.map((g) => [g.role, shownRole(g.role), g.contacts.length])).toEqual([['Mechanic', 'Monteur', 3]]);
   } finally {
     await setLangForTests('en');
   }

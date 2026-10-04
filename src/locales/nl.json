@@ -40,7 +40,7 @@
   "error.loadSettings": "De instellingen konden niet worden geladen",
   "error.loadShops": "De garages konden niet worden geladen",
   "error.save": "Opslaan lukte niet",
-  "role.mechanic": "Garage",
+  "role.mechanic": "Monteur",
   "role.dealer": "Dealer",
   "role.tires": "Banden",
   "role.bodyShop": "Schadeherstel",
