@@ -36,7 +36,7 @@ export const ROLE_NAMES = {
 /** The stored names in the Shops tab's order: `ContactDialog`'s and `groupContacts`' roles. */
 export const STORED_ROLES: string[] = ROLES.map((r) => ROLE_NAMES[r]);
 
-/** A one-tap role's name in the page's language ("Mechanic", "Mecánico", "Garage"). */
+/** A one-tap role's name in the page's language ("Mechanic", "Mecánico", "Monteur"). */
 export const roleLabel = (role: ShopRole): string => t(ROLE_KEYS[role]);
 
 /** A stored role as shown: a one-tap role in the page's language, anything typed as typed. The kit's `roleLabel`. */
@@ -47,7 +47,7 @@ export function shownRole(stored: string): string {
 
 /**
  * The one-tap role whose name `text` is, in any language, for a role typed as another language's
- * name ("Garage"). A language whose messages are not loaded yet answers in English.
+ * name ("Monteur"). A language whose messages are not loaded yet answers in English.
  */
 export function namedRole(text: string | undefined): ShopRole | null {
   const typed = text?.trim().toLowerCase();
