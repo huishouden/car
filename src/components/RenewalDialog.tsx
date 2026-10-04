@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Archive, Trash2 } from 'lucide-react';
 import type { Renewal, RenewalKind, Vehicle } from '../lib/model';
-import { LIMITS, RENEWAL_KINDS, RENEWAL_LABELS } from '../lib/model';
+import { LIMITS, RENEWAL_KINDS, renewalLabel } from '../lib/model';
+import { useT } from '../i18n';
 import { describeMonths } from '@huishouden/pwa-kit/schedule';
 import { DEFAULT_RENEWAL_MONTHS } from '../lib/renewals';
 import { addMonths, isYmd, toYmd } from '@huishouden/pwa-kit/time';
@@ -22,8 +23,9 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
   onHandled?: () => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const [kind, setKind] = useState<RenewalKind>(renewal?.kind ?? 'registration');
-  const [name, setName] = useState(renewal?.name ?? RENEWAL_LABELS.registration);
+  const [name, setName] = useState(renewal?.name ?? renewalLabel('registration'));
   const [car, setCar] = useState(renewal ? (renewal.vehicleId ?? '') : (vehicleId ?? vehicles[0]?.id ?? ''));
   const [dueDate, setDueDate] = useState(renewal?.dueDate ?? addMonths(toYmd(now), 1));
   const [every, setEvery] = useState(renewal ? (renewal.everyMonths ?? 0) : (DEFAULT_RENEWAL_MONTHS.registration ?? 0));
@@ -32,7 +34,7 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
 
   const pickKind = (k: RenewalKind) => {
     // The name follows the kind until someone types their own.
-    if (!name.trim() || name === RENEWAL_LABELS[kind]) setName(k === 'other' ? '' : RENEWAL_LABELS[k]);
+    if (!name.trim() || name === renewalLabel(kind)) setName(k === 'other' ? '' : renewalLabel(k));
     if (!renewal) setEvery(DEFAULT_RENEWAL_MONTHS[k] ?? 0);
     // Insurance and toll accounts often cover every car.
     if (!renewal && (k === 'insurance' || k === 'toll') && vehicles.length > 1) setCar('');
@@ -47,7 +49,7 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
 
   return (
     <Dialog
-      title={renewal ? `Edit ${renewal.name}` : 'New renewal'}
+      title={renewal ? t('row.edit', { name: renewal.name }) : t('renewal.new')}
       onClose={onClose}
       footer={
         <>
@@ -60,7 +62,7 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
                 onClose();
               }}
             >
-              <Trash2 size={18} /> Delete
+              <Trash2 size={18} /> {t('common.delete')}
             </button>
           )}
           {onHandled && (
@@ -72,14 +74,14 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
                 onClose();
               }}
             >
-              <Archive size={18} /> Mark handled
+              <Archive size={18} /> {t('todo.markHandled')}
             </button>
           )}
           <button type="button" className={ghostButton} onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button type="button" className={primaryButton} disabled={!valid} onClick={save}>
-            Save
+            {t('common.save')}
           </button>
         </>
       }
@@ -92,22 +94,22 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
         }}
       >
         <fieldset>
-          <legend className="mb-1.5 block text-sm font-medium text-ink-soft">Kind</legend>
+          <legend className="mb-1.5 block text-sm font-medium text-ink-soft">{t('renewal.kind')}</legend>
           <div className="flex flex-wrap gap-2">
             {RENEWAL_KINDS.map((k) => (
               <Chip key={k} active={kind === k} onClick={() => pickKind(k)}>
-                {RENEWAL_LABELS[k]}
+                {renewalLabel(k)}
               </Chip>
             ))}
           </div>
         </fieldset>
-        <Field label="Name">
-          <input className={inputClass} value={name} maxLength={LIMITS.renewalName} onChange={(e) => setName(e.target.value)} placeholder="Emissions test" autoComplete="off" />
+        <Field label={t('common.name')}>
+          <input className={inputClass} value={name} maxLength={LIMITS.renewalName} onChange={(e) => setName(e.target.value)} placeholder={t('renewal.namePlaceholder')} autoComplete="off" />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Car">
+          <Field label={t('cars.car')}>
             <select className={selectClass} value={car} onChange={(e) => setCar(e.target.value)}>
-              <option value="">All cars</option>
+              <option value="">{t('cars.all')}</option>
               {vehicles.map((v) => (
                 <option key={v.id} value={v.id}>
                   {v.name}
@@ -115,11 +117,11 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
               ))}
             </select>
           </Field>
-          <Field label={kind === 'registration' || kind === 'inspection' ? 'Expires on' : 'Due on'}>
+          <Field label={kind === 'registration' || kind === 'inspection' ? t('renewal.expiresOn') : t('renewal.dueOn')}>
             <input className={inputClass} type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
           </Field>
         </div>
-        <Field label="Repeats">
+        <Field label={t('renewal.repeats')}>
           <select className={selectClass} value={every} onChange={(e) => setEvery(Number(e.target.value))}>
             {[...new Set([...REPEATS, every])].sort((a, b) => a - b).map((m) => (
               <option key={m} value={m}>
@@ -128,7 +130,7 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
             ))}
           </select>
         </Field>
-        <Field label="Notes (optional)">
+        <Field label={t('form.notesOptional')}>
           <textarea className={`${inputClass} min-h-20`} value={notes} maxLength={LIMITS.renewalNotes} onChange={(e) => setNotes(e.target.value)} />
         </Field>
         <button type="submit" hidden />

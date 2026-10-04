@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import type { Vehicle } from '../lib/model';
 import { LIMITS } from '../lib/model';
-import { UNIT_NAMES, formatDistance, parseReading, type DistanceUnit } from '../lib/distance';
+import { formatDistance, formatReading, parseReading, unitWord, type DistanceUnit } from '../lib/distance';
+import { useT } from '../i18n';
 import type { MeterReading as OdometerPoint } from '@huishouden/pwa-kit/schedule';
 import { formatYmd, isYmd, toYmd } from '@huishouden/pwa-kit/time';
 import type { ReadingInput } from '../data/types';
@@ -15,6 +16,7 @@ export function ReadingDialog({ vehicle, latest, unit, now, onSave, onClose }: {
   onSave: (input: Omit<ReadingInput, 'vehicleId'>) => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const [reading, setReading] = useState('');
   const [date, setDate] = useState(toYmd(now));
   const [note, setNote] = useState('');
@@ -30,15 +32,15 @@ export function ReadingDialog({ vehicle, latest, unit, now, onSave, onClose }: {
 
   return (
     <Dialog
-      title={`Odometer: ${vehicle?.name ?? 'car'}`}
+      title={t('reading.title', { car: vehicle?.name ?? t('toast.theCar') })}
       onClose={onClose}
       footer={
         <>
           <button type="button" className={ghostButton} onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button type="button" className={primaryButton} disabled={!valid} onClick={save}>
-            Save reading
+            {t('reading.save')}
           </button>
         </>
       }
@@ -50,19 +52,19 @@ export function ReadingDialog({ vehicle, latest, unit, now, onSave, onClose }: {
           save();
         }}
       >
-        <Field label={`Reading in ${UNIT_NAMES[unit].many}`} hint={latest ? `Last: ${formatDistance(latest.reading, unit)} on ${formatYmd(latest.date)}` : undefined}>
-          <input className={`${inputClass} text-2xl font-semibold tabular-nums`} inputMode="numeric" value={reading} onChange={(e) => setReading(e.target.value)} placeholder="42,180" autoComplete="off" />
+        <Field label={t('reading.label', { units: unitWord(unit) })} hint={latest ? t('reading.last', { distance: formatDistance(latest.reading, unit), date: formatYmd(latest.date) }) : undefined}>
+          <input className={`${inputClass} text-2xl font-semibold tabular-nums`} inputMode="numeric" value={reading} onChange={(e) => setReading(e.target.value)} placeholder={formatReading(42180)} autoComplete="off" />
         </Field>
         {lower && (
           <p role="status" className="rounded-xl bg-attention-tint px-3 py-2 text-base text-attention">
-            That is lower than the last reading. Save anyway if the last one was wrong.
+            {t('reading.lower')}
           </p>
         )}
-        <Field label="Date">
+        <Field label={t('common.date')}>
           <input className={inputClass} type="date" value={date} max={toYmd(now)} onChange={(e) => setDate(e.target.value)} />
         </Field>
-        <Field label="Note (optional)">
-          <input className={inputClass} value={note} maxLength={LIMITS.readingNote} onChange={(e) => setNote(e.target.value)} placeholder="Before the road trip" />
+        <Field label={t('form.noteOptional')}>
+          <input className={inputClass} value={note} maxLength={LIMITS.readingNote} onChange={(e) => setNote(e.target.value)} placeholder={t('reading.notePlaceholder')} />
         </Field>
         <button type="submit" hidden />
       </form>

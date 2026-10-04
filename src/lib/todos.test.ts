@@ -198,3 +198,17 @@ describe('renewals', () => {
     expect(renewalTitle('E2E todo 123')).toBe('Renew E2E todo 123');
   });
 });
+
+test('to-dos carry their words in every language; a renewal kind saved in another language reads lower-case', async () => {
+  const { localizeTodos } = await import('@huishouden/pwa-kit/todos');
+  const data = demoData();
+  const items = await localizeTodos(() => todoItems(data, DEMO_NOW));
+  const renewal = items.find((i) => i.ref.startsWith('renewal:'))!;
+  expect(renewal.texts.en).toMatchObject({ title: 'Renew registration', done: 'Renewed', cancel: 'Mark handled' });
+  expect(renewal.texts.es).toMatchObject({ title: 'Renovar registration', done: 'Renovado', cancel: 'Marcar resuelto' });
+  expect(renewal.texts.nl).toMatchObject({ done: 'Verlengd', cancel: 'Afgehandeld' });
+  const service = items.find((i) => i.ref.startsWith('service:'))!;
+  expect([service.texts.en?.done, service.texts.es?.done, service.texts.nl?.done]).toEqual(['Done', 'Listo', 'Klaar']);
+  expect(renewalTitle('APK')).toBe('Renew apk');
+  expect(renewalTitle('E-ZPass')).toBe('Renew E-ZPass');
+});

@@ -33,10 +33,10 @@ test('a schedule item due by time or distance', async ({ page }) => {
   await expect(page.getByText('Brake check due in 600 miles or 6 weeks')).toBeVisible();
 });
 
-test('kilometres relabel every distance', async ({ page }) => {
-  await page.getByRole('group', { name: 'Distance unit' }).getByRole('button', { name: 'Kilometres' }).click();
-  await expect(page.getByRole('region', { name: 'Odometer' })).toContainText('kilometres');
-  await expect(page.getByText('Every 6 months or 5,000 kilometres')).toBeVisible();
+test('kilometers relabel every distance', async ({ page }) => {
+  await page.getByRole('group', { name: 'Distance unit' }).getByRole('button', { name: 'Kilometers' }).click();
+  await expect(page.getByRole('region', { name: 'Odometer' })).toContainText('kilometers');
+  await expect(page.getByText('Every 6 months or 5,000 kilometers')).toBeVisible();
 });
 
 test('deleting a car takes its history with it, and Undo brings it all back', async ({ page }) => {

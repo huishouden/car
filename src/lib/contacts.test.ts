@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'bun:test';
 import { contactInput, groupContacts, type Contact } from '@huishouden/pwa-kit/contacts';
-import { APP, ROLES } from './contacts';
+import { APP, roleLabels } from './contacts';
 
 const c = (name: string, role?: string): Contact => ({ id: name, name, role, apps: ['car'], createdAt: 1, by: 'sam@example.com' });
 
 test('shops group by known role first, then typed roles, then Other', () => {
-  const groups = groupContacts([c('Zed Detailing', 'detailing'), c('B Tires', 'tires'), c('A Garage', 'Mechanic'), c('No Role'), c('Dealer One', 'Dealer')], ROLES);
+  const groups = groupContacts([c('Zed Detailing', 'detailing'), c('B Tires', 'tires'), c('A Garage', 'Mechanic'), c('No Role'), c('Dealer One', 'Dealer')], roleLabels());
   expect(groups.map((g) => [g.role, g.contacts.map((x) => x.name)])).toEqual([
     ['Mechanic', ['A Garage']],
     ['Dealer', ['Dealer One']],

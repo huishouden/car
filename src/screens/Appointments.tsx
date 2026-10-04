@@ -13,6 +13,8 @@ import { cardClass, ghostButton, iconButton, linkClass, primaryButton, secondary
 
 import type { ScreenProps } from '../CarApp';
 import { PrivateMark } from '@huishouden/pwa-kit/react/contacts';
+import { formatNumber } from '@huishouden/pwa-kit/i18n';
+import { useT } from '../i18n';
 
 /** Service appointments: coming up first, the past folded away; Import from calendar finds them. */
 export function Appointments({ store, may, open, calendarAvailable, onImport }: ScreenProps & {
@@ -22,6 +24,7 @@ export function Appointments({ store, may, open, calendarAvailable, onImport }: 
 }) {
   const onAdd = () => open({ kind: 'appointment', appointment: null });
   const onEdit = (a: Appointment) => (may.change(a) ? () => open({ kind: 'appointment', appointment: a }) : undefined);
+  const t = useT();
   const vehicles = store.data.vehicles;
   const { now } = useClock();
   const [showPast, setShowPast] = useState(false);
@@ -37,7 +40,7 @@ export function Appointments({ store, may, open, calendarAvailable, onImport }: 
     <div className="mx-auto max-w-3xl space-y-6 lg:h-full lg:overflow-y-auto">
       <div>
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-          <h2 className="text-2xl font-semibold text-ink">Appointments</h2>
+          <h2 className="text-2xl font-semibold text-ink">{t('tab.appointments')}</h2>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -49,20 +52,20 @@ export function Appointments({ store, may, open, calendarAvailable, onImport }: 
                 runScan();
               }}
             >
-              <CalendarArrowDown size={20} /> Import from calendar
+              <CalendarArrowDown size={20} /> {t('appointments.import')}
             </button>
             <button type="button" className={primaryButton} onClick={onAdd}>
-              <CalendarPlus size={20} /> Add appointment
+              <CalendarPlus size={20} /> {t('appointments.add')}
             </button>
           </div>
         </div>
         <div className="mt-1 flex justify-end text-right">
-          <CalendarHint app="Car" available={calendarAvailable} />
+          <CalendarHint app="Car" name={t('app.name')} available={calendarAvailable} />
         </div>
       </div>
 
-      <section className={cardClass} aria-label="Upcoming appointments">
-        {upcoming.length === 0 && <p className="p-6 text-lg text-muted">No appointments coming up.</p>}
+      <section className={cardClass} aria-label={t('appointments.upcoming')}>
+        {upcoming.length === 0 && <p className="p-6 text-lg text-muted">{t('appointments.none')}</p>}
         <ul>
           {upcoming.map((a, i) => (
             <Row key={a.id} a={a} now={now} contacts={contacts} vehicles={vehicles} first={i === 0} onEdit={onEdit(a)} />
@@ -71,9 +74,9 @@ export function Appointments({ store, may, open, calendarAvailable, onImport }: 
       </section>
 
       {past.length > 0 && (
-        <section aria-label="Past appointments">
+        <section aria-label={t('appointments.past')}>
           <button type="button" className={ghostButton} onClick={() => setShowPast((s) => !s)} aria-expanded={showPast}>
-            {showPast ? <ChevronUp size={18} /> : <ChevronDown size={18} />} Past ({past.length})
+            {showPast ? <ChevronUp size={18} /> : <ChevronDown size={18} />} {t('appointments.pastCount', { n: past.length })}
           </button>
           {showPast && (
             <ul className={`${cardClass} mt-2`}>
@@ -88,9 +91,9 @@ export function Appointments({ store, may, open, calendarAvailable, onImport }: 
       {importing && (
         <CalendarImportDialog
           state={scan.state}
-          intro="Oil changes, service, tires, inspection, registration and other car events from last week to a year ahead."
-          noneFound="No car events found in your calendars."
-          allImported="Every car event in your calendar is already in Car."
+          intro={t('import.intro')}
+          noneFound={t('import.none')}
+          allImported={t('import.allImported')}
           records={all}
           onRetry={runScan}
           onAdd={onImport}
@@ -105,6 +108,7 @@ export function Appointments({ store, may, open, calendarAvailable, onImport }: 
 }
 
 function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; now: number; contacts: Contact[]; vehicles: Vehicle[]; first?: boolean; onEdit?: () => void }) {
+  const t = useT();
   const d = new Date(a.at);
   const who = a.shopId ? contacts.find((c) => c.id === a.shopId) : undefined;
   const car = a.vehicleId ? vehicles.find((v) => v.id === a.vehicleId) : undefined;
@@ -112,7 +116,7 @@ function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; no
     <li className="flex items-start gap-5 border-b border-line p-5 last:border-b-0">
       <div className={`flex w-16 shrink-0 flex-col items-center rounded-xl py-2 ${first ? 'bg-primary text-on-primary' : 'bg-tint text-link'}`}>
         <span className="text-sm font-medium">{monthShort(a.at)}</span>
-        <span className="text-2xl font-semibold tabular-nums">{d.getDate()}</span>
+        <span className="text-2xl font-semibold tabular-nums">{formatNumber(d.getDate())}</span>
       </div>
       <div className="min-w-0 flex-1">
         <p className={`${first ? 'text-2xl' : 'text-xl'} font-semibold text-ink`}>{a.title}</p>
@@ -131,7 +135,7 @@ function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; no
               <Store size={16} aria-hidden="true" /> {who.name}
             </span>
             {who.phone && (
-              <a className={`${linkClass} tabular-nums`} href={telHref(who.phone)} aria-label={`Call ${who.name}, ${who.phone}`}>
+              <a className={`${linkClass} tabular-nums`} href={telHref(who.phone)} aria-label={t('contacts.call', { name: who.name, phone: who.phone })}>
                 <Phone size={16} aria-hidden="true" /> {who.phone}
               </a>
             )}
@@ -145,12 +149,12 @@ function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; no
         {a.notes && <p className="mt-1 text-base whitespace-pre-line text-muted">{a.notes}</p>}
         {a.calendarLink && (
           <a className={linkClass} href={a.calendarLink} target="_blank" rel="noopener noreferrer">
-            <ExternalLink size={16} aria-hidden="true" /> Open in Calendar
+            <ExternalLink size={16} aria-hidden="true" /> {t('calendar.openInCalendar')}
           </a>
         )}
       </div>
       {onEdit && (
-        <button type="button" className={iconButton} onClick={onEdit} aria-label={`Edit ${a.title}`}>
+        <button type="button" className={iconButton} onClick={onEdit} aria-label={t('row.edit', { name: a.title })}>
           <Pencil size={18} />
         </button>
       )}

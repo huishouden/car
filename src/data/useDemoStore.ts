@@ -18,7 +18,7 @@ function previewRole(): Role {
  * starts over. `clock` is the demo's moving "now" (fixed 2031 start plus time since load).
  */
 export function useDemoStore(clock: () => number): CarStore {
-  const { data, read, patch, backend: memory } = useSampleStore<CarData, CollectionName>(demoData, (col) => COLLECTIONS[col]);
+  const { data, read, patch, backend: memory } = useSampleStore<CarData, CollectionName>(() => demoData(), (col) => COLLECTIONS[col]);
   const [role] = useState(previewRole);
   const me = role === 'admin' ? DEMO_MEMBERS[0] : 'jo@example.com';
 

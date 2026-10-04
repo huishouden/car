@@ -30,7 +30,7 @@ describe('everything Car publishes', () => {
       'service:demo-item-van-cabin | due | Cabin air filter | 2031-11-08 | or at 52,000 miles | Family van | upcoming',
       'service:demo-item-commuter-wipers | due | Wiper blades | 2032-02-11 | - | Commuter | upcoming',
       'appointment:demo-appt-1 | appointment | Oil change | Tue Apr 22 2031 08:00 | Example Auto Service | Family van | -',
-      'appointment:demo-appt-2 | appointment | State inspection | Tue Apr 29 2031 10:30 | Example Auto Service | Commuter | -',
+      'appointment:demo-appt-2 | appointment | Inspection | Tue Apr 29 2031 10:30 | Example Auto Service | Commuter | -',
       'appointment:demo-appt-3 | appointment | Tire rotation | Mon Jan 20 2031 09:00 | Sample Tire & Wheel | Family van | -',
     ]);
   });
@@ -73,7 +73,7 @@ describe('service items', () => {
 
   test('the household’s distance unit is used in the detail', () => {
     const d = { ...data, settings: { ...data.settings!, distanceUnit: 'km' as const } };
-    expect(only(d, 'service:demo-item-van-cabin')[0].detail).toBe('or at 52,000 kilometres');
+    expect(only(d, 'service:demo-item-van-cabin')[0].detail).toBe('or at 52,000 kilometers');
   });
 
   test('a deleted car’s schedule and renewals are not published; household-wide ones stay', () => {

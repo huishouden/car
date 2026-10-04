@@ -1,6 +1,7 @@
 import type { RenewalData, RenewalKind } from './model';
 import { nextRenewal, renewalDue as kitRenewalDue, type RenewalState } from '@huishouden/pwa-kit/schedule';
 import { daysAgo, daysUntil, formatSpan, inDays, type Ymd } from '@huishouden/pwa-kit/time';
+import { t } from '../i18n';
 
 // Renewals with a due date: registration, insurance, the inspection sticker, a toll account.
 
@@ -26,10 +27,11 @@ const EXPIRES: Record<RenewalKind, boolean> = { registration: true, inspection: 
  */
 export function renewalText(r: Pick<RenewalData, 'kind' | 'name' | 'dueDate'>, now: number): string {
   const days = daysUntil(r.dueDate, now);
-  if (r.kind === 'other') return days < 0 ? `${r.name} overdue by ${formatSpan(-days)}` : `${r.name} due ${inDays(days)}`;
-  if (EXPIRES[r.kind]) return days < 0 ? `${r.name} expired ${daysAgo(-days)}` : `${r.name} expires ${inDays(days)}`;
-  if (days < 0) return `${r.name} renewal is ${formatSpan(-days)} overdue`;
-  return `${r.name} renews ${inDays(days)}`;
+  const name = r.name;
+  if (r.kind === 'other') return days < 0 ? t('renewal.otherOverdue', { name, span: formatSpan(-days) }) : t('renewal.otherDue', { name, when: inDays(days) });
+  if (EXPIRES[r.kind]) return days < 0 ? t('renewal.expired', { name, ago: daysAgo(-days) }) : t('renewal.expires', { name, when: inDays(days) });
+  if (days < 0) return t('renewal.overdue', { name, span: formatSpan(-days) });
+  return t('renewal.renews', { name, when: inDays(days) });
 }
 
 /** The due date after marking it renewed: the anniversary stays put; null when it doesn't repeat. */

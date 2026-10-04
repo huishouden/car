@@ -3,8 +3,9 @@ import { Trash2 } from 'lucide-react';
 import type { ServiceLogEntry } from '../lib/model';
 import { LIMITS } from '../lib/model';
 import type { CarData } from '../lib/demo';
-import { UNIT_NAMES, formatDistance, formatReading, parseReading, type DistanceUnit } from '../lib/distance';
-import { centsToInput, parseCents } from '@huishouden/pwa-kit/money';
+import { formatDistance, formatReading, parseReading, unitWord, type DistanceUnit } from '../lib/distance';
+import { useT } from '../i18n';
+import { centsToInput, formatCents, parseCents } from '@huishouden/pwa-kit/money';
 import { formatYmd, isYmd, toYmd } from '@huishouden/pwa-kit/time';
 import { carOdometer } from '../lib/upcoming';
 import { joinNames } from '../lib/words';
@@ -21,6 +22,7 @@ export function VisitDialog({ visit, prefill, data, unit, now, onSave, onDelete,
   onDelete?: () => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const start = { ...prefill, ...visit };
   const [vehicleId, setVehicleId] = useState(start.vehicleId ?? data.vehicles[0]?.id ?? '');
   const [itemIds, setItemIds] = useState<string[]>(start.serviceItemIds ?? []);
@@ -63,7 +65,7 @@ export function VisitDialog({ visit, prefill, data, unit, now, onSave, onDelete,
 
   return (
     <Dialog
-      title={visit ? 'Edit service' : 'Log a service'}
+      title={visit ? t('visit.edit') : t('visit.log')}
       onClose={onClose}
       footer={
         <>
@@ -76,14 +78,14 @@ export function VisitDialog({ visit, prefill, data, unit, now, onSave, onDelete,
                 onClose();
               }}
             >
-              <Trash2 size={18} /> Delete
+              <Trash2 size={18} /> {t('common.delete')}
             </button>
           )}
           <button type="button" className={ghostButton} onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button type="button" className={primaryButton} disabled={!valid} onClick={save}>
-            Save
+            {t('common.save')}
           </button>
         </>
       }
@@ -96,7 +98,7 @@ export function VisitDialog({ visit, prefill, data, unit, now, onSave, onDelete,
         }}
       >
         {data.vehicles.length > 1 && (
-          <Field label="Car">
+          <Field label={t('cars.car')}>
             <select
               className={selectClass}
               value={vehicleId}
@@ -115,7 +117,7 @@ export function VisitDialog({ visit, prefill, data, unit, now, onSave, onDelete,
         )}
         {items.length > 0 && (
           <fieldset>
-            <legend className="mb-1 block text-sm font-medium text-ink-soft">Covers</legend>
+            <legend className="mb-1 block text-sm font-medium text-ink-soft">{t('visit.covers')}</legend>
             <div className="grid sm:grid-cols-2">
               {items.map((i) => (
                 <Checkbox key={i.id} checked={itemIds.includes(i.id)} onChange={(on) => toggle(i.id, on)}>
@@ -125,35 +127,38 @@ export function VisitDialog({ visit, prefill, data, unit, now, onSave, onDelete,
             </div>
           </fieldset>
         )}
-        <Field label="What was done">
-          <input className={inputClass} value={what} maxLength={LIMITS.what} onChange={(e) => setWhat(e.target.value)} placeholder="Oil change" autoComplete="off" />
+        <Field label={t('visit.what')}>
+          <input className={inputClass} value={what} maxLength={LIMITS.what} onChange={(e) => setWhat(e.target.value)} placeholder={t('item.oil')} autoComplete="off" />
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Date">
+          <Field label={t('common.date')}>
             <input className={inputClass} type="date" value={date} max={toYmd(now)} onChange={(e) => setDate(e.target.value)} />
           </Field>
-          <Field label={`Odometer (${UNIT_NAMES[unit].many})`} hint={latest ? `Last: ${formatDistance(latest.reading, unit)}, ${formatYmd(latest.date, { day: 'numeric', month: 'short' })}` : undefined}>
+          <Field
+            label={t('visit.odometer', { units: unitWord(unit) })}
+            hint={latest ? t('visit.lastReading', { distance: formatDistance(latest.reading, unit), date: formatYmd(latest.date, { day: 'numeric', month: 'short' }) }) : undefined}
+          >
             <input className={inputClass} inputMode="numeric" value={odometer} onChange={(e) => setOdometer(e.target.value)} aria-invalid={reading === null} />
           </Field>
         </div>
         <div className="grid grid-cols-[1fr_9rem] gap-3">
-          <Field label="Shop (optional)">
+          <Field label={t('form.shopOptional')}>
             <select className={selectClass} value={shopId} onChange={(e) => setShopId(e.target.value)}>
-              <option value="">No shop</option>
+              <option value="">{t('form.noShop')}</option>
               {data.contacts.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
-              {missingShop && <option value={shopId}>A removed shop</option>}
+              {missingShop && <option value={shopId}>{t('form.removedShop')}</option>}
             </select>
           </Field>
-          <Field label="Cost (optional)">
-            <input className={`${inputClass} tabular-nums`} inputMode="decimal" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="$0.00" aria-invalid={cents === null} />
+          <Field label={t('visit.cost')}>
+            <input className={`${inputClass} tabular-nums`} inputMode="decimal" value={cost} onChange={(e) => setCost(e.target.value)} placeholder={formatCents(0)} aria-invalid={cents === null} />
           </Field>
         </div>
-        <Field label="Notes (optional)">
-          <textarea className={`${inputClass} min-h-20`} value={notes} maxLength={LIMITS.logNotes} onChange={(e) => setNotes(e.target.value)} placeholder="Front brakes have about a year left." />
+        <Field label={t('form.notesOptional')}>
+          <textarea className={`${inputClass} min-h-20`} value={notes} maxLength={LIMITS.logNotes} onChange={(e) => setNotes(e.target.value)} placeholder={t('visit.notesPlaceholder')} />
         </Field>
         <button type="submit" hidden />
       </form>

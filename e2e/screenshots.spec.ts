@@ -72,7 +72,7 @@ test('history', ({ page }) =>
     fixedTime,
     prepare: async (p) => {
       await tab('History')(p);
-      await expect(p.getByText('Tire rotation and balance')).toBeVisible();
+      await expect(p.getByText('Changed them ourselves.')).toBeVisible();
     },
   }));
 
@@ -90,7 +90,7 @@ test('appointments', ({ page }) =>
     fixedTime,
     prepare: async (p) => {
       await tab('Appointments')(p);
-      await expect(p.getByText('State inspection')).toBeVisible();
+      await expect(p.getByText('Ask them to check the front brakes.')).toBeVisible();
     },
   }));
 

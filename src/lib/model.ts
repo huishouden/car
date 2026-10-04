@@ -1,5 +1,6 @@
 import type { DistanceUnit } from './distance';
 import type { Ymd } from '@huishouden/pwa-kit/time';
+import { t } from '../i18n';
 
 // Firestore shapes under households/{householdId}. The project's rules accept exactly these keys,
 // so writers build documents from these types (data/build.ts) and never add fields.
@@ -124,10 +125,13 @@ export const LIMITS = {
   maxYear: 2100,
 } as const;
 
-export const RENEWAL_LABELS: Record<RenewalKind, string> = {
-  registration: 'Registration',
-  insurance: 'Insurance',
-  inspection: 'Inspection sticker',
-  toll: 'Toll account',
-  other: 'Other',
-};
+const RENEWAL_KEYS = {
+  registration: 'renewalKind.registration',
+  insurance: 'renewalKind.insurance',
+  inspection: 'renewalKind.inspection',
+  toll: 'renewalKind.toll',
+  other: 'renewalKind.other',
+} as const satisfies Record<RenewalKind, string>;
+
+/** A renewal kind's name in the page's language ("Registration", "Matrícula", "Kenteken"). */
+export const renewalLabel = (kind: RenewalKind): string => t(RENEWAL_KEYS[kind]);

@@ -11,6 +11,7 @@ import { CalendarFind, LinkedEvent } from '@huishouden/pwa-kit/react/calendar';
 import { auth } from '../data/firebase';
 import { Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton, selectClass } from '@huishouden/pwa-kit/react/ui';
 import { PrivateCheckbox } from '@huishouden/pwa-kit/react/contacts';
+import { useT } from '../i18n';
 
 export function AppointmentDialog({ appointment, vehicleId: initialVehicle, now, vehicles, shops, calendarAvailable, canMarkPrivate = true, onSave, onDelete, onClose }: {
   appointment: Appointment | null;
@@ -25,6 +26,7 @@ export function AppointmentDialog({ appointment, vehicleId: initialVehicle, now,
   onDelete?: () => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const initial = toLocalInput(appointment?.at ?? addDays(now, 1) + 9 * 3_600_000);
   const [title, setTitle] = useState(appointment?.title ?? '');
   const [vehicleId, setVehicleId] = useState(appointment ? (appointment.vehicleId ?? '') : (initialVehicle ?? (vehicles.length === 1 ? vehicles[0].id : '')));
@@ -65,7 +67,7 @@ export function AppointmentDialog({ appointment, vehicleId: initialVehicle, now,
 
   return (
     <Dialog
-      title={appointment ? 'Edit appointment' : 'New appointment'}
+      title={appointment ? t('appointmentDialog.edit') : t('appointmentDialog.new')}
       onClose={onClose}
       footer={
         <>
@@ -78,14 +80,14 @@ export function AppointmentDialog({ appointment, vehicleId: initialVehicle, now,
                 onClose();
               }}
             >
-              <Trash2 size={18} /> Delete
+              <Trash2 size={18} /> {t('common.delete')}
             </button>
           )}
           <button type="button" className={ghostButton} onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button type="button" className={primaryButton} disabled={!valid} onClick={save}>
-            Save
+            {t('common.save')}
           </button>
         </>
       }
@@ -97,25 +99,25 @@ export function AppointmentDialog({ appointment, vehicleId: initialVehicle, now,
           save();
         }}
       >
-        <Field label="What">
-          <input className={inputClass} value={title} maxLength={LIMITS.title} onChange={(e) => setTitle(e.target.value)} placeholder="Oil change" />
+        <Field label={t('form.what')}>
+          <input className={inputClass} value={title} maxLength={LIMITS.title} onChange={(e) => setTitle(e.target.value)} placeholder={t('item.oil')} />
         </Field>
 
-        <CalendarFind auth={auth} app="Car" query={title} available={calendarAvailable} onPick={pickMatch} />
+        <CalendarFind auth={auth} app="Car" name={t('app.name')} query={title} available={calendarAvailable} onPick={pickMatch} />
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Date">
+          <Field label={t('common.date')}>
             <input className={inputClass} type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </Field>
-          <Field label="Time">
+          <Field label={t('common.time')}>
             <input className={inputClass} type="time" value={time} onChange={(e) => setTime(e.target.value)} />
           </Field>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           {vehicles.length > 0 && (
-            <Field label="Car">
+            <Field label={t('cars.car')}>
               <select className={selectClass} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
-                <option value="">Any car</option>
+                <option value="">{t('appointmentDialog.anyCar')}</option>
                 {vehicles.map((v) => (
                   <option key={v.id} value={v.id}>
                     {v.name}
@@ -125,23 +127,23 @@ export function AppointmentDialog({ appointment, vehicleId: initialVehicle, now,
             </Field>
           )}
           {(shops.length > 0 || shopId) && (
-            <Field label="Shop (optional)">
+            <Field label={t('form.shopOptional')}>
               <select className={selectClass} value={shopId} onChange={(e) => pickShop(e.target.value)}>
-                <option value="">No shop</option>
+                <option value="">{t('form.noShop')}</option>
                 {shops.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
                 ))}
-                {missingShop && <option value={shopId}>A removed shop</option>}
+                {missingShop && <option value={shopId}>{t('form.removedShop')}</option>}
               </select>
             </Field>
           )}
         </div>
-        <Field label="Where (optional)">
+        <Field label={t('form.whereOptional')}>
           <input className={inputClass} value={location} maxLength={LIMITS.location} onChange={(e) => setLocation(e.target.value)} />
         </Field>
-        <Field label="Notes (optional)">
+        <Field label={t('form.notesOptional')}>
           <textarea className={`${inputClass} min-h-20`} maxLength={LIMITS.appointmentNotes} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </Field>
         {event && <LinkedEvent link={event.link} onUnlink={() => setEvent(null)} />}
