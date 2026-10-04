@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1](https://github.com/huishouden/car/compare/v1.11.0...v1.11.1) (2026-10-04)
+
+
+### Bug Fixes
+
+* **contacts:** store shop roles in English, show them in the reader's language ([#37](https://github.com/huishouden/car/issues/37)) ([1231802](https://github.com/huishouden/car/commit/12318027e96556972c40c50fbe7bf0987aa00e66))
+
 ## [1.11.0](https://github.com/huishouden/car/compare/v1.10.0...v1.11.0) (2026-10-04)
 
 
