@@ -20,16 +20,34 @@ const ROLE_KEYS = {
   insurance: 'role.insurance',
 } as const satisfies Record<ShopRole, string>;
 
+/**
+ * The one-tap roles as a shop stores them: in English, whoever picks them, so the household's
+ * shared contacts group the same in every app and language (pwa-kit docs/i18n.md step 7).
+ */
+export const ROLE_NAMES = {
+  mechanic: 'Mechanic',
+  dealer: 'Dealer',
+  tires: 'Tires',
+  bodyShop: 'Body shop',
+  carWash: 'Car wash',
+  insurance: 'Insurance',
+} as const satisfies Record<ShopRole, string>;
+
+/** The stored names in the Shops tab's order: `ContactDialog`'s and `groupContacts`' roles. */
+export const STORED_ROLES: string[] = ROLES.map((r) => ROLE_NAMES[r]);
+
 /** A one-tap role's name in the page's language ("Mechanic", "Mecánico", "Garage"). */
 export const roleLabel = (role: ShopRole): string => t(ROLE_KEYS[role]);
 
-/** The one-tap roles in the page's language, for the contact dialog and grouping. */
-export const roleLabels = (): string[] => ROLES.map(roleLabel);
+/** A stored role as shown: a one-tap role in the page's language, anything typed as typed. The kit's `roleLabel`. */
+export function shownRole(stored: string): string {
+  const role = ROLES.find((r) => ROLE_NAMES[r].toLowerCase() === stored.trim().toLowerCase());
+  return role ? roleLabel(role) : stored;
+}
 
 /**
- * The one-tap role whose name `text` is, in any language: a role is stored as chosen, so one saved
- * on a Dutch phone ("Garage") is still the mechanic on a Spanish one. A language whose messages are
- * not loaded yet answers in English.
+ * The one-tap role whose name `text` is, in any language, for a role typed as another language's
+ * name ("Garage"). A language whose messages are not loaded yet answers in English.
  */
 export function namedRole(text: string | undefined): ShopRole | null {
   const typed = text?.trim().toLowerCase();
@@ -37,10 +55,10 @@ export function namedRole(text: string | undefined): ShopRole | null {
   return ROLES.find((r) => LANGS.some((l) => withLang(l, () => roleLabel(r)).toLowerCase() === typed)) ?? null;
 }
 
-/** Contacts whose role is a one-tap role, shown under that role's name in the page's language. */
-export function withShownRoles(contacts: Contact[]): Contact[] {
+/** Contacts with a one-tap role typed under another language's name read as the stored English role, so they group with the rest. */
+export function withStoredRoles(contacts: Contact[]): Contact[] {
   return contacts.map((c) => {
     const role = namedRole(c.role);
-    return role ? { ...c, role: roleLabel(role) } : c;
+    return role && c.role !== ROLE_NAMES[role] ? { ...c, role: ROLE_NAMES[role] } : c;
   });
 }

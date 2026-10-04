@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'bun:test';
 import { contactInput, groupContacts, type Contact } from '@huishouden/pwa-kit/contacts';
-import { APP, roleLabels } from './contacts';
+import { APP, STORED_ROLES, shownRole, withStoredRoles } from './contacts';
 
 const c = (name: string, role?: string): Contact => ({ id: name, name, role, apps: ['car'], createdAt: 1, by: 'sam@example.com' });
 
 test('shops group by known role first, then typed roles, then Other', () => {
-  const groups = groupContacts([c('Zed Detailing', 'detailing'), c('B Tires', 'tires'), c('A Garage', 'Mechanic'), c('No Role'), c('Dealer One', 'Dealer')], roleLabels());
+  const groups = groupContacts([c('Zed Detailing', 'detailing'), c('B Tires', 'tires'), c('A Garage', 'Mechanic'), c('No Role'), c('Dealer One', 'Dealer')], STORED_ROLES);
   expect(groups.map((g) => [g.role, g.contacts.map((x) => x.name)])).toEqual([
     ['Mechanic', ['A Garage']],
     ['Dealer', ['Dealer One']],
@@ -36,4 +36,16 @@ describe('saving a shop', () => {
     expect(contactInput({ name: 'Example Insurance' }, ['car', 'home'], APP).apps).toEqual(['car', 'home']);
   });
 
+});
+
+test('a shop role is stored in English and shown in the page language', async () => {
+  const { loadLang, setLangForTests } = await import('@huishouden/pwa-kit/i18n');
+  await setLangForTests('nl');
+  await loadLang('es');
+  try {
+    const groups = groupContacts(withStoredRoles([c('A', 'Mechanic'), c('B', 'Mecánico'), c('C', 'Garage')]), STORED_ROLES, shownRole);
+    expect(groups.map((g) => [g.role, shownRole(g.role), g.contacts.length])).toEqual([['Mechanic', 'Garage', 3]]);
+  } finally {
+    await setLangForTests('en');
+  }
 });
