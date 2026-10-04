@@ -1,0 +1,24 @@
+{
+  "elements": [
+    {
+      "type": "node",
+      "id": 2000001,
+      "lat": 39.8105,
+      "lon": -89.6501,
+      "tags": { "name": "Sample Lube & Tune", "shop": "car_repair", "addr:housenumber": "40", "addr:street": "Demo Road", "addr:city": "Springfield", "phone": "+1 555 010 0177", "opening_hours": "Mo-Fr 08:00-18:00" }
+    },
+    {
+      "type": "way",
+      "id": 2000002,
+      "center": { "lat": 39.7935, "lon": -89.6438 },
+      "tags": { "name": "Example Auto Service", "shop": "car_repair", "addr:housenumber": "18", "addr:street": "Example Street", "addr:city": "Springfield", "website": "autoservice.example.com" }
+    },
+    {
+      "type": "node",
+      "id": 2000003,
+      "lat": 39.7820,
+      "lon": -89.6440,
+      "tags": { "shop": "car_repair" }
+    }
+  ]
+}

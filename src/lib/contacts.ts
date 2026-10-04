@@ -8,7 +8,7 @@ import { t } from '../i18n';
 export const APP = 'car';
 
 /** Roles offered as one-tap choices, in the order the Shops tab shows them. */
-export const ROLES = ['mechanic', 'dealer', 'tires', 'bodyShop', 'carWash', 'insurance'] as const;
+export const ROLES = ['mechanic', 'dealer', 'tires', 'bodyShop', 'carWash', 'gas', 'insurance'] as const;
 export type ShopRole = (typeof ROLES)[number];
 
 const ROLE_KEYS = {
@@ -17,6 +17,7 @@ const ROLE_KEYS = {
   tires: 'role.tires',
   bodyShop: 'role.bodyShop',
   carWash: 'role.carWash',
+  gas: 'role.gas',
   insurance: 'role.insurance',
 } as const satisfies Record<ShopRole, string>;
 
@@ -30,6 +31,7 @@ export const ROLE_NAMES = {
   tires: 'Tires',
   bodyShop: 'Body shop',
   carWash: 'Car wash',
+  gas: 'Gas station',
   insurance: 'Insurance',
 } as const satisfies Record<ShopRole, string>;
 

@@ -2,6 +2,8 @@ import { CalendarCheck, CalendarClock, CarFront, History as HistoryIcon, LayoutD
 import { useEffect, useState, type ReactNode } from 'react';
 import type { User } from 'firebase/auth';
 import type { Contact } from '@huishouden/pwa-kit/contacts';
+import type { Place } from '@huishouden/pwa-kit/places';
+import { placePrefill, withPlacePosition } from './lib/nearby';
 import type { Appointment, Renewal, ServiceItem, ServiceLogEntry, Vehicle } from './lib/model';
 import type { DistanceUnit } from './lib/distance';
 import { formatYmd } from '@huishouden/pwa-kit/time';
@@ -55,7 +57,7 @@ export type Open =
   | { kind: 'renewal'; renewal: Renewal | null; vehicleId?: string }
   | { kind: 'visit'; visit: ServiceLogEntry | null; prefill?: Partial<VisitInput> }
   | { kind: 'appointment'; appointment: Appointment | null; vehicleId?: string }
-  | { kind: 'contact'; contact: Contact | null };
+  | { kind: 'contact'; contact: Contact | null; place?: Place; role?: string };
 
 export type Notify = (message: string, undo?: () => void) => void;
 
@@ -248,6 +250,8 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
       {dialog?.kind === 'contact' && (
         <ContactDialog
           contact={dialog.contact}
+          prefill={dialog.place ? placePrefill(dialog.place) : undefined}
+          role={dialog.role}
           app={APP}
           roles={STORED_ROLES}
           roleLabel={shownRole}
@@ -257,7 +261,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           canMarkPrivate={may.seePrivate}
           onClose={close}
           onSave={(input) => {
-            actions.saveContact(dialog.contact?.id ?? null, input);
+            actions.saveContact(dialog.contact?.id ?? null, withPlacePosition(input, dialog.place));
             if (!dialog.contact) notify(t('common.added', { name: input.name }));
           }}
           onDelete={
