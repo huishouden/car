@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/huishouden/car/compare/v1.12.0...v1.12.1) (2026-10-04)
+
+
+### Bug Fixes
+
+* kit v0.74.0 to 0.82.1, contacts' pay details for admins and members only ([#48](https://github.com/huishouden/car/issues/48)) ([76982ea](https://github.com/huishouden/car/commit/76982eabddb0130e71cab769cc47ce16f69fc24a))
+
 ## [1.12.0](https://github.com/huishouden/car/compare/v1.11.2...v1.12.0) (2026-10-04)
 
 
