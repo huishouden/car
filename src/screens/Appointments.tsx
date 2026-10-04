@@ -7,9 +7,10 @@ import { CAR_CALENDAR_QUERIES } from '../lib/calendarImport';
 import type { CalendarMatch } from '@huishouden/pwa-kit/calendar';
 import { formatDayLong, formatTime, monthShort, relativeDay } from '@huishouden/pwa-kit/time';
 import { useClock } from '@huishouden/pwa-kit/react/clock';
-import { CalendarHint, CalendarImportDialog, useCalendarSearch } from '@huishouden/pwa-kit/react/calendar';
+import { AddToCalendar, CalendarHint, CalendarImportDialog, useCalendarSearch } from '@huishouden/pwa-kit/react/calendar';
 import { auth } from '../data/firebase';
 import { cardClass, ghostButton, iconButton, linkClass, primaryButton, secondaryButton } from '@huishouden/pwa-kit/react/ui';
+import { appointmentAgenda } from '../lib/agenda';
 
 import type { ScreenProps } from '../CarApp';
 import { PrivateMark } from '@huishouden/pwa-kit/react/contacts';
@@ -112,6 +113,9 @@ function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; no
   const d = new Date(a.at);
   const who = a.shopId ? contacts.find((c) => c.id === a.shopId) : undefined;
   const car = a.vehicleId ? vehicles.find((v) => v.id === a.vehicleId) : undefined;
+  // As Car puts it on the household agenda, with the place and the notes for the person's calendar.
+  const published = appointmentAgenda(a, { vehicles, contacts })[0];
+  const entry = published && { ...published, ...(a.location ? { location: a.location } : {}), ...(a.notes ? { detail: [published.detail, a.notes].filter(Boolean).join('\n') } : {}) };
   return (
     <li className="flex items-start gap-5 border-b border-line p-5 last:border-b-0">
       <div className={`flex w-16 shrink-0 flex-col items-center rounded-xl py-2 ${first ? 'bg-primary text-on-primary' : 'bg-tint text-link'}`}>
@@ -153,6 +157,7 @@ function Row({ a, now, contacts, vehicles, first, onEdit }: { a: Appointment; no
           </a>
         )}
       </div>
+      {entry && <AddToCalendar entry={entry} compact />}
       {onEdit && (
         <button type="button" className={iconButton} onClick={onEdit} aria-label={t('row.edit', { name: a.title })}>
           <Pencil size={18} />

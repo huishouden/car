@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { agendaDoc, inAgendaWindow } from '@huishouden/pwa-kit/agenda';
+import { agendaDoc, agendaOpsAllowed, canEdit, fillEditOps, inAgendaWindow, toAgendaItem } from '@huishouden/pwa-kit/agenda';
 import { toYmd } from '@huishouden/pwa-kit/time';
 import { applyOps, createActions, type Backend, type Op } from '../data/actions';
 import { AGENDA_APP, APP_URL, agendaChanges, agendaItems, type AgendaEntry } from './agenda';
@@ -177,5 +177,43 @@ describe('publishing a save', () => {
 
   test('a write that changes no dates publishes nothing', () => {
     expect(act((a) => a.saveVisit('demo-visit-6', { vehicleId: 'demo-car-commuter', date: '2031-02-11', what: 'Wiper blades', notes: 'Cheap ones.' }))).toEqual({ replace: [], remove: [] });
+  });
+});
+
+describe('edits for changes made in a calendar', () => {
+  const items = agendaItems(data, DEMO_NOW);
+  const of = (prefix: string) => items.find((i) => i.ref.startsWith(prefix))!;
+
+  test('each item’s edits write only Car’s own collections, and the kit accepts them', () => {
+    for (const i of items) {
+      for (const action of Object.values(i.edit ?? {})) expect(agendaOpsAllowed('car', action!.ops)).toBe(true);
+      expect(() => agendaDoc('car', i, 'a@example.com')).not.toThrow();
+    }
+  });
+
+  test('an appointment moves by its time, is renamed, re-noted or cancelled; by staff or whoever added it', () => {
+    const a = of('appointment:');
+    const id = a.ref.slice('appointment:'.length);
+    expect(Object.keys(a.edit!).sort()).toEqual(['cancel', 'notes', 'rename', 'reschedule']);
+    const [op] = fillEditOps(a.edit!.reschedule!.ops, { start: 123 });
+    expect(op).toEqual({ col: 'carAppointments', id, data: { at: 123, updatedAt: '$now' }, merge: true });
+    expect(a.edit!.cancel!.ops).toEqual([{ col: 'carAppointments', id, data: null }]);
+    const item = toAgendaItem('x', { ...agendaDoc('car', a, 'a@example.com') });
+    const by = data.appointments.find((x) => x.id === id)!.by;
+    expect(canEdit(item, 'reschedule', 'member', 'm@example.com')).toBe(true);
+    expect(canEdit(item, 'reschedule', 'helper', 'someone-else@example.com')).toBe(false);
+    expect(canEdit(item, 'reschedule', 'helper', by)).toBe(true);
+  });
+
+  test('a renewal moves by its due date, which any member may tick', () => {
+    const r = of('renewal:');
+    const [op] = fillEditOps(r.edit!.reschedule!.ops, { date: '2031-03-01' });
+    expect(op.data).toEqual({ dueDate: '2031-03-01', updatedAt: '$now' });
+    expect(r.edit!.reschedule!.roles).toEqual(['admin', 'member', 'helper']);
+  });
+
+  test('a service item can only be renamed: its due day follows the schedule', () => {
+    const s = of('service:');
+    expect(Object.keys(s.edit!)).toEqual(['rename']);
   });
 });
