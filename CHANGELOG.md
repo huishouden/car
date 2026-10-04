@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.12.0](https://github.com/huishouden/car/compare/v1.11.2...v1.12.0) (2026-10-04)
+
+
+### Features
+
+* calendar edits on Car's agenda items; Add to calendar on every dated item (kit v0.67.0) ([#41](https://github.com/huishouden/car/issues/41)) ([5275cdd](https://github.com/huishouden/car/commit/5275cdd3ebfe7172b44ec287f47a1cc9e429492d))
+
+
+### Bug Fixes
+
+* kit 0.70.0, dark tiles and toasts, Sign in that fits one row ([#44](https://github.com/huishouden/car/issues/44)) ([14721c6](https://github.com/huishouden/car/commit/14721c6af70d044041dbed3764ba11e69a4261f0))
+
 ## [1.11.2](https://github.com/huishouden/car/compare/v1.11.1...v1.11.2) (2026-10-04)
 
 
