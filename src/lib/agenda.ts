@@ -1,4 +1,4 @@
-import type { AgendaInput } from '@huishouden/pwa-kit/agenda';
+import type { AgendaEdit, AgendaInput } from '@huishouden/pwa-kit/agenda';
 import { allDayStart } from '@huishouden/pwa-kit/agenda';
 import { appUrl } from '@huishouden/pwa-kit/site';
 import { addDays, toYmd, type Ymd } from '@huishouden/pwa-kit/time';
@@ -25,6 +25,38 @@ export const APP_URL = appUrl(import.meta.env.BASE_URL ?? '/car/', '', globalThi
 export type AgendaEntry = Omit<AgendaInput, 'ref'>;
 
 export const serviceRef = (id: string) => `service:${id}`;
+
+/**
+ * How a change made in someone's own calendar (huishouden/calendar's Google sync) is written back,
+ * as the person, so the rules still decide: admins and members, and whoever added the record (a
+ * helper changes only their own). Writes only fields the rules let each collection take.
+ */
+const staffOr = (by: string) => ({ roles: ['admin' as const, 'member' as const], ...(by ? { emails: [by] } : {}) });
+
+/** A service item: only its name. Its due day follows the schedule and the odometer, not a date to move. */
+export function serviceEdit(item: Pick<ServiceItem, 'id' | 'by'>): AgendaEdit {
+  return { rename: { ops: [{ col: 'carServiceItems', id: item.id, data: { name: '$title', updatedAt: '$now' }, merge: true }], ...staffOr(item.by) } };
+}
+
+/** A renewal: its due date (anyone may tick a renewal's date, as in the app), name and notes. */
+export function renewalEdit(renewal: Pick<Renewal, 'id' | 'by'>): AgendaEdit {
+  return {
+    reschedule: { ops: [{ col: 'carRenewals', id: renewal.id, data: { dueDate: '$date', updatedAt: '$now' }, merge: true }], roles: ['admin', 'member', 'helper'] },
+    rename: { ops: [{ col: 'carRenewals', id: renewal.id, data: { name: '$title', updatedAt: '$now' }, merge: true }], ...staffOr(renewal.by) },
+    notes: { ops: [{ col: 'carRenewals', id: renewal.id, data: { notes: '$notes', updatedAt: '$now' }, merge: true }], ...staffOr(renewal.by) },
+  };
+}
+
+/** An appointment: moved, renamed, its notes, or cancelled (deleted, as in the app). */
+export function appointmentEdit(appointment: Pick<Appointment, 'id' | 'by'>): AgendaEdit {
+  const write = (data: object) => [{ col: 'carAppointments', id: appointment.id, data: { ...data, updatedAt: '$now' }, merge: true }];
+  return {
+    reschedule: { ops: write({ at: '$start' }), ...staffOr(appointment.by) },
+    rename: { ops: write({ title: '$title' }), ...staffOr(appointment.by) },
+    notes: { ops: write({ notes: '$notes' }), ...staffOr(appointment.by) },
+    cancel: { ops: [{ col: 'carAppointments', id: appointment.id, data: null }], ...staffOr(appointment.by) },
+  };
+}
 export const renewalRef = (id: string) => `renewal:${id}`;
 export const appointmentRef = (id: string) => `appointment:${id}`;
 
@@ -57,6 +89,7 @@ export function serviceAgenda(item: ServiceItem, vehicle: Vehicle, due: ServiceD
       url: appUrl,
       who: vehicle.name,
       status: due.state === 'overdue' || day < today ? 'overdue' : 'upcoming',
+      edit: serviceEdit(item),
     },
   ];
 }
@@ -72,6 +105,7 @@ export function renewalAgenda(renewal: Renewal, vehicle: Vehicle | null, now: nu
       url: appUrl,
       ...(vehicle ? { who: vehicle.name } : {}),
       status: renewalDue(renewal, now).days < 0 ? 'overdue' : 'upcoming',
+      edit: renewalEdit(renewal),
     },
   ];
 }
@@ -93,6 +127,7 @@ export function appointmentAgenda(appointment: Appointment, data: Pick<CarData, 
       ...(vehicle ? { who: vehicle.name } : {}),
       // A private appointment stays private on the household agenda.
       ...(appointment.private ? { private: true } : {}),
+      edit: appointmentEdit(appointment),
     },
   ];
 }

@@ -9,6 +9,7 @@ import { describeInterval, describeLast } from '../lib/schedule';
 import type { CarStore } from '../data/types';
 import type { May, Notify, Open } from '../CarApp';
 import { DueRow, Meta } from '../components/DueRow';
+import { renewalAgenda, serviceAgenda } from '../lib/agenda';
 import { useT } from '../i18n';
 
 const formatDayShort = (ms: number) => formatYmd(toYmd(ms), { day: 'numeric', month: 'short' });
@@ -50,6 +51,7 @@ export function UpcomingRow({ entry, store, unit, now, may, open, notify, showCa
           })
         }
         onEdit={may.change(item) ? () => open({ kind: 'item', vehicleId: item.vehicleId, item }) : undefined}
+        calendar={entry.vehicle ? serviceAgenda(item, entry.vehicle, entry.due, carOdometer(item.vehicleId, data.readings, data.serviceLog, data.serviceItems), unit, now)[0] : undefined}
         editLabel={showCar ? t('row.editFor', { name: item.name, car }) : t('row.edit', { name: item.name })}
       />
     );
@@ -72,6 +74,7 @@ export function UpcomingRow({ entry, store, unit, now, may, open, notify, showCa
           : undefined
       }
       onEdit={may.change(renewal) ? () => open({ kind: 'renewal', renewal }) : undefined}
+      calendar={renewalAgenda(renewal, entry.vehicle, now)[0]}
       editLabel={showCar ? t('row.editFor', { name: renewal.name, car }) : t('row.edit', { name: renewal.name })}
     />
   );

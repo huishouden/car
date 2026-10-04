@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 import { CheckCircle2, FileText, Pencil, Wrench } from 'lucide-react';
 import { StatusPill, iconButton, secondaryButton, type Attention } from '@huishouden/pwa-kit/react/ui';
+import { AddToCalendar } from '@huishouden/pwa-kit/react/calendar';
+import type { CalendarEntry } from '@huishouden/pwa-kit/calendar-export';
 import { useT } from '../i18n';
 
 /** One thing to do: the glanceable line, its state, what it is about, and the one action. */
-export function DueRow({ kind, state, text, meta, onDone, doneLabel, onEdit, editLabel }: {
+export function DueRow({ kind, state, text, meta, onDone, doneLabel, onEdit, editLabel, calendar }: {
   kind: 'service' | 'renewal';
   state: Attention;
   text: string;
@@ -14,6 +16,8 @@ export function DueRow({ kind, state, text, meta, onDone, doneLabel, onEdit, edi
   /** Left out where the person may not edit it (a helper on someone else's item). */
   onEdit?: () => void;
   editLabel: string;
+  /** The item as Car puts it on the household agenda, for "Add to calendar"; left out when it has no day. */
+  calendar?: CalendarEntry;
 }) {
   const t = useT();
   const Icon = kind === 'service' ? Wrench : FileText;
@@ -33,6 +37,7 @@ export function DueRow({ kind, state, text, meta, onDone, doneLabel, onEdit, edi
           <CheckCircle2 size={18} aria-hidden="true" /> {doneLabel}
         </button>
       )}
+      {calendar && <AddToCalendar entry={calendar} compact />}
       {onEdit && (
         <button type="button" className={iconButton} onClick={onEdit} aria-label={editLabel}>
           <Pencil size={18} />
