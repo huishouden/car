@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.14.2](https://github.com/huishouden/car/compare/v1.14.1...v1.14.2) (2026-10-05)
+
+### Tests
+
+* signed-in tests on a household of the run's own; all but the portal To-do round trip run on the emulators ([#45](https://github.com/huishouden/car/issues/45))
+
 ## [1.14.1](https://github.com/huishouden/car/compare/v1.14.0...v1.14.1) (2026-10-05)
 
 ### Other
