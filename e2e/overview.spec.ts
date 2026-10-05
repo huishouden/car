@@ -17,8 +17,18 @@ test('what is due reads at a glance, overdue first', async ({ page }) => {
   await expect(page.getByRole('region', { name: 'Next appointment' })).toContainText('Oil change');
 });
 
-test('Done logs the service, moves the schedule on, and can be undone', async ({ page }) => {
-  await page.getByRole('button', { name: 'Done: Oil change due in 600 miles or 3 weeks' }).click();
+test('each due item has an outlined verb button named for it, never a bare Done', async ({ page }) => {
+  const coming = page.getByRole('region', { name: 'Coming up' });
+  const overdue = coming.getByRole('listitem').filter({ hasText: 'Inspection overdue by 2 weeks' });
+  await expect(overdue.getByRole('button', { name: 'Log Inspection for Family van as done' })).toHaveText('Log service');
+  await expect(coming.getByRole('button', { name: 'Mark Registration for Family van renewed' })).toHaveText('Mark renewed');
+  await expect(coming.getByRole('button', { name: /^Done/ })).toHaveCount(0);
+  await expect(coming.locator('[aria-pressed]')).toHaveCount(0);
+  await expect(coming.locator('[data-complete=open]').first()).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+});
+
+test('Log service logs it, moves the schedule on, and can be undone', async ({ page }) => {
+  await page.getByRole('button', { name: 'Log Oil change for Family van as done' }).click();
   const dialog = page.getByRole('dialog', { name: 'Log a service' });
   await expect(dialog.getByLabel('What was done')).toHaveValue('Oil change');
   await expect(dialog.getByRole('checkbox', { name: 'Oil change' })).toBeChecked();
@@ -43,10 +53,15 @@ test('Done logs the service, moves the schedule on, and can be undone', async ({
   await expect(page.getByText('Oil change due in 600 miles or 3 weeks')).toBeVisible();
 });
 
-test('Renewed moves registration on a year, with Undo', async ({ page }) => {
-  await page.getByRole('button', { name: 'Renewed: Registration expires in 12 days' }).click();
+test('Mark renewed moves registration on a year, with Undo', async ({ page }) => {
+  const renew = page.getByRole('button', { name: 'Mark Registration for Family van renewed' });
+  await renew.click();
   await expect(page.getByText(/Registration next due Apr 27, 2032/)).toBeVisible();
   await expect(page.getByText('Registration expires in 12 days')).toHaveCount(0);
+  // Renewed, the row is next year's registration, open again: it says so rather than showing a done button.
+  const row = page.getByRole('listitem').filter({ hasText: 'Registration expires in 12 months' }).filter({ has: renew });
+  await expect(row).toHaveCount(1);
+  await expect(row.locator('[data-completion=done], [aria-pressed]')).toHaveCount(0);
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(page.getByText('Registration expires in 12 days')).toBeVisible();
 });

@@ -80,7 +80,7 @@ test('log a service', ({ page }) =>
   captureScreenshot(page, 'log-service', {
     fixedTime,
     prepare: async (p) => {
-      await p.getByRole('button', { name: 'Done: Oil change due in 600 miles or 3 weeks' }).click();
+      await p.getByRole('button', { name: 'Log Oil change for Family van as done' }).click();
       await expect(p.getByRole('dialog', { name: 'Log a service' })).toBeVisible();
     },
   }));
