@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.13.0](https://github.com/huishouden/car/compare/v1.12.1...v1.13.0) (2026-10-05)
+
+
+### Features
+
+* **shops:** shops near home, and how far each shop is from home (kit 0.84.0) ([#50](https://github.com/huishouden/car/issues/50)) ([d8498e8](https://github.com/huishouden/car/commit/d8498e88e12347419279284ce4888ac6c70005c8))
+
+
+### Bug Fixes
+
+* the set-home link opens the portal's Household panel (/apps#household) ([#52](https://github.com/huishouden/car/issues/52)) ([772516e](https://github.com/huishouden/car/commit/772516ef12c3afd5bf63042def03e2cfcf420c46))
+
 ## [1.12.1](https://github.com/huishouden/car/compare/v1.12.0...v1.12.1) (2026-10-04)
 
 
