@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.14.3](https://github.com/huishouden/car/compare/v1.14.2...v1.14.3) (2026-10-05)
+
+### Bug Fixes
+
+* changes saved offline survive a reload until the server has them; signing out removes this device's unsent ones (pwa-kit 0.98.0)
+
 ## [1.14.2](https://github.com/huishouden/car/compare/v1.14.1...v1.14.2) (2026-10-05)
 
 ### Tests
