@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.15.0](https://github.com/huishouden/car/compare/v1.14.3...v1.15.0) (2026-10-05)
+
+### Features
+
+* hashed assets from the suite's asset CDN (pwa-kit 0.100.0) ([b13df42](https://github.com/huishouden/car/commit/b13df42d8daaa77594ecae33bc1f1342a21decce))
+
 ## [1.14.3](https://github.com/huishouden/car/compare/v1.14.2...v1.14.3) (2026-10-05)
 
 ### Bug Fixes
