@@ -138,7 +138,7 @@ test('without a home, admins and members are pointed to the portal; helpers see 
   await page.getByRole('button', { name: 'Shops', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Near home' })).toHaveCount(0);
   await expect(page.getByText("Set your home address in the portal's Household panel to find shops near home.")).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Set home address' })).toHaveAttribute('href', '/#household');
+  await expect(page.getByRole('link', { name: 'Set home address' })).toHaveAttribute('href', '/apps#household');
   await expect(page.getByRole('region', { name: 'Example Auto Service' })).not.toContainText('from home');
 
   await page.goto('./?home=none&role=helper');

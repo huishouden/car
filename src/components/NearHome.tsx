@@ -39,7 +39,7 @@ export function NearHome({ contacts, canSetHome, onAdd, search = findNearHome }:
         <MapPin size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
         <div>
           <p>{t('nearby.noHome')}</p>
-          <a className={linkClass} href={`${PORTAL_URL}#household`}>
+          <a className={linkClass} href={`${PORTAL_URL}apps#household`}>
             {t('nearby.setHome')}
           </a>
         </div>
