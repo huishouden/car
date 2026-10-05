@@ -1,4 +1,5 @@
 import type { Contact } from '@huishouden/pwa-kit/contacts';
+import type { HouseholdHome } from '@huishouden/pwa-kit/home';
 import type { Appointment, OdometerReading, Renewal, ServiceItem, ServiceLogEntry, SettingsData, Vehicle } from './model';
 import { renewalLabel } from './model';
 import { defaultDistance, localeUnit, type DistanceUnit } from './distance';
@@ -38,6 +39,16 @@ const at = (ymd: string, hhmm: string) => {
 
 const VAN = 'demo-car-van';
 const COMMUTER = 'demo-car-commuter';
+/** The sample household's home: an invented address in Springfield, Illinois, so shops say how far they are. */
+export const DEMO_HOME: HouseholdHome = {
+  address: '12 Example Lane, Springfield, Illinois 62701',
+  lat: 39.7817,
+  lng: -89.6501,
+  timeZone: 'America/Chicago',
+  setBy: 'sam@example.com',
+  updatedAt: new Date(2030, 2, 1, 12).getTime(),
+};
+
 const AUTO = 'demo-shop-auto';
 const TIRES = 'demo-shop-tires';
 const DEALER = 'demo-shop-dealer';
@@ -143,10 +154,12 @@ export function demoData(unit: DistanceUnit = localeUnit()): CarData {
       phone: '(555) 010-0164',
       website: 'https://autoservice.example.com',
       address: '18 Example Street, Springfield',
+      lat: 39.7935,
+      lng: -89.6438,
       notes: 'Free shuttle within 5 miles. Closed Sundays.',
       ...shop,
     },
-    { id: TIRES, name: 'Sample Tire & Wheel', role: 'Tires', phone: '(555) 010-0128', address: '220 Demo Avenue, Springfield', ...shop },
+    { id: TIRES, name: 'Sample Tire & Wheel', role: 'Tires', phone: '(555) 010-0128', address: '220 Demo Avenue, Springfield', lat: 39.7604, lng: -89.6812, ...shop },
     {
       id: DEALER,
       name: 'Demo Motors Service',
@@ -155,6 +168,8 @@ export function demoData(unit: DistanceUnit = localeUnit()): CarData {
       email: 'service@motors.example.com',
       website: 'https://motors.example.com',
       address: '5 Sample Parkway, Springfield',
+      lat: 39.8172,
+      lng: -89.7023,
       ...shop,
     },
     { id: 'demo-shop-insurance', name: 'Example Insurance', role: 'Insurance', phone: '(555) 010-0150', website: 'https://insurance.example.com', notes: 'Policy covers both cars.', ...shop },

@@ -6,7 +6,8 @@ import { householdRole } from '@huishouden/pwa-kit/roles';
 import { auth, db, googleClientId, signInWithGoogle, signOutEverywhere } from './data/firebase';
 import { useLiveStore } from './data/useLiveStore';
 import { useDemoStore } from './data/useDemoStore';
-import { DEMO_NOW } from './lib/demo';
+import { DEMO_HOME, DEMO_NOW } from './lib/demo';
+import { setHome } from '@huishouden/pwa-kit/home';
 import { PORTAL_URL } from './lib/portal';
 import { ClockProvider } from '@huishouden/pwa-kit/react/clock';
 import { CarApp } from './CarApp';
@@ -114,8 +115,16 @@ function DemoApp({ signInError, ...frame }: FrameProps & { signInError: string |
   );
 }
 
+/** `?home=none` previews the sample as a household that hasn't set its home yet. */
+const sampleHome = () => (new URLSearchParams(location.search).get('home') === 'none' ? undefined : DEMO_HOME);
+
 function DemoInner({ read, signInError, ...frame }: FrameProps & { read: () => number; signInError: string | null }) {
   const t = useT();
+  // The sample's home, as `watchHousehold` sets a signed-in household's.
+  useEffect(() => {
+    setHome(sampleHome());
+    return () => setHome(undefined);
+  }, []);
   const { toast, notify, clear } = useToast();
   const store = useDemoStore(read);
   const banner = <SampleBanner text={t('sample.banner')} notice={signInError ?? undefined} />;

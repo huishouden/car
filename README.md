@@ -74,6 +74,14 @@ Find in my calendar and Import from calendar read Google Calendar (read-only) th
 `@huishouden/pwa-kit/calendar`; Google asks once for permission the first time. Find a business looks
 places up on OpenStreetMap (`@huishouden/pwa-kit/places`), only when Search is pressed.
 
+Shops near home: with the household's home set (the portal's Household panel, `households/{id}.home`
+through `@huishouden/pwa-kit/home`), the Shops tab finds the nearest mechanics, tire shops, car
+washes and gas stations within 10 km of it (OpenStreetMap, one search per tap), each with its
+distance and Add, which opens the new shop filled in and saves its position. Every shop with a
+position (`lat`/`lng`) says how far it is from home. Without a home, admins and members see a link to
+set one; helpers and kids see nothing. The signed-out sample has an invented home in Springfield;
+`?home=none` shows it without one.
+
 ## Privacy
 
 Household data lives in the household's own Firestore documents, visible only to its members.
