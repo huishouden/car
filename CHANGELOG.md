@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.15.3](https://github.com/huishouden/car/compare/v1.15.2...v1.15.3) (2026-10-05)
+
+### Bug Fixes
+
+* Rebuild against the re-tagged kit ([eb826cc](https://github.com/huishouden/car/commit/eb826cc1e45352774a8db93e4aba81b87779444e))
+
 ## [1.15.2](https://github.com/huishouden/car/compare/v1.15.1...v1.15.2) (2026-10-05)
 
 ### Changes
