@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/huishouden/car/compare/v1.13.0...v1.13.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* **due:** Log service and Mark renewed as outlined verb buttons, named for the item ([#53](https://github.com/huishouden/car/issues/53)) ([1e950d9](https://github.com/huishouden/car/commit/1e950d9a0829a0ce707939b8ff0a7050c71288c8))
+
 ## [1.13.0](https://github.com/huishouden/car/compare/v1.12.1...v1.13.0) (2026-10-05)
 
 
