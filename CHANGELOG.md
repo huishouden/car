@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.14.0](https://github.com/huishouden/car/compare/v1.13.1...v1.14.0) (2026-10-05)
+
+
+### Features
+
+* **contacts:** contacts saved before positions get one in the background (kit 0.88.0) ([#55](https://github.com/huishouden/car/issues/55)) ([15c7c34](https://github.com/huishouden/car/commit/15c7c34fc9dcaf022a9717cd1aac9216a3240681))
+
+
+### Bug Fixes
+
+* **todos:** the portal's to-do button says what it does, "Mark done" not "Done" ([#57](https://github.com/huishouden/car/issues/57)) ([5b443c9](https://github.com/huishouden/car/commit/5b443c93d5258b7636dce9a0e86562f16c22dab0))
+
 ## [1.13.1](https://github.com/huishouden/car/compare/v1.13.0...v1.13.1) (2026-10-05)
 
 
