@@ -36,7 +36,8 @@ export function UpcomingRow({ entry, store, unit, now, may, open, notify, showCa
         state={entry.state}
         text={entry.text}
         meta={<Meta parts={[showCar && car, describeInterval(item, unit), describeLast(item, unit, now)]} />}
-        doneLabel={t('common.done')}
+        doneVerb={t('row.logService')}
+        doneLabel={showCar ? t('row.logServiceFor', { name: item.name, car }) : t('row.logServiceName', { name: item.name })}
         onDone={() =>
           open({
             kind: 'visit',
@@ -64,7 +65,8 @@ export function UpcomingRow({ entry, store, unit, now, may, open, notify, showCa
       state={entry.state}
       text={entry.text}
       meta={<Meta parts={[showCar && car, formatYmd(renewal.dueDate, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }), describeMonths(renewal.everyMonths)]} />}
-      doneLabel={t('todo.renewed')}
+      doneVerb={t('row.markRenewed')}
+      doneLabel={showCar ? t('row.markRenewedFor', { name: renewal.name, car }) : t('row.markRenewedName', { name: renewal.name })}
       onDone={
         next
           ? () => {
