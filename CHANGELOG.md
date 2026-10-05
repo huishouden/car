@@ -4,7 +4,7 @@
 
 ### Features
 
-* hashed assets from the suite's asset CDN (pwa-kit 0.100.0) ([b13df42](https://github.com/huishouden/car/commit/b13df42d8daaa77594ecae33bc1f1342a21decce))
+* hashed build files (`assets/*`) load from the suite's asset CDN (Cloudflare Worker `huishouden-assets`, pwa-kit 0.100.0); if the CDN fails the page falls back once to the site's own copy; `HH_ASSET_CDN=off` rolls the suite back ([b13df42](https://github.com/huishouden/car/commit/b13df42d8daaa77594ecae33bc1f1342a21decce))
 
 ## [1.14.3](https://github.com/huishouden/car/compare/v1.14.2...v1.14.3) (2026-10-05)
 

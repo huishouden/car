@@ -84,6 +84,9 @@ set one; helpers and kids see nothing. The signed-out sample has an invented hom
 
 ## Privacy
 
+The app's build files load from the suite's asset CDN on Cloudflare (a Cloudflare Worker), which sees
+each request like any web host; no household data goes there.
+
 Household data lives in the household's own Firestore documents, visible only to its members.
 To catch problems early, the app sends reports to New Relic (free tier) through
 `@huishouden/pwa-kit/observability`: errors (emails, ids, query strings and long numbers removed),
