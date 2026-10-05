@@ -40,10 +40,10 @@ describe('what Car publishes', () => {
 
   test('the four things the Overview says need doing soon, in its order', () => {
     expect(items.map(line)).toEqual([
-      'service:demo-item-van-inspection | Inspection | - | 2031-03-28 | Family van | sam@example.com | Done | Pause',
-      'renewal:demo-renewal-van-registration | Renew registration | Every year | 2031-04-27 | Family van | sam@example.com | Renewed | Mark handled',
-      'service:demo-item-van-oil | Oil change | at 42,000 miles (estimated date) | 2031-04-29 | Family van | sam@example.com | Done | Pause',
-      'service:demo-item-commuter-inspection | Inspection | - | 2031-05-02 | Commuter | sam@example.com | Done | Pause',
+      'service:demo-item-van-inspection | Inspection | - | 2031-03-28 | Family van | sam@example.com | Mark done | Pause',
+      'renewal:demo-renewal-van-registration | Renew registration | Every year | 2031-04-27 | Family van | sam@example.com | Mark renewed | Mark handled',
+      'service:demo-item-van-oil | Oil change | at 42,000 miles (estimated date) | 2031-04-29 | Family van | sam@example.com | Mark done | Pause',
+      'service:demo-item-commuter-inspection | Inspection | - | 2031-05-02 | Commuter | sam@example.com | Mark done | Pause',
     ]);
   });
 
@@ -84,7 +84,7 @@ describe('Done on a service item', () => {
 
   test('logs a visit as the member who taps it and moves the item forward, with placeholders', () => {
     expect(item.done).toEqual({
-      label: 'Done',
+      label: 'Mark done',
       roles: ['admin', 'member', 'helper', 'kid'],
       ops: [
         {
@@ -151,7 +151,7 @@ describe('renewals', () => {
 
   test('Renewed on a repeating one moves the due date a cycle on from the due date; anyone may', () => {
     expect(reg.done).toEqual({
-      label: 'Renewed',
+      label: 'Mark renewed',
       roles: ['admin', 'member', 'helper', 'kid'],
       ops: [{ col: 'carRenewals', id: 'demo-renewal-van-registration', data: { dueDate: '2032-04-27', updatedAt: '$now' }, merge: true }],
     });
@@ -169,7 +169,7 @@ describe('renewals', () => {
     const item = find(todoItems(once, DEMO_NOW), 'renewal:demo-renewal-van-registration');
     expect(item.detail).toBe('Once');
     expect(item.done).toEqual({
-      label: 'Renewed',
+      label: 'Mark renewed',
       roles: ['admin', 'member'],
       owner: true,
       ops: [{ col: 'carRenewals', id: 'demo-renewal-van-registration', data: { closedAt: '$now', updatedAt: '$now' }, merge: true }],
@@ -204,11 +204,11 @@ test('to-dos carry their words in every language; a renewal kind saved in anothe
   const data = demoData();
   const items = await localizeTodos(() => todoItems(data, DEMO_NOW));
   const renewal = items.find((i) => i.ref.startsWith('renewal:'))!;
-  expect(renewal.texts.en).toMatchObject({ title: 'Renew registration', done: 'Renewed', cancel: 'Mark handled' });
-  expect(renewal.texts.es).toMatchObject({ title: 'Renovar registration', done: 'Renovado', cancel: 'Marcar resuelto' });
-  expect(renewal.texts.nl).toMatchObject({ done: 'Verlengd', cancel: 'Afgehandeld' });
+  expect(renewal.texts.en).toMatchObject({ title: 'Renew registration', done: 'Mark renewed', cancel: 'Mark handled' });
+  expect(renewal.texts.es).toMatchObject({ title: 'Renovar registration', done: 'Marcar renovado', cancel: 'Marcar resuelto' });
+  expect(renewal.texts.nl).toMatchObject({ done: 'Markeer als verlengd', cancel: 'Afgehandeld' });
   const service = items.find((i) => i.ref.startsWith('service:'))!;
-  expect([service.texts.en?.done, service.texts.es?.done, service.texts.nl?.done]).toEqual(['Done', 'Listo', 'Klaar']);
+  expect([service.texts.en?.done, service.texts.es?.done, service.texts.nl?.done]).toEqual(['Mark done', 'Marcar como hecho', 'Afvinken']);
   expect(renewalTitle('APK')).toBe('Renew apk');
   expect(renewalTitle('E-ZPass')).toBe('Renew E-ZPass');
 });
