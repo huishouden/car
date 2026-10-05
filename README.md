@@ -113,7 +113,9 @@ The due-date logic is pure and tested in `src/lib` (`schedule.ts`, `renewals.ts`
 
 Built on [huishouden-pwa-kit](https://github.com/huishouden/pwa-kit) and follows its
 [design language](https://github.com/huishouden/pwa-kit/blob/main/DESIGN.md) and
-[standard](https://github.com/huishouden/pwa-kit/blob/main/STANDARD.md). Pushes to `main` deploy to
+[standard](https://github.com/huishouden/pwa-kit/blob/main/STANDARD.md). Pushes to `main` upload the hashed build files to the suite's asset CDN (the
+Cloudflare Worker `huishouden-assets`, with the repo secrets `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID`; the variable `HH_ASSET_CDN=off` turns it off) and deploy the pages to
 Firebase Hosting (project `huishouden-piekstra`, site `huishouden-car`), then run the smoke tests and refresh the screenshots.
 
 ## License
