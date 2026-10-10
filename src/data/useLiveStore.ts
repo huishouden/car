@@ -2,11 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
 import { commitOps, setDoc } from '@huishouden/pwa-kit/firestore';
 import { householdContacts, markUnflaggedOpen, watchContacts } from '@huishouden/pwa-kit/contacts';
+import { toYmd } from '@huishouden/pwa-kit/time';
 import { can, isRestricted, type Role } from '@huishouden/pwa-kit/roles';
 import type { CarData } from '../lib/demo';
 import type { SettingsData } from '../lib/model';
+import { useHome } from '@huishouden/pwa-kit/react/home';
+import { localizeReminders, syncReminders } from '@huishouden/pwa-kit/reminders';
 import { readError } from '@huishouden/pwa-kit/feedback';
 import { APP } from '../lib/contacts';
+import { AGENDA_APP } from '../lib/agenda';
+import { carReminders } from '../lib/reminders';
 import { db } from './firebase';
 import { COLLECTIONS, applyOps, createActions, type Backend, type CollectionName } from './actions';
 import { publishChanges, syncAll, syncTodoList } from './publishAgenda';
@@ -131,5 +136,27 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
     shops.current = data.contacts;
     if (synced.current && before !== data.contacts) publishChanges(householdId, me, { ...ref.current, contacts: before }, ref.current, [], Date.now(), restricted);
   }, [data.contacts, householdId, me, restricted]);
-  return { data, ready, actions, me, role };
+
+  // Reminders follow the renewals and service items: worked out from everything loaded, written on
+  // open and whenever they change (a renewal renewed or closed, an item serviced, paused or
+  // switched off), and when the day turns. Kids write none. The household's home zone sets the clock.
+  const day = toYmd(Date.now());
+  const homeZone = useHome()?.timeZone;
+  const lastReminders = useRef('');
+  useEffect(() => {
+    if (!ready || !me || role === 'kid') return;
+    const now = Date.now();
+    const build = () => carReminders(data, now);
+    const signature = JSON.stringify(build().map((r) => [r.id, r.title, r.body]));
+    if (signature === lastReminders.current) return;
+    lastReminders.current = signature;
+    localizeReminders(build)
+      .then((items) => syncReminders(db, householdId, AGENDA_APP, items, me, now, { restricted }))
+      .catch((e) => {
+        lastReminders.current = '';
+        console.warn("Couldn't schedule reminders", e);
+      });
+  }, [ready, data, householdId, me, role, restricted, day, homeZone]);
+
+  return { data, ready, actions, me, role, householdId };
 }

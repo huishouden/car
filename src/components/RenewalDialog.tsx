@@ -7,7 +7,7 @@ import { describeMonths } from '@huishouden/pwa-kit/schedule';
 import { DEFAULT_RENEWAL_MONTHS } from '../lib/renewals';
 import { addMonths, isYmd, toYmd } from '@huishouden/pwa-kit/time';
 import type { RenewalInput } from '../data/types';
-import { Chip, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton, selectClass } from '@huishouden/pwa-kit/react/ui';
+import { Checkbox, Chip, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton, selectClass } from '@huishouden/pwa-kit/react/ui';
 
 const REPEATS = [0, 1, 3, 6, 12, 24];
 
@@ -30,6 +30,7 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
   const [dueDate, setDueDate] = useState(renewal?.dueDate ?? addMonths(toYmd(now), 1));
   const [every, setEvery] = useState(renewal ? (renewal.everyMonths ?? 0) : (DEFAULT_RENEWAL_MONTHS.registration ?? 0));
   const [notes, setNotes] = useState(renewal?.notes ?? '');
+  const [remind, setRemind] = useState(renewal?.remind !== false);
   const valid = name.trim().length > 0 && isYmd(dueDate);
 
   const pickKind = (k: RenewalKind) => {
@@ -43,7 +44,7 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
 
   const save = () => {
     if (!valid) return;
-    onSave({ kind, name, vehicleId: car || undefined, dueDate, everyMonths: every || undefined, notes });
+    onSave({ kind, name, vehicleId: car || undefined, dueDate, everyMonths: every || undefined, notes, remind });
     onClose();
   };
 
@@ -130,6 +131,9 @@ export function RenewalDialog({ renewal, vehicleId, vehicles, now, onSave, onDel
             ))}
           </select>
         </Field>
+        <Checkbox checked={remind} onChange={setRemind}>
+          {t('remind.toggle')}
+        </Checkbox>
         <Field label={t('form.notesOptional')}>
           <textarea className={`${inputClass} min-h-20`} value={notes} maxLength={LIMITS.renewalNotes} onChange={(e) => setNotes(e.target.value)} />
         </Field>

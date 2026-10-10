@@ -41,9 +41,9 @@ Signed-in members of a Huishouden household read and write under `households/{ho
 | Collection | Fields |
 |---|---|
 | `carVehicles` | `name` (nickname), `make`, `model`, `year`, `notes`, `createdAt`, `updatedAt`, `by` |
-| `carServiceItems` | `vehicleId`, `name`, `everyMonths`, `everyDistance`, `lastDate`, `lastOdometer`, `notes`, `createdAt`, `updatedAt`, `by` |
+| `carServiceItems` | `vehicleId`, `name`, `everyMonths`, `everyDistance`, `lastDate`, `lastOdometer`, `notes`, `pausedAt`, `remind`, `createdAt`, `updatedAt`, `by` |
 | `carOdometer` | `vehicleId`, `date`, `reading`, `note`, `createdAt`, `updatedAt`, `by` |
-| `carRenewals` | `vehicleId` (absent: every car), `kind` (`registration`, `insurance`, `inspection`, `toll`, `other`), `name`, `dueDate`, `everyMonths`, `notes`, `createdAt`, `updatedAt`, `by` |
+| `carRenewals` | `vehicleId` (absent: every car), `kind` (`registration`, `insurance`, `inspection`, `toll`, `other`), `name`, `dueDate`, `everyMonths`, `notes`, `closedAt`, `remind`, `createdAt`, `updatedAt`, `by` |
 | `carServiceLog` | `vehicleId`, `date`, `odometer`, `what`, `serviceItemIds`, `shopId`, `costCents`, `notes`, `createdAt`, `updatedAt`, `by` |
 | `carAppointments` | `vehicleId`, `title`, `at`, `location`, `notes`, `shopId`, `calendarEventId`, `calendarLink`, `createdAt`, `updatedAt`, `by` |
 | `carSettings/main` | `distanceUnit` (`mi` or `km`), `updatedAt`, `updatedBy` |
@@ -69,6 +69,17 @@ today and moves the item on (anyone); Pause sets the item's `pausedAt` (admins, 
 added it); Renewed moves a repeating renewal's due date a cycle on (anyone) or closes one that doesn't
 repeat; Mark handled sets the renewal's `closedAt`. Paused items and closed renewals don't come due
 anywhere; Car lists them on the car's page, marked, with Resume and Reopen.
+
+Car also writes push reminders (`households/{id}/reminders`, app `car`, through
+`@huishouden/pwa-kit/reminders`, delivered by the shared sender): at 9:00 on the household's clock
+(its home's time zone), a week before and on the due day, for each open renewal and each service item
+that repeats by time (its last date plus the months; distance-only items have no date to remind).
+Each member's device gets them in its language once they turn on "Notifications on this device" on
+the Cars tab (the suite's one push subscription per device, `VITE_VAPID_PUBLIC_KEY`), and can mute
+Car's reminders for themselves. `remind: false` on a renewal or service item turns its reminders off
+(absent means on; the dialogs have a "Remind me" switch). Each reminder carries a `source`, so one
+renewed, closed, serviced, paused or removed is dropped unsent. Reminders are rewritten on open and
+whenever the data changes; kids write none, helpers write theirs as non-private. The sample never writes.
 
 Find in my calendar and Import from calendar read Google Calendar (read-only) through
 `@huishouden/pwa-kit/calendar`; Google asks once for permission the first time. Find a business looks
