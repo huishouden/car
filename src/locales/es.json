@@ -227,5 +227,16 @@
   "visit.odometer": "Odómetro ({units})",
   "visit.lastReading": "Última: {distance}, {date}",
   "visit.cost": "Costo (opcional)",
-  "visit.notesPlaceholder": "A los frenos delanteros les queda un año más o menos."
+  "visit.notesPlaceholder": "A los frenos delanteros les queda un año más o menos.",
+  "remind.toggle": "Recordarme una semana antes y el mismo día",
+  "remind.itemHint": "Una notificación a las 9:00. Lo que se repite solo por distancia no tiene fecha que recordar.",
+  "remind.inWeek": "{name} vence en una semana",
+  "remind.today": "{name} vence hoy",
+  "push.title": "Notificaciones en este dispositivo",
+  "push.offText": "Recibe los recordatorios del coche en este dispositivo: renovaciones y mantenimientos, una semana antes y el mismo día, a las 9:00.",
+  "push.onText": "Activadas. Este dispositivo recibe los recordatorios del coche a las 9:00.",
+  "push.mute": "Silenciar los recordatorios del coche para mí",
+  "push.muteHint": "Solo para ti, en todos tus dispositivos. Los demás los siguen recibiendo.",
+  "push.turnOn": "Activar",
+  "push.sampleNote": "Inicia sesión para activar las notificaciones."
 }

@@ -227,5 +227,16 @@
   "visit.odometer": "Odometer ({units})",
   "visit.lastReading": "Last: {distance}, {date}",
   "visit.cost": "Cost (optional)",
-  "visit.notesPlaceholder": "Front brakes have about a year left."
+  "visit.notesPlaceholder": "Front brakes have about a year left.",
+  "remind.toggle": "Remind me a week before and on the day",
+  "remind.itemHint": "A notification at 9:00. Items that repeat only by distance have no date to remind.",
+  "remind.inWeek": "{name} is due in a week",
+  "remind.today": "{name} is due today",
+  "push.title": "Notifications on this device",
+  "push.offText": "Get car reminders on this device: renewals and service due, a week before and on the day, at 9:00.",
+  "push.onText": "On. This device gets car reminders at 9:00.",
+  "push.mute": "Mute car reminders for me",
+  "push.muteHint": "Only for you, on all your devices. Everyone else still gets them.",
+  "push.turnOn": "Turn on",
+  "push.sampleNote": "Sign in to turn on notifications."
 }

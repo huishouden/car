@@ -8,6 +8,7 @@ import { useClock } from '@huishouden/pwa-kit/react/clock';
 import type { ScreenProps } from '../CarApp';
 import { Chip, cardClass, ghostButton, iconButton, overline, primaryButton } from '@huishouden/pwa-kit/react/ui';
 import { SetAsideRow, UpcomingRow } from './rows';
+import { DeviceNotifications } from '../components/Notifications';
 import { RoleNote } from '@huishouden/pwa-kit/react/roles';
 
 /** One car at a time: its details, odometer, service schedule and renewals. */
@@ -108,6 +109,8 @@ export function Cars({ store, unit, may, open, notify, carId, onCar }: ScreenPro
               </ul>
             )}
           </section>
+
+          <DeviceNotifications live={store.householdId ? { householdId: store.householdId, email: store.me } : undefined} />
         </div>
 
         <div className="flex flex-col gap-6 lg:min-h-0 lg:overflow-y-auto">

@@ -7,7 +7,7 @@ import { serviceSuggestions } from '../lib/schedule';
 import { useT } from '../i18n';
 import { isYmd, toYmd } from '@huishouden/pwa-kit/time';
 import type { ServiceItemInput } from '../data/types';
-import { Chip, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
+import { Checkbox, Chip, Dialog, Field, deleteButton, ghostButton, inputClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
 
 export function ServiceItemDialog({ item, unit, now, onSave, onDelete, onPause, onClose }: {
   item: ServiceItem | null;
@@ -26,6 +26,7 @@ export function ServiceItemDialog({ item, unit, now, onSave, onDelete, onPause, 
   const [lastDate, setLastDate] = useState(item?.lastDate ?? '');
   const [lastOdometer, setLastOdometer] = useState(item?.lastOdometer !== undefined ? formatReading(item.lastOdometer) : '');
   const [notes, setNotes] = useState(item?.notes ?? '');
+  const [remind, setRemind] = useState(item?.remind !== false);
 
   const everyMonths = months.trim() ? Number(months) : undefined;
   const everyDistance = distance.trim() ? parseReading(distance) : undefined;
@@ -38,7 +39,7 @@ export function ServiceItemDialog({ item, unit, now, onSave, onDelete, onPause, 
 
   const save = () => {
     if (!valid) return;
-    onSave({ name, everyMonths, everyDistance: everyDistance ?? undefined, lastDate: lastDate || undefined, lastOdometer: odometer ?? undefined, notes });
+    onSave({ name, everyMonths, everyDistance: everyDistance ?? undefined, lastDate: lastDate || undefined, lastOdometer: odometer ?? undefined, notes, remind });
     onClose();
   };
 
@@ -125,6 +126,12 @@ export function ServiceItemDialog({ item, unit, now, onSave, onDelete, onPause, 
           </div>
           <p className="mt-1 text-sm text-muted">{t('item.lastDoneHint')}</p>
         </fieldset>
+        <div>
+          <Checkbox checked={remind} onChange={setRemind}>
+            {t('remind.toggle')}
+          </Checkbox>
+          <p className="ml-9 text-sm text-muted">{t('remind.itemHint')}</p>
+        </div>
         <Field label={t('form.notesOptional')}>
           <textarea className={`${inputClass} min-h-20`} value={notes} maxLength={LIMITS.itemNotes} onChange={(e) => setNotes(e.target.value)} placeholder={t('item.notesPlaceholder')} />
         </Field>

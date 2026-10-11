@@ -57,6 +57,8 @@ export interface CarStore {
   actions: CarActions;
   /** The signed-in member's email (or the demo's). */
   me: string;
+  /** The household's id when signed in; the sample has none. */
+  householdId?: string;
   /** Their role in the household (the demo's member is an admin). */
   role: Role | null;
 }
