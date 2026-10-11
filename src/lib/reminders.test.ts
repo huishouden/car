@@ -106,7 +106,7 @@ describe('languages', () => {
   test('each reminder carries its words in English, Spanish and Dutch', async () => {
     const rs = await localizeReminders(() => list());
     const r = rs.find((x) => x.ref === serviceReminderRef('demo-item-van-oil') && x.at === at9('2031-05-08'))!;
-    expect(r.texts?.en?.title).toBe('Oil change is due today');
+    expect(r.title).toBe('Oil change is due today');
     // The item's name is the household's own text; the sentence around it follows the language.
     expect(r.texts?.es?.title).toBe('Oil change vence hoy');
     expect(r.texts?.nl?.title).toBe('Oil change is vandaag aan de beurt');

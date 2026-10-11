@@ -204,11 +204,11 @@ test('to-dos carry their words in every language; a renewal kind saved in anothe
   const data = demoData();
   const items = await localizeTodos(() => todoItems(data, DEMO_NOW));
   const renewal = items.find((i) => i.ref.startsWith('renewal:'))!;
-  expect(renewal.texts.en).toMatchObject({ title: 'Renew registration', done: 'Mark renewed', cancel: 'Mark handled' });
-  expect(renewal.texts.es).toMatchObject({ title: 'Renovar registration', done: 'Marcar renovado', cancel: 'Marcar resuelto' });
-  expect(renewal.texts.nl).toMatchObject({ done: 'Markeer als verlengd', cancel: 'Afgehandeld' });
+  expect({ title: renewal.title, done: renewal.done?.label, cancel: renewal.cancel?.label }).toMatchObject({ title: 'Renew registration', done: 'Mark renewed', cancel: 'Mark handled' });
+  expect(renewal.texts?.es).toMatchObject({ title: 'Renovar registration', done: 'Marcar renovado', cancel: 'Marcar resuelto' });
+  expect(renewal.texts?.nl).toMatchObject({ done: 'Markeer als verlengd', cancel: 'Afgehandeld' });
   const service = items.find((i) => i.ref.startsWith('service:'))!;
-  expect([service.texts.en?.done, service.texts.es?.done, service.texts.nl?.done]).toEqual(['Mark done', 'Marcar como hecho', 'Afvinken']);
+  expect([service.done?.label, service.texts?.es?.done, service.texts?.nl?.done]).toEqual(['Mark done', 'Marcar como hecho', 'Afvinken']);
   expect(renewalTitle('APK')).toBe('Renew apk');
   expect(renewalTitle('E-ZPass')).toBe('Renew E-ZPass');
 });
