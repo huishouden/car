@@ -3,7 +3,7 @@ import { DEMO_NOW, demoData, type CarData } from '../lib/demo';
 import { appointmentAgenda } from '../lib/agenda';
 import { mayFor } from '../lib/may';
 import { applyOps, createActions, type Backend, type Op } from './actions';
-import { appointmentDoc } from './build';
+import { appointmentDoc, renewalDoc, serviceItemDoc } from './build';
 
 // What a helper's device writes must fit the rules: on someone else's record, only the fields that
 // tick it off (huishouden/rules README "Roles").
@@ -74,5 +74,23 @@ describe('what each role may do', () => {
       const may = mayFor({ role, me: HELPER });
       expect([may.settings, may.seePrivate, may.change(theirs), may.change(mine), may.change({})]).toEqual([false, false, false, true, false]);
     }
+  });
+});
+
+describe('the reminder switch', () => {
+  const stamp = { createdAt: 1, by: 'alex@example.com' };
+  test('is written only when off, so a record with reminders on keeps the same fields as before', () => {
+    expect('remind' in renewalDoc({ kind: 'toll', name: 'Toll', dueDate: '2031-09-30', remind: true }, stamp)).toBe(false);
+    expect(renewalDoc({ kind: 'toll', name: 'Toll', dueDate: '2031-09-30', remind: false }, stamp).remind).toBe(false);
+    expect(serviceItemDoc({ vehicleId: 'v', name: 'Oil', everyMonths: 6, remind: false }, stamp).remind).toBe(false);
+  });
+
+  test('a helper ticking off a visit keeps an item’s switch as it was', () => {
+    const { actions, writes, get } = setup(HELPER);
+    actions.saveServiceItem('demo-item-van-oil', { vehicleId: 'demo-car-van', name: 'Oil change', everyMonths: 6, remind: false });
+    actions.saveVisit(null, { vehicleId: 'demo-car-van', date: '2031-04-15', odometer: 41450, what: 'Oil change', serviceItemIds: ['demo-item-van-oil'] });
+    const [, item] = writes.at(-1)! as (Op & { data: { remind?: boolean } })[];
+    expect(item.data.remind).toBe(false);
+    expect(get().serviceItems.find((i) => i.id === 'demo-item-van-oil')?.remind).toBe(false);
   });
 });

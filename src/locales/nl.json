@@ -227,5 +227,16 @@
   "visit.odometer": "Teller ({units})",
   "visit.lastReading": "Laatst: {distance}, {date}",
   "visit.cost": "Kosten (optioneel)",
-  "visit.notesPlaceholder": "De voorremmen gaan nog ongeveer een jaar mee."
+  "visit.notesPlaceholder": "De voorremmen gaan nog ongeveer een jaar mee.",
+  "remind.toggle": "Herinner me een week van tevoren en op de dag zelf",
+  "remind.itemHint": "Een melding om 9:00. Wat alleen op afstand herhaalt, heeft geen datum om aan te herinneren.",
+  "remind.inWeek": "{name} is over een week aan de beurt",
+  "remind.today": "{name} is vandaag aan de beurt",
+  "push.title": "Meldingen op dit apparaat",
+  "push.offText": "Krijg herinneringen voor de auto op dit apparaat: verlengingen en onderhoud, een week van tevoren en op de dag zelf, om 9:00.",
+  "push.onText": "Aan. Dit apparaat krijgt herinneringen voor de auto om 9:00.",
+  "push.mute": "Herinneringen voor de auto voor mij dempen",
+  "push.muteHint": "Alleen voor jou, op al je apparaten. De anderen krijgen ze nog wel.",
+  "push.turnOn": "Aanzetten",
+  "push.sampleNote": "Log in om meldingen aan te zetten."
 }

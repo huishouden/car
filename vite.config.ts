@@ -20,6 +20,7 @@ export default defineConfig({
     pwaApp({
       // Car's path on the suite's one site (pwa-kit docs/one-site.md).
       base: '/car/',
+      push: true,
       name: 'Huishouden Car',
       shortName: 'Car',
       description: "Keeping the cars on the road",

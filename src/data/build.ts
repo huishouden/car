@@ -47,6 +47,7 @@ export function serviceItemDoc(i: ServiceItemInput, s: Stamp): ServiceItemData {
     lastOdometer: whole(i.lastOdometer, 0, LIMITS.maxReading),
     notes: text(i.notes, LIMITS.itemNotes),
     pausedAt: whole(i.pausedAt, 0, Number.MAX_SAFE_INTEGER),
+    remind: i.remind === false ? false : undefined,
     ...stamp(s),
   });
 }
@@ -70,6 +71,7 @@ export function renewalDoc(r: RenewalInput, s: Stamp): RenewalData {
     everyMonths: whole(r.everyMonths, 1, LIMITS.maxRenewalMonths),
     notes: text(r.notes, LIMITS.renewalNotes),
     closedAt: whole(r.closedAt, 0, Number.MAX_SAFE_INTEGER),
+    remind: r.remind === false ? false : undefined,
     ...stamp(s),
   });
 }
