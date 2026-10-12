@@ -7,14 +7,12 @@ import { can, isRestricted, type Role } from '@huishouden/pwa-kit/roles';
 import type { CarData } from '../lib/demo';
 import type { SettingsData } from '../lib/model';
 import { useHome } from '@huishouden/pwa-kit/react/home';
-import { localizeReminders, syncReminders } from '@huishouden/pwa-kit/reminders';
 import { readError } from '@huishouden/pwa-kit/feedback';
 import { APP } from '../lib/contacts';
-import { AGENDA_APP } from '../lib/agenda';
 import { carReminders } from '../lib/reminders';
 import { db } from './firebase';
 import { COLLECTIONS, applyOps, createActions, type Backend, type CollectionName } from './actions';
-import { publishChanges, syncAll, syncTodoList } from './publishAgenda';
+import { publishChanges, publishReminders, syncAll, syncTodoList } from './publishAgenda';
 import type { CarStore } from './types';
 import { t } from '../i18n';
 
@@ -97,9 +95,9 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
         report(commitOps(db, base, ops));
         const before = ref.current;
         const after = applyOps(before, ops);
-        publishChanges(householdId, me, before, after, ops, Date.now(), restricted);
+        void publishChanges(db, householdId, me, before, after, ops, Date.now(), { restricted });
         // At once as well as after the snapshot: someone may close the app right after a tap.
-        if (synced.current) syncTodoList(householdId, me, after, Date.now(), restricted);
+        if (synced.current) void syncTodoList(db, householdId, me, after, Date.now(), { restricted });
       },
       saveSettings: (distanceUnit, by, now) => report(setDoc(doc(db, base, 'carSettings', 'main'), { distanceUnit, updatedAt: Math.round(now), updatedBy: by })),
       contacts: householdContacts(db, householdId, APP, me, report),
@@ -115,7 +113,7 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
   useEffect(() => {
     if (!loaded || synced.current || !me) return;
     synced.current = true;
-    syncAll(householdId, me, ref.current, Date.now(), restricted);
+    void syncAll(db, householdId, me, ref.current, Date.now(), { restricted });
     // Appointments saved before the private flag are hidden from helpers and kids until written
     // with `private: false`: an admin's or member's device does that once.
     if (can(role, 'see-private')) markUnflaggedOpen(db, householdId, 'carAppointments', ref.current.appointments).catch(() => {});
@@ -125,7 +123,7 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
   // once the first sync has run.
   useEffect(() => {
     if (!synced.current || !me) return;
-    const t = setTimeout(() => syncTodoList(householdId, me, ref.current, Date.now(), restricted), TODO_DELAY);
+    const t = setTimeout(() => void syncTodoList(db, householdId, me, ref.current, Date.now(), { restricted }), TODO_DELAY);
     return () => clearTimeout(t);
   }, [data, householdId, me, restricted]);
 
@@ -134,7 +132,7 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
   useEffect(() => {
     const before = shops.current;
     shops.current = data.contacts;
-    if (synced.current && before !== data.contacts) publishChanges(householdId, me, { ...ref.current, contacts: before }, ref.current, [], Date.now(), restricted);
+    if (synced.current && before !== data.contacts) void publishChanges(db, householdId, me, { ...ref.current, contacts: before }, ref.current, [], Date.now(), { restricted });
   }, [data.contacts, householdId, me, restricted]);
 
   // Reminders follow the renewals and service items: worked out from everything loaded, written on
@@ -150,12 +148,10 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
     const signature = JSON.stringify(build().map((r) => [r.id, r.title, r.body]));
     if (signature === lastReminders.current) return;
     lastReminders.current = signature;
-    localizeReminders(build)
-      .then((items) => syncReminders(db, householdId, AGENDA_APP, items, me, now, { restricted }))
-      .catch((e) => {
-        lastReminders.current = '';
-        console.warn("Couldn't schedule reminders", e);
-      });
+    // A failure is warned about by default; forgetting the signature tries again on the next change.
+    void publishReminders(db, householdId, me, data, now, { restricted }).then((r) => {
+      if (r === null) lastReminders.current = '';
+    });
   }, [ready, data, householdId, me, role, restricted, day, homeZone]);
 
   return { data, ready, actions, me, role, householdId };

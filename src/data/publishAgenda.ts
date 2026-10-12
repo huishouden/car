@@ -1,52 +1,91 @@
+import type { Firestore } from 'firebase/firestore';
 import { localizeAgenda, removeAgenda, replaceAgenda, syncAgenda } from '@huishouden/pwa-kit/agenda';
+import { localizeReminders, syncReminders } from '@huishouden/pwa-kit/reminders';
 import { localizeTodos, syncTodos } from '@huishouden/pwa-kit/todos';
 import { AGENDA_APP, agendaByRef, agendaChanges, agendaItems, type Touched } from '../lib/agenda';
+import { carReminders } from '../lib/reminders';
 import { TODO_APP, todoItems } from '../lib/todos';
 import type { CarData } from '../lib/demo';
-import { db } from './firebase';
 
-// The household agenda and to-do list from the live store. The agenda is a copy for the portal: a failed write
-// here never fails the save, and the next open's sync repairs it.
+// The household agenda, to-do list and reminders from the live store, as functions of a Firestore
+// so each is read-budgeted on the emulators (e2e/reads.sdk.ts). The agenda is a copy for the
+// portal: a failed write here never fails the save, and the next open's sync repairs it.
+//
+// One convention for every publisher here: it never rejects. A failure goes to `onError` (default:
+// a console warning) and the steps after it still run. Steps run one after the other, each reading
+// what is there when it runs.
 
 const warn = (e: unknown) => console.warn("Couldn't update the household agenda", e);
 const warnTodos = (e: unknown) => console.warn("Couldn't update the household to-do list", e);
 
-/** Makes Car's items on the household to-do list match the data: on open, and a few seconds after a change. */
-export function syncTodoList(householdId: string, by: string, data: CarData, now = Date.now(), restricted = false): void {
+type Published = NonNullable<Parameters<typeof syncAgenda>[4]['published']>;
+
+export interface PublishOptions {
+  /** A helper's or kid's device: only what they may read and write. */
+  restricted?: boolean;
+  /** Where this device notes what it published (default localStorage; null reads every time). */
+  published?: Published | null;
+  /** Hears a failure (default: a console warning). */
+  onError?: (e: unknown) => void;
+  /** The app's address (tests: the suite's own, which the rules require). */
+  appUrl?: string;
+}
+
+const publishedOf = ({ published }: PublishOptions) => (published === undefined ? {} : { published });
+const urlOf = ({ appUrl }: PublishOptions) => (appUrl === undefined ? [] : [appUrl]);
+
+/** Makes Car's items on the household to-do list match the data (one query): on open, and a few seconds after a change. */
+export async function syncTodoList(db: Firestore, householdId: string, by: string, data: CarData, now: number, options: PublishOptions = {}): Promise<void> {
+  const { restricted = false, onError = warnTodos } = options;
   try {
     // Each to-do carries its words in every language; each member's portal shows their own.
-    localizeTodos(() => todoItems(data, now))
-      .then((items) => syncTodos(db, householdId, TODO_APP, items, { by, now, restricted }))
-      .catch(warnTodos);
+    const items = await localizeTodos(() => todoItems(data, now, ...urlOf(options)));
+    await syncTodos(db, householdId, TODO_APP, items, { by, now, restricted, ...publishedOf(options) });
   } catch (e) {
-    warnTodos(e);
+    onError(e);
   }
 }
 
-/** After a write: replaces the items of every record it changed, removes those of deleted ones. */
-export function publishChanges(householdId: string, by: string, before: CarData, after: CarData, touched: Touched[], now = Date.now(), restricted = false): void {
+/**
+ * After a write: replaces the items of every record it changed (one query each), removes those of
+ * deleted ones (one query each), one after the other.
+ */
+export async function publishChanges(db: Firestore, householdId: string, by: string, before: CarData, after: CarData, touched: Touched[], now: number, options: PublishOptions = {}): Promise<void> {
+  const { restricted = false, onError = warn } = options;
   let changes;
   try {
-    changes = agendaChanges(before, after, touched, now);
+    changes = agendaChanges(before, after, touched, now, ...urlOf(options));
   } catch (e) {
-    warn(e);
+    onError(e);
     return;
   }
   for (const { ref } of changes.replace)
-    localizeAgenda(() => agendaByRef(after, now).get(ref) ?? [])
+    await localizeAgenda(() => agendaByRef(after, now, ...urlOf(options)).get(ref) ?? [])
       .then((items) => replaceAgenda(db, householdId, AGENDA_APP, ref, items, { by, now, restricted }))
-      .catch(warn);
-  for (const ref of changes.remove) removeAgenda(db, householdId, AGENDA_APP, ref, { restricted }).catch(warn);
+      .catch(onError);
+  for (const ref of changes.remove) await removeAgenda(db, householdId, AGENDA_APP, ref, { restricted }).catch(onError);
 }
 
-/** On open: makes everything Car has published match the data, and refreshes overdue status. */
-export function syncAll(householdId: string, by: string, data: CarData, now = Date.now(), restricted = false): void {
+/** On open: makes everything Car has put on the agenda match the data (one query), then the to-do list (one query). */
+export async function syncAll(db: Firestore, householdId: string, by: string, data: CarData, now: number, options: PublishOptions = {}): Promise<void> {
+  const { restricted = false, onError = warn } = options;
   try {
-    localizeAgenda(() => agendaItems(data, now))
-      .then((items) => syncAgenda(db, householdId, AGENDA_APP, items, { by, now, restricted }))
-      .catch(warn);
+    const items = await localizeAgenda(() => agendaItems(data, now, ...urlOf(options)));
+    await syncAgenda(db, householdId, AGENDA_APP, items, { by, now, restricted, ...publishedOf(options) });
   } catch (e) {
-    warn(e);
+    onError(e);
   }
-  syncTodoList(householdId, by, data, now, restricted);
+  await syncTodoList(db, householdId, by, data, now, options);
+}
+
+/** The reminders for renewals and service items, from everything loaded (one query); null when it failed. */
+export async function publishReminders(db: Firestore, householdId: string, by: string, data: CarData, now: number, options: Omit<PublishOptions, 'appUrl'> = {}) {
+  const { restricted = false, onError = (e: unknown) => console.warn("Couldn't schedule reminders", e) } = options;
+  try {
+    const items = await localizeReminders(() => carReminders(data, now));
+    return await syncReminders(db, householdId, AGENDA_APP, items, by, now, { restricted, ...publishedOf(options) });
+  } catch (e) {
+    onError(e);
+    return null;
+  }
 }
