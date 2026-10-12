@@ -148,12 +148,9 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
     const signature = JSON.stringify(build().map((r) => [r.id, r.title, r.body]));
     if (signature === lastReminders.current) return;
     lastReminders.current = signature;
-    void publishReminders(db, householdId, me, data, now, {
-      restricted,
-      onError: (e) => {
-        lastReminders.current = '';
-        console.warn("Couldn't schedule reminders", e);
-      },
+    // A failure is warned about by default; forgetting the signature tries again on the next change.
+    void publishReminders(db, householdId, me, data, now, { restricted }).then((r) => {
+      if (r === null) lastReminders.current = '';
     });
   }, [ready, data, householdId, me, role, restricted, day, homeZone]);
 

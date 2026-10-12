@@ -97,12 +97,16 @@ const fail = (e: unknown) => {
   throw e;
 };
 
-/** Another device's stray item in each list Car publishes to: the sync must remove it. */
-const stray = (n: number) => ({
-  [`agenda/car_stray_${n}`]: agendaDoc('car', { ref: `stray:${n}`, kind: 'due', title: `Old ${n}`, start: NOW + 2 * DAY, allDay: true, url: URL }, admin, NOW),
-  [`reminders/car-stray-${n}`]: reminderDoc({ app: 'car', ref: `stray:${n}`, title: `Old ${n}`, at: NOW + 2 * DAY, url: URL }, admin, NOW),
-  [`todos/car:stray:${n}`]: todoDoc('car', { ref: `stray:${n}`, title: `Old ${n}`, createdAt: NOW - DAY, url: URL }, admin, NOW),
-});
+type List = 'agenda' | 'reminders' | 'todos';
+/** Another device's stray item in `lists` (those a test's sync reads): the sync must remove it. */
+const stray = (n: number, lists: List[]) => {
+  const docs = {
+    agenda: { [`agenda/car_stray_${n}`]: agendaDoc('car', { ref: `stray:${n}`, kind: 'due', title: `Old ${n}`, start: NOW + 2 * DAY, allDay: true, url: URL }, admin, NOW) },
+    reminders: { [`reminders/car-stray-${n}`]: reminderDoc({ app: 'car', ref: `stray:${n}`, title: `Old ${n}`, at: NOW + 2 * DAY, url: URL }, admin, NOW) },
+    todos: { [`todos/car:stray:${n}`]: todoDoc('car', { ref: `stray:${n}`, title: `Old ${n}`, createdAt: NOW - DAY, url: URL }, admin, NOW) },
+  };
+  return Object.assign({}, ...lists.map((l) => docs[l]));
+};
 
 describe.skipIf(!emulator)('on open: the agenda, then the to-do list, one query each, none when this device already published the same', () => {
   test('first, again, and again with this device\'s note', async () => {
@@ -123,7 +127,7 @@ describe.skipIf(!emulator)('on open: the agenda, then the to-do list, one query 
       min: 9,
       counter,
       label: 'Car on open with a write before each read',
-      beforeRead: writeBeforeEachRead(() => writeTestDocs(hh, stray(++n))),
+      beforeRead: writeBeforeEachRead(() => writeTestDocs(hh, stray(++n, ['agenda', 'todos']))),
     });
     expect(n).toBe(2);
     // What the reads saw is gone; the agenda stray written after the agenda's read is read and removed by the next run.
@@ -138,7 +142,8 @@ describe.skipIf(!emulator)('on open: the agenda, then the to-do list, one query 
 
 describe.skipIf(!emulator)('the reminders: one query, none when this device already published the same', () => {
   test('first, again, with the note, and with a stray landing before the read', async () => {
-    // First: the query finds the two strays the open's interleaving test left in the reminders, and removes them.
+    // First: the query finds two strays another device left, and removes them.
+    await writeTestDocs(hh, { ...stray(30, ['reminders']), ...stray(31, ['reminders']) });
     await expectReads(() => publishReminders(db, hh.id, admin, data(), NOW, { published: null, onError: fail }), { max: 2, min: 2, counter, label: 'Car reminders, first' });
     // Again: the 8 it wrote (the oil change, the registration and the insurance, each at its lead times).
     const again = await expectReads(() => publishReminders(db, hh.id, admin, data(), NOW, { published: null, onError: fail }), { max: 8, min: 8, counter, label: 'Car reminders, again' });
@@ -152,7 +157,7 @@ describe.skipIf(!emulator)('the reminders: one query, none when this device alre
       min: 9,
       counter,
       label: 'Car reminders with a write before the read',
-      beforeRead: writeBeforeEachRead(() => writeTestDocs(hh, stray(10))),
+      beforeRead: writeBeforeEachRead(() => writeTestDocs(hh, stray(10, ['reminders']))),
     });
     expect(inter.value).toMatchObject({ deleted: 1, unchanged: 8 });
   });
@@ -179,7 +184,7 @@ describe.skipIf(!emulator)('after a write: one query per record whose agenda ite
       min: 5,
       counter,
       label: 'Car after a rename, with a write before each read',
-      beforeRead: writeBeforeEachRead(() => writeTestDocs(hh, stray(++n))),
+      beforeRead: writeBeforeEachRead(() => writeTestDocs(hh, stray(++n, ['agenda']))),
     });
     expect(n - 20).toBe(5);
   });

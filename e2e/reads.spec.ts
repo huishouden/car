@@ -88,9 +88,11 @@ async function firstOpen(browser: Browser, as: 'admin' | 'helper' | 'kid', max: 
 
 // Every role's open: the household, every Car collection whole, the settings document (none,
 // billed 1), the household's contacts (every app's, filtered on the device), then the agenda's one
-// query (the sync on open; on the local preview the to-dos stop before reading, as the links are
-// http: e2e/reads.sdk.ts budgets the publish whole). Cars adds the member's notification settings
-// (1, the kit's NotificationsCard); every other screen adds nothing.
+// query (the sync on open). The to-dos and the reminders stop before reading on the local preview,
+// as their links are http; on the suite's https site a first open with nothing published from the
+// device also pays their two queries (2 to-dos and 8 reminders on reads.sdk.ts's data), which
+// e2e/reads.sdk.ts budgets. Cars adds the member's notification settings (1, the kit's
+// NotificationsCard); every other screen adds nothing.
 const SCREENS = { Cars: 1 };
 
 // The admin: the car 1, service items 2, readings 3, renewals 2, visits 2, appointments 2, the
