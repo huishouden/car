@@ -139,15 +139,15 @@ describe.skipIf(!emulator)('on open: the agenda, then the to-do list, one query 
 describe.skipIf(!emulator)('the reminders: one query, none when this device already published the same', () => {
   test('first, again, with the note, and with a stray landing before the read', async () => {
     // First: the query finds the two strays the open's interleaving test left in the reminders, and removes them.
-    await expectReads(() => publishReminders(db, hh.id, admin, data(), NOW, { published: null }), { max: 2, min: 2, counter, label: 'Car reminders, first' });
+    await expectReads(() => publishReminders(db, hh.id, admin, data(), NOW, { published: null, onError: fail }), { max: 2, min: 2, counter, label: 'Car reminders, first' });
     // Again: the 8 it wrote (the oil change, the registration and the insurance, each at its lead times).
-    const again = await expectReads(() => publishReminders(db, hh.id, admin, data(), NOW, { published: null }), { max: 8, min: 8, counter, label: 'Car reminders, again' });
-    expect(again.value.unchanged).toBe(8);
+    const again = await expectReads(() => publishReminders(db, hh.id, admin, data(), NOW, { published: null, onError: fail }), { max: 8, min: 8, counter, label: 'Car reminders, again' });
+    expect(again.value?.unchanged).toBe(8);
     const store = memory();
-    await publishReminders(db, hh.id, admin, data(), NOW, { published: store });
-    await expectReads(() => publishReminders(db, hh.id, admin, data(), NOW, { published: store }), { max: 0, counter, label: 'Car reminders, published' });
+    await publishReminders(db, hh.id, admin, data(), NOW, { published: store, onError: fail });
+    await expectReads(() => publishReminders(db, hh.id, admin, data(), NOW, { published: store, onError: fail }), { max: 0, counter, label: 'Car reminders, published' });
     // Interleaving: a stray lands before its read; read once and removed.
-    const inter = await expectReads(() => publishReminders(db, hh.id, admin, data(), NOW, { published: null }), {
+    const inter = await expectReads(() => publishReminders(db, hh.id, admin, data(), NOW, { published: null, onError: fail }), {
       max: 9,
       min: 9,
       counter,

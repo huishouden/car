@@ -10,6 +10,10 @@ import type { CarData } from '../lib/demo';
 // The household agenda, to-do list and reminders from the live store, as functions of a Firestore
 // so each is read-budgeted on the emulators (e2e/reads.sdk.ts). The agenda is a copy for the
 // portal: a failed write here never fails the save, and the next open's sync repairs it.
+//
+// One convention for every publisher here: it never rejects. A failure goes to `onError` (default:
+// a console warning) and the steps after it still run. Steps run one after the other, each reading
+// what is there when it runs.
 
 const warn = (e: unknown) => console.warn("Couldn't update the household agenda", e);
 const warnTodos = (e: unknown) => console.warn("Couldn't update the household to-do list", e);
@@ -21,7 +25,7 @@ export interface PublishOptions {
   restricted?: boolean;
   /** Where this device notes what it published (default localStorage; null reads every time). */
   published?: Published | null;
-  /** Hears a failure (default: a console warning); the publish never throws. */
+  /** Hears a failure (default: a console warning). */
   onError?: (e: unknown) => void;
   /** The app's address (tests: the suite's own, which the rules require). */
   appUrl?: string;
@@ -74,8 +78,14 @@ export async function syncAll(db: Firestore, householdId: string, by: string, da
   await syncTodoList(db, householdId, by, data, now, options);
 }
 
-/** The reminders for renewals and service items, from everything loaded (one query). Throws on failure. */
-export async function publishReminders(db: Firestore, householdId: string, by: string, data: CarData, now: number, options: Omit<PublishOptions, 'onError' | 'appUrl'> = {}) {
-  const items = await localizeReminders(() => carReminders(data, now));
-  return syncReminders(db, householdId, AGENDA_APP, items, by, now, { restricted: options.restricted ?? false, ...publishedOf(options) });
+/** The reminders for renewals and service items, from everything loaded (one query); null when it failed. */
+export async function publishReminders(db: Firestore, householdId: string, by: string, data: CarData, now: number, options: Omit<PublishOptions, 'appUrl'> = {}) {
+  const { restricted = false, onError = (e: unknown) => console.warn("Couldn't schedule reminders", e) } = options;
+  try {
+    const items = await localizeReminders(() => carReminders(data, now));
+    return await syncReminders(db, householdId, AGENDA_APP, items, by, now, { restricted, ...publishedOf(options) });
+  } catch (e) {
+    onError(e);
+    return null;
+  }
 }

@@ -148,9 +148,12 @@ export function useLiveStore(householdId: string, me: string, role: Role | null,
     const signature = JSON.stringify(build().map((r) => [r.id, r.title, r.body]));
     if (signature === lastReminders.current) return;
     lastReminders.current = signature;
-    publishReminders(db, householdId, me, data, now, { restricted }).catch((e) => {
-      lastReminders.current = '';
-      console.warn("Couldn't schedule reminders", e);
+    void publishReminders(db, householdId, me, data, now, {
+      restricted,
+      onError: (e) => {
+        lastReminders.current = '';
+        console.warn("Couldn't schedule reminders", e);
+      },
     });
   }, [ready, data, householdId, me, role, restricted, day, homeZone]);
 
