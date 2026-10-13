@@ -12,7 +12,7 @@ import { PORTAL_URL } from './lib/portal';
 import { ClockProvider } from '@huishouden/pwa-kit/react/clock';
 import { CarApp } from './CarApp';
 import { AppFrame } from '@huishouden/pwa-kit/react/frame';
-import { CarOpening, carFrame } from './components/frame';
+import { CarOpening, carFrame, type Account } from './components/frame';
 import { cardClass, primaryButton, SampleBanner, useToast } from '@huishouden/pwa-kit/react/ui';
 import { t, useLang, useT } from './i18n';
 
@@ -49,11 +49,7 @@ export default function App() {
   return <SignedIn key={user.uid} user={user} {...frame} />;
 }
 
-interface FrameProps {
-  onSignIn: () => void;
-  onSignOut: () => void;
-  signingIn: boolean;
-}
+type FrameProps = Omit<Account, 'user'>;
 
 function SignedIn({ user, ...frame }: FrameProps & { user: User }) {
   const t = useT();

@@ -14,7 +14,7 @@ import { isImported, type CalendarMatch } from '@huishouden/pwa-kit/calendar';
 import { CAR_CALENDAR_QUERIES, fromCalendar, guessVehicle } from './lib/calendarImport';
 import { auth } from './data/firebase';
 import { AppFrame, AppOpening } from '@huishouden/pwa-kit/react/frame';
-import { carFrame, useCarTab } from './components/frame';
+import { carFrame, useCarTab, type Account } from './components/frame';
 import { Toast, type ToastState } from '@huishouden/pwa-kit/react/ui';
 import { useUrlParam } from '@huishouden/pwa-kit/react/url-state';
 import { VehicleDialog } from './components/VehicleDialog';
@@ -37,7 +37,6 @@ import { History } from './screens/History';
 import { Appointments } from './screens/Appointments';
 import { Shops } from './screens/Shops';
 
-export type { TabId } from './components/frame';
 
 /** Which dialog is open, and what it was opened with. */
 export type Open =
@@ -60,12 +59,9 @@ export interface ScreenProps {
   notify: Notify;
 }
 
-interface Props {
+interface Props extends Omit<Account, 'user'> {
   store: CarStore;
   user: User | null;
-  onSignIn: () => void;
-  onSignOut: () => void;
-  signingIn: boolean;
   toast: ToastState | null;
   notify: Notify;
   clearToast: () => void;
