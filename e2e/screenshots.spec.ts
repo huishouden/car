@@ -1,11 +1,14 @@
 import { expect, test } from '@playwright/test';
-import { captureScreenshot } from '@huishouden/pwa-kit/e2e';
+import { captureOpening, captureScreenshot } from '@huishouden/pwa-kit/e2e';
 import places from './fixtures/nominatim.json' with { type: 'json' };
 import { calendarEvents, mockCalendar } from './fixtures/calendar';
 
 // README images of the signed-out app's invented sample household, refreshed by CI after each
 // deploy. The clock is frozen at the sample data's moment so every run renders the same.
 const fixedTime = '2031-04-15T09:30:00';
+
+// The frame while the app opens (the session restoring), held there: the kit's AppOpening.
+test('opening', ({ page }) => captureOpening(page, 'opening', { path: './?tab=renewals', fixedTime }));
 
 const tab = (name: string) => async (p: import('@playwright/test').Page) => {
   await p.getByRole('button', { name, exact: true }).click();
