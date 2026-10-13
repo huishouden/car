@@ -1,4 +1,3 @@
-import { CalendarCheck, CalendarClock, CarFront, History as HistoryIcon, LayoutDashboard, Store } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import type { User } from 'firebase/auth';
 import type { Contact } from '@huishouden/pwa-kit/contacts';
@@ -14,9 +13,10 @@ import { CalendarSuggestions, calendarAvailable, useCalendarSuggestions } from '
 import { isImported, type CalendarMatch } from '@huishouden/pwa-kit/calendar';
 import { CAR_CALENDAR_QUERIES, fromCalendar, guessVehicle } from './lib/calendarImport';
 import { auth } from './data/firebase';
-import { Header, type Tab } from './components/Header';
-import { ScreenSkeleton, Toast, type ToastState } from '@huishouden/pwa-kit/react/ui';
-import { useUrlParam, useUrlTab } from '@huishouden/pwa-kit/react/url-state';
+import { AppFrame, AppOpening } from '@huishouden/pwa-kit/react/frame';
+import { carFrame, useCarTab, type Account } from './components/frame';
+import { Toast, type ToastState } from '@huishouden/pwa-kit/react/ui';
+import { useUrlParam } from '@huishouden/pwa-kit/react/url-state';
 import { VehicleDialog } from './components/VehicleDialog';
 import { ServiceItemDialog } from './components/ServiceItemDialog';
 import { ReadingDialog } from './components/ReadingDialog';
@@ -37,24 +37,6 @@ import { History } from './screens/History';
 import { Appointments } from './screens/Appointments';
 import { Shops } from './screens/Shops';
 
-export type TabId = 'overview' | 'cars' | 'renewals' | 'history' | 'appointments' | 'shops';
-
-// On phones the four primaries sit in the bottom bar (what is due, then what is booked and done);
-// the cars' details and the shops are under More.
-const TABS = [
-  { id: 'overview', label: 'tab.overview', icon: LayoutDashboard, primary: true },
-  { id: 'cars', label: 'tab.cars', icon: CarFront },
-  { id: 'renewals', label: 'tab.renewals', short: 'tab.renewalsShort', icon: CalendarClock, primary: true },
-  { id: 'history', label: 'tab.history', short: 'tab.historyShort', icon: HistoryIcon, primary: true },
-  { id: 'appointments', label: 'tab.appointments', short: 'tab.appointmentsShort', icon: CalendarCheck, primary: true },
-  { id: 'shops', label: 'tab.shops', icon: Store },
-] as const satisfies readonly (Omit<Tab, 'label' | 'short'> & { id: TabId; label: string; short?: string })[];
-
-/** The tabs' ids, in order: the address's `?tab=` names one of them. */
-export const TAB_IDS: readonly TabId[] = TABS.map((x) => x.id);
-
-/** The app bar's tabs, in the page's language. */
-export const tabsFor = (t: ReturnType<typeof useT>): Tab[] => TABS.map((x) => ({ ...x, label: t(x.label), short: 'short' in x ? t(x.short) : undefined }));
 
 /** Which dialog is open, and what it was opened with. */
 export type Open =
@@ -77,12 +59,9 @@ export interface ScreenProps {
   notify: Notify;
 }
 
-interface Props {
+interface Props extends Omit<Account, 'user'> {
   store: CarStore;
   user: User | null;
-  onSignIn: () => void;
-  onSignOut: () => void;
-  signingIn: boolean;
   toast: ToastState | null;
   notify: Notify;
   clearToast: () => void;
@@ -95,7 +74,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
   const t = useT();
   const { now } = useClock();
   // The tab and the car on screen live in the address, so a reload (an update) and Back return to them.
-  const [tab, setTab] = useUrlTab(TAB_IDS, 'overview');
+  const [tab, setTab] = useCarTab();
   const [carId, setCarParam] = useUrlParam('car');
   const setCarId = (id: string | null) => setCarParam(id, { replace: true });
   const [dialog, setDialog] = useState<Open | null>(null);
@@ -120,9 +99,12 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
   const screen: ScreenProps = { store, unit, may, open: setDialog, notify };
   const showCar = (id: string) => setTab('cars', { also: { car: id } });
 
+  const frame = carFrame(t, { user, onSignIn, onSignOut, signingIn }, { id: tab, choose: (id) => setTab(id) });
+  // The first data still on its way: the opening frame, which counts no view yet.
+  if (!store.ready) return <AppOpening {...frame} phase="data" />;
+
   let content: ReactNode;
-  if (!store.ready) content = <ScreenSkeleton label={t('app.loading')} />;
-  else if (tab === 'cars') content = <Cars {...screen} carId={carId} onCar={setCarId} />;
+  if (tab === 'cars') content = <Cars {...screen} carId={carId} onCar={setCarId} />;
   else if (tab === 'renewals') content = <Renewals {...screen} />;
   else if (tab === 'history') content = <History {...screen} />;
   else if (tab === 'appointments') content = <Appointments {...screen} calendarAvailable={calendar} onImport={importEvents} />;
@@ -131,17 +113,8 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
 
   const vehicleName = (id: string | undefined) => data.vehicles.find((v) => v.id === id)?.name;
 
-  return (
-    <div className="flex min-h-dvh flex-col bg-page font-sans text-ink antialiased lg:h-dvh lg:overflow-hidden">
-      <Header tabs={tabsFor(t)} tab={tab} onTab={(id) => setTab(id as TabId)} user={user} onSignIn={onSignIn} onSignOut={onSignOut} signingIn={signingIn} />
-      <main className="mx-auto flex w-full max-w-[1200px] min-h-0 flex-1 flex-col gap-4 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pt-6 sm:pb-6">
-        {banner}
-        {tab === 'overview' && store.ready && (
-          <CalendarSuggestions suggestions={suggested.suggestions} now={now} onAdd={(m) => importEvents([m])} onDismiss={suggested.dismiss} />
-        )}
-        <div className="min-h-0 flex-1">{content}</div>
-      </main>
-
+  const dialogs = (
+    <>
       {dialog?.kind === 'vehicle' && may.settings && (
         <VehicleDialog
           vehicle={dialog.vehicle}
@@ -281,6 +254,16 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
         />
       )}
       <Toast toast={toast} onDone={clearToast} />
-    </div>
+    </>
+  );
+
+  return (
+    <AppFrame {...frame} after={dialogs}>
+        {banner}
+        {tab === 'overview' && store.ready && (
+          <CalendarSuggestions suggestions={suggested.suggestions} now={now} onAdd={(m) => importEvents([m])} onDismiss={suggested.dismiss} />
+        )}
+        <div className="min-h-0 flex-1">{content}</div>
+    </AppFrame>
   );
 }

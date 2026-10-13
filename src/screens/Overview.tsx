@@ -5,7 +5,8 @@ import { daysAgo, daysUntil, formatDayLong, formatTime, relativeDay } from '@hui
 import { carOdometer, needsAttention, upcoming } from '../lib/upcoming';
 import { useClock } from '@huishouden/pwa-kit/react/clock';
 import { RoleNote } from '@huishouden/pwa-kit/react/roles';
-import type { ScreenProps, TabId } from '../CarApp';
+import type { ScreenProps } from '../CarApp';
+import type { TabId } from '../components/frame';
 import { cardClass, ghostButton, overline, primaryButton, secondaryButton } from '@huishouden/pwa-kit/react/ui';
 import { UpcomingRow } from './rows';
 
