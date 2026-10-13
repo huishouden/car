@@ -15,7 +15,8 @@ import { isImported, type CalendarMatch } from '@huishouden/pwa-kit/calendar';
 import { CAR_CALENDAR_QUERIES, fromCalendar, guessVehicle } from './lib/calendarImport';
 import { auth } from './data/firebase';
 import { Header, type Tab } from './components/Header';
-import { Toast, type ToastState } from '@huishouden/pwa-kit/react/ui';
+import { ScreenSkeleton, Toast, type ToastState } from '@huishouden/pwa-kit/react/ui';
+import { useUrlParam, useUrlTab } from '@huishouden/pwa-kit/react/url-state';
 import { VehicleDialog } from './components/VehicleDialog';
 import { ServiceItemDialog } from './components/ServiceItemDialog';
 import { ReadingDialog } from './components/ReadingDialog';
@@ -50,6 +51,12 @@ const TABS = [
 ] as const satisfies readonly (Omit<Tab, 'label' | 'short'> & { id: TabId; label: string; short?: string })[];
 
 /** Which dialog is open, and what it was opened with. */
+/** The tabs' ids, in order: the address's `?tab=` names one of them. */
+export const TAB_IDS: readonly TabId[] = TABS.map((x) => x.id);
+
+/** The app bar's tabs, in the page's language. */
+export const tabsFor = (t: ReturnType<typeof useT>): Tab[] => TABS.map((x) => ({ ...x, label: t(x.label), short: 'short' in x ? t(x.short) : undefined }));
+
 export type Open =
   | { kind: 'vehicle'; vehicle: Vehicle | null }
   | { kind: 'item'; vehicleId: string; item: ServiceItem | null }
@@ -87,8 +94,10 @@ interface Props {
 export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, notify, clearToast, banner }: Props) {
   const t = useT();
   const { now } = useClock();
-  const [tab, setTab] = useState<TabId>('overview');
-  const [carId, setCarId] = useState<string | null>(null);
+  // The tab and the car on screen live in the address, so a reload (an update) and Back return to them.
+  const [tab, setTab] = useUrlTab(TAB_IDS, 'overview');
+  const [carId, setCarParam] = useUrlParam('car');
+  const setCarId = (id: string | null) => setCarParam(id, { replace: true });
   const [dialog, setDialog] = useState<Open | null>(null);
   const { data, actions } = store;
   const unit: DistanceUnit = householdUnit(data);
@@ -109,25 +118,22 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
 
   const may = mayFor(store);
   const screen: ScreenProps = { store, unit, may, open: setDialog, notify };
-  const showCar = (id: string) => {
-    setCarId(id);
-    setTab('cars');
-  };
+  const showCar = (id: string) => setTab('cars', { also: { car: id } });
 
   let content: ReactNode;
-  if (!store.ready) content = <p className="p-2 text-lg text-muted">{t('app.loading')}</p>;
+  if (!store.ready) content = <ScreenSkeleton label={t('app.loading')} />;
   else if (tab === 'cars') content = <Cars {...screen} carId={carId} onCar={setCarId} />;
   else if (tab === 'renewals') content = <Renewals {...screen} />;
   else if (tab === 'history') content = <History {...screen} />;
   else if (tab === 'appointments') content = <Appointments {...screen} calendarAvailable={calendar} onImport={importEvents} />;
   else if (tab === 'shops') content = <Shops {...screen} />;
-  else content = <Overview {...screen} onCar={showCar} onOpen={setTab} />;
+  else content = <Overview {...screen} onCar={showCar} onOpen={(id) => setTab(id)} />;
 
   const vehicleName = (id: string | undefined) => data.vehicles.find((v) => v.id === id)?.name;
 
   return (
     <div className="flex min-h-dvh flex-col bg-page font-sans text-ink antialiased lg:h-dvh lg:overflow-hidden">
-      <Header tabs={TABS.map((x) => ({ ...x, label: t(x.label), short: 'short' in x ? t(x.short) : undefined }))} tab={tab} onTab={(id) => setTab(id as TabId)} user={user} onSignIn={onSignIn} onSignOut={onSignOut} signingIn={signingIn} />
+      <Header tabs={tabsFor(t)} tab={tab} onTab={(id) => setTab(id as TabId)} user={user} onSignIn={onSignIn} onSignOut={onSignOut} signingIn={signingIn} />
       <main className="mx-auto flex w-full max-w-[1200px] min-h-0 flex-1 flex-col gap-4 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pt-6 sm:pb-6">
         {banner}
         {tab === 'overview' && store.ready && (
@@ -143,8 +149,7 @@ export function CarApp({ store, user, onSignIn, onSignOut, signingIn, toast, not
           onSave={(input, defaultSchedule) => {
             const { id, undo } = actions.saveVehicle(dialog.vehicle?.id ?? null, input, { defaultSchedule });
             if (!dialog.vehicle) {
-              setCarId(id);
-              setTab('cars');
+              showCar(id);
               notify(t('common.added', { name: input.name.trim() }), undo);
             }
           }}
