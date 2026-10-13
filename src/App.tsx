@@ -10,9 +10,10 @@ import { DEMO_HOME, DEMO_NOW } from './lib/demo';
 import { setHome } from '@huishouden/pwa-kit/home';
 import { PORTAL_URL } from './lib/portal';
 import { ClockProvider } from '@huishouden/pwa-kit/react/clock';
-import { CarApp } from './CarApp';
+import { CarApp, TAB_IDS, tabsFor, type TabId } from './CarApp';
+import { useUrlTab } from '@huishouden/pwa-kit/react/url-state';
 import { Header } from './components/Header';
-import { cardClass, primaryButton, SampleBanner, useToast } from '@huishouden/pwa-kit/react/ui';
+import { cardClass, primaryButton, SampleBanner, useToast, ScreenSkeleton } from '@huishouden/pwa-kit/react/ui';
 import { t, useLang, useT } from './i18n';
 
 export default function App() {
@@ -43,7 +44,7 @@ export default function App() {
 
   const frame = { onSignIn: signIn, onSignOut: signOut, signingIn };
 
-  if (user === undefined) return <Plain user={null} {...frame} hideSignIn />;
+  if (user === undefined) return <Opening user={undefined} {...frame} />;
   if (user === null) return <DemoApp {...frame} signInError={signInError} />;
   return <SignedIn key={user.uid} user={user} {...frame} />;
 }
@@ -70,7 +71,7 @@ function SignedIn({ user, ...frame }: FrameProps & { user: User }) {
   }, [householdId, user]);
 
   if (state.status === 'ready') return <LiveApp household={state.household} user={user} {...frame} />;
-  if (state.status === 'loading') return <Plain user={user} {...frame}>{t('household.finding')}</Plain>;
+  if (state.status === 'loading') return <Opening user={user} {...frame} label={t('household.finding')} />;
   if (state.status === 'error')
     return (
       <Plain user={user} {...frame}>
@@ -131,10 +132,27 @@ function DemoInner({ read, signInError, ...frame }: FrameProps & { read: () => n
   return <CarApp store={store} user={null} {...frame} toast={toast} notify={notify} clearToast={clear} banner={banner} />;
 }
 
-function Plain({ user, children, hideSignIn, ...frame }: FrameProps & { user: User | null; children?: ReactNode; hideSignIn?: boolean }) {
+/**
+ * While the app opens (the session restoring, the household loading): the app's own frame and tabs
+ * over the kit's placeholder, so nothing flashes or jumps before the first screen arrives.
+ */
+function Opening({ user, label, ...frame }: FrameProps & { user: User | null | undefined; label?: string }) {
+  const t = useT();
+  const [tab, setTab] = useUrlTab(TAB_IDS, 'overview');
+  return (
+    <div className="flex min-h-dvh flex-col bg-page font-sans text-ink antialiased lg:h-dvh lg:overflow-hidden">
+      <Header tabs={tabsFor(t)} tab={tab} onTab={(id) => setTab(id as TabId)} user={user} {...frame} opening />
+      <main className="mx-auto flex w-full max-w-[1200px] min-h-0 flex-1 flex-col gap-4 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pt-6 sm:pb-6">
+        <ScreenSkeleton label={label ?? t('app.loading')} />
+      </main>
+    </div>
+  );
+}
+
+function Plain({ user, children, ...frame }: FrameProps & { user: User | null; children?: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col bg-page font-sans text-ink antialiased">
-      <Header tabs={[]} tab="" onTab={() => {}} user={hideSignIn ? undefined : user} {...frame} />
+      <Header tabs={[]} tab="" onTab={() => {}} user={user} {...frame} />
       <main className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-6">
         {children && <div className={`${cardClass} max-w-2xl p-6 text-lg text-muted`}>{children}</div>}
       </main>
