@@ -50,13 +50,13 @@ const TABS = [
   { id: 'shops', label: 'tab.shops', icon: Store },
 ] as const satisfies readonly (Omit<Tab, 'label' | 'short'> & { id: TabId; label: string; short?: string })[];
 
-/** Which dialog is open, and what it was opened with. */
 /** The tabs' ids, in order: the address's `?tab=` names one of them. */
 export const TAB_IDS: readonly TabId[] = TABS.map((x) => x.id);
 
 /** The app bar's tabs, in the page's language. */
 export const tabsFor = (t: ReturnType<typeof useT>): Tab[] => TABS.map((x) => ({ ...x, label: t(x.label), short: 'short' in x ? t(x.short) : undefined }));
 
+/** Which dialog is open, and what it was opened with. */
 export type Open =
   | { kind: 'vehicle'; vehicle: Vehicle | null }
   | { kind: 'item'; vehicleId: string; item: ServiceItem | null }

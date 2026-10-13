@@ -140,7 +140,7 @@ function Opening({ user, label, ...frame }: FrameProps & { user: User | null | u
   const t = useT();
   const [tab, setTab] = useUrlTab(TAB_IDS, 'overview');
   return (
-    <div className="flex min-h-dvh flex-col bg-page font-sans text-ink antialiased">
+    <div className="flex min-h-dvh flex-col bg-page font-sans text-ink antialiased lg:h-dvh lg:overflow-hidden">
       <Header tabs={tabsFor(t)} tab={tab} onTab={(id) => setTab(id as TabId)} user={user} {...frame} opening />
       <main className="mx-auto flex w-full max-w-[1200px] min-h-0 flex-1 flex-col gap-4 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pt-6 sm:pb-6">
         <ScreenSkeleton label={label ?? t('app.loading')} />
